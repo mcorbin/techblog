@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): What&#39;s new in Meuse 0.2.0</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2019-11-11-meuse-0.2.0/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">11 novembre 2019</div>
+        
+    </div>
+    <h2>What&#39;s new in Meuse 0.2.0</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>I released today the version 0.2.0 of <a href="https://github.com/mcorbin/meuse">Meuse</a>, an alternative registry for the Rust programming language. A lot of improvements have been made, and new features (in beta :p) are availables in this release: S3 backend for crates binary files, and <code>crates.io</code> mirroring.</p>
+</div>
+<div class="sect1">
+<h2 id="_new_things_in_this_release">New things in this release</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_refactoring_and_bugfixes">Refactoring and bugfixes</h3>
+<div class="paragraph">
+<p>I did a lot of refactoring in the project internals. It&#8217;s not finished yet, but the code looks better now.</p>
+</div>
+<div class="paragraph">
+<p>I also fixed a couple of bugs, and also made a few improvements (for example in error handling).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_monitoring">Monitoring</h3>
+<div class="paragraph">
+<p>Meuse exposes a Prometheus endpoint since the release <code>0.1.0</code>. This release adds more metrics: JVM metrics and the database connection pool metrics.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_multiple_backends_for_the_crates_binary_files">Multiple backends for the crates binary files</h3>
+<div class="paragraph">
+<p>I refactored the project to be able to easily add more backends for crates binary files, and added a S3 backend. This will allow you to store your crates binary files on any S3-compatible storage (I made my tests with SOS, the S3-compatible storage provided by <a href="https://www.exoscale.com/">Exoscale</a>).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_crates_io_mirroring">crates.io mirroring</h3>
+<div class="paragraph">
+<p>Meuse is now able to mirror <code>crates.io</code>, and will also cache crates binary files downloaded from <code>crates.io</code> on its own store (so on its filesystem or on S3).</p>
+</div>
+<div class="paragraph">
+<p><strong>Using Meuse alongside crates.io</strong></p>
+</div>
+<div class="paragraph">
+<p>It was already possible to use <code>Meuse</code> alongside <code>crates.io</code>. You could for example upload private crates on Meuse, and these crates could have dependencies on crates stored on <code>crates.io</code>.</p>
+</div>
+<div class="paragraph">
+<p>To do that, you should configure the <code>allowed-registries</code> parameter of your private registry index (cf <a href="https://github.com/rust-lang/rfcs/blob/master/text/2141-alternative-registries.md#registry-index-format-specification">the alternative registry RFC</a>).</p>
+</div>
+<div class="paragraph">
+<p>But we can do better.</p>
+</div>
+<div class="paragraph">
+<p><strong>crates.io mirroring</strong></p>
+</div>
+<div class="paragraph">
+<p>Meuse can download crates files from <code>crates.io</code>, and then cache them on its own store. The next time you download this crate, <code>crates.io</code> will not be contacted at all, Meuse will serve the crate from its store directly.</p>
+</div>
+<div class="paragraph">
+<p>If you store your crates files on the <code>filesystem</code>, Meuse will write the cached crates in a directory named <code>.crates.io</code>, which will be automatically created at the root of the store directory. If the crates are stored in a S3-compatible storage, the file path will be prefixed by <code>.crates.io</code>.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/meuse_020/cargo_mirror1.jpg" alt="cargo mirror explanation"></span></p>
+</div>
+<div class="paragraph">
+<p>To find how to create a <code>crates.io</code> mirror, please check the <a href="https://meuse.mcorbin.fr/installation/mirroring/">Meuse documentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>In the next Meuse release, I will add an endpoint to force the caching of a crate. Like that, you will be able to cache crates from <code>crates.io</code> in Meuse even if you don&#8217;t run <code>cargo build</code> for your project.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_auth_issues">Auth issues</h3>
+<div class="paragraph">
+<p><code>cargo</code> does not pass the authentication token for the <code>cargo search</code> command, and when a crate is downloaded. This means that I cannot authenticate the user for these actions in Meuse (cf <a href="https://github.com/rust-lang/cargo/issues/7091">this issue</a>)</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The next steps for Meuse are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>More refactoring: there are several things that I don&#8217;t like in the codebase.</p>
+</li>
+<li>
+<p>New features around <code>crates.io</code> mirroring.</p>
+</li>
+<li>
+<p>More metrics (especially for the S3 client).</p>
+</li>
+<li>
+<p>Better documentation (in the code and in the documentation website).</p>
+</li>
+<li>
+<p>A CLI.</p>
+</li>
+<li>
+<p>A read-only frontend.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Also, don&#8217;t hesitate to test the project, report issues, and give me feedbacks. It would be very helpful for me.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+    <a href="/tags/rust/">rust</a>
+    
+    <a href="/tags/meuse/">meuse</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-11-20-un-exemple-infra-intro/">&laquo; Un exemple d&#39;infrastructure automatisée et scalable</a>
+        
+        
+        <a class="right" href="/posts/2019-09-10-machines-virtuelles/">Slides: Gérez les images de vos machines virtuelles &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

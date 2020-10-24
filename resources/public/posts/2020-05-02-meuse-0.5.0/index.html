@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Meuse 0.5.0 released !</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-05-02-meuse-0.5.0/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">2 mai 2020</div>
+        
+    </div>
+    <h2>Meuse 0.5.0 released !</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>I&#8217;ve released today the version 0.5.0 of <a href="https://github.com/mcorbin/meuse">Meuse</a>, my free alternative registry for the Rust programming language. A new way to manage the crate index has been added in this release.</p>
+</div>
+<div class="sect1">
+<h2 id="_managing_the_crate_index">Managing the crate index</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Crates metadata are stored in a Git repository. For example, the index for crates.io is available on <a href="https://github.com/rust-lang/crates.io-index">Github</a>.
+A crate registry should be able to manage this Git repository (adding files, running git commands like commit, push&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>The previous versions of Meuse were shelling out to the <code>git</code> command (which should then be available on the Meuse machine) to perform that. It works well, but a new way of managing the index has been added to this release.</p>
+</div>
+<div class="sect2">
+<h3 id="_jgit">JGit</h3>
+<div class="paragraph">
+<p><a href="https://www.eclipse.org/jgit/">JGit</a> is an implementation of Git in pure Java. i&#8217;ve integrated this library in Meuse. This allow users to manage the index even if the <code>git</code> command is not installed on the machine.</p>
+</div>
+<div class="paragraph">
+<p>You can specify the way Meuse is managing the index in the configuration file. By default, the <code>git</code> command is used, as it was before. You can enable <code>JGit</code> by adding a <code>type: jgit</code> in the <code>metadata</code> configuration section:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">metadata:
+  # use jgit
+  type: "jgit"
+  # The local path of your Git index
+  path: "/home/mathieu/prog/rust/testregistry"
+  # The branch which will contain the metadata files
+  target: "origin/master"
+  # The URL of your Git index.
+  url: "https://github.com/mcorbin/testregistry"
+  # the Git username
+  username: my-git-usename
+  # the Git password
+  password: my-git-password</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should also specify in the configuration the credentials (<code>username</code> and <code>password</code>) to interact with the Git repository. Remember that Meuse uses the <a href="https://github.com/exoscale/yummy">Yummy</a> library to load the YAML file, so you can use for example the <code>!envvar</code> flag to read an environment variable.</p>
+</div>
+<div class="paragraph">
+<p>JGit also works with Github Access Token (which are needed if you have enabled the 2FA on your Github account). In that case, the password should be the token.</p>
+</div>
+<div class="paragraph">
+<p>I hope this feature will help you running Meuse in more contexts, for example in containers (where it can be difficult to set up SSH authentication for the <code>git</code> command for example).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+    <a href="/tags/rust/">rust</a>
+    
+    <a href="/tags/meuse/">meuse</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-06-20-cloud-vendor-lock-in/">&laquo; Cloud, Gaia-X: le faux débat du vendor lock-in</a>
+        
+        
+        <a class="right" href="/posts/2020-04-25-guixsd-presentation/">GuixSD, une distrib Linux originale: présentation et déploiement dans le cloud &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

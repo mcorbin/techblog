@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): One day one manpage: lesspipe</title>
+    <link rel="canonical" href="https://mcorbin.fr/pages/lesspipe-en/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="custom-page">
+    <div id="page-header">
+        <h2>One day one manpage: lesspipe</h2>
+    </div>
+    
+    <p><div id="post-meta">22 april 2016</div></p>
+<div class="paragraph">
+<p><em>The 'one day one manpage concept' is simple: I randomly select one manpage and explore the associated command.</em></p>
+</div>
+<div class="paragraph">
+<p>Today, I will describe the <strong>lesspipe</strong> utility. First, a <strong>man lesspipe</strong> :</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>lessfile, lesspipe - "input preprocessor" for  less.
+lessfile and lesspipe are programs that can be used to modify the  way  the contents of a file are displayed in less</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Lesspipe allows to manipulate content of a file before sending it to <strong>less</strong>. Why ? The answer is easy. have you ever tried to launch <strong>less</strong> on an image, a .deb, .rpm, .tar.gz&#8230;&#8203; ? You may have some problems. Lesspipe allow you (among others things) to enrich less to explore new file types with it.</p>
+</div>
+<div class="paragraph">
+<p>To activate Lesspipe, just launch (or add it on your .bachrc or equivalent) :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>eval "$(lesspipe)"</code></pre>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_it_works">How it works ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Launch <strong>lesspipe</strong> on a terminal. You will have :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>export LESSOPEN="| /usr/bin/lesspipe %s";
+export LESSCLOSE="/usr/bin/lesspipe %s %s";</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Two variables are defined: LESSOPEN and LESSCLOSE.</p>
+</div>
+<div class="paragraph">
+<p>The <strong>less</strong> manpage indicates, in the <strong>INPUT PREPROCESSOR</strong> section, that the LESSOPEN variable is used to activate a preprocessor for less. This proprocessor receives the file name sent to less, creates a temporary file and output the temporary file name. Next, less will use the temporary file.</p>
+</div>
+<div class="paragraph">
+<p>The preprocessor script can also directly send to <strong>less</strong> information, without creating a temporary file. In this case, the stdout of the LESSOPEN script will be sent to <strong>less</strong>.
+The <strong>less</strong> man page says:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>It is also possible to set up an input preprocessor to pipe the file  data  directly to less, rather than putting the data into a replacement file.</p>
+</div>
+<div class="paragraph">
+<p>[&#8230;&#8203;] To use an input pipe, make the first character in the LESSOPEN environment variable a vertical bar (|) to  signify  that  the  input  pre-processor is an input pipe.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>In our case, lesspipe will not create a temporary file, because the LESSOPEN variable begins with <strong>|</strong>.</p>
+</div>
+<div class="paragraph">
+<p>So, when <strong>less</strong> is called, the <code>/usr/bin/lesspipe</code> script will be called with the file name as a parameter.
+Let&#8217;s try to call <code>/usr/bin/lesspipe</code> manually, on a file for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$ lesspipe myimage.png
+myimage.png PNG 254x29 1920x1080+12+134 8-bit sRGB 3.69KB 0.000u 0:00.000</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lesspipe returns some information about the image. These information will be passed to <strong>less</strong> and displayed.</p>
+</div>
+<div class="paragraph">
+<p>For LESSCLOSE, the <strong>less</strong> man page says:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>When less closes a file opened in such a way, it will call another program, called  the  input  postprocessor,  which  may perform any desired clean-up action.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>LESSCLOSE takes care of the cleanup. The script referenced by LESSCLOSE receives 2 parameters: The original file name (on which less was called), and the temporary file name (generated by the LESSOPEN script if needed).</p>
+</div>
+<div class="paragraph">
+<p>We can no use <strong>less</strong> on many file types. For example on .tar.gz their contents, or .deb, .rpm, .png&#8230;&#8203; files.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_source_highlight">source-highlight</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>source-highlight add syntax highlighting to <strong>less</strong>. For install it (for debian), just do :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo apt-get install source-highlight</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You will now have this script:
+<strong>/usr/share/source-highlight/src-hilite-lesspipe.sh</strong></p>
+</div>
+<div class="paragraph">
+<p>You can now use this script as a less preprocessor:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>less -R [your file]</strong> will now open the file with syntax highlighting.</p>
+</div>
+<div class="paragraph">
+<p>In conclusion, with these two variables (LESSOPEN and LESSCLOSE), you can easily write your own preprocessor scripts !</p>
+</div>
+</div>
+</div>
+
+    <div id="prev-next">
+        
+        <a href="/pages/meuse-rust-registry/">&laquo; Meuse, a free Rust private Registry</a>
+        
+        
+        ||
+        
+        
+        <a href="/pages/xdp-introduction/">Introduction to eBPF and XDP &raquo;</a>
+        
+    </div>
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

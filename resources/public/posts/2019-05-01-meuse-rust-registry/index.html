@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Meuse, a free Rust private Registry</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2019-05-01-meuse-rust-registry/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">1 mai 2019</div>
+        
+    </div>
+    <h2>Meuse, a free Rust private Registry</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p><strong>English version <a href="https://mcorbin.fr/pages/meuse-rust-registry/">here</a></strong><br>
+Je m&#8217;étais intéressé à Rust à sa sortie en version 1.0. Après avoir pas mal joué avec, j&#8217;ai un peu mis de côté ce langage pour me consacrer à d&#8217;autres choses. Mais une phrase de la <a href="https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1340-2019-04-11">release note</a> de la version 1.34 m&#8217;a interpellé: <code>You can now use alternative registries to crates.io.</code> J&#8217;avais trouvé mon prochain projet: écrire un registry.</p>
+</div>
+<div class="sect1">
+<h2 id="_meuse_un_registry_pour_vos_crates">Meuse, un registry pour vos crates</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>Meuse</code> est un registry écrit en <a href="https://clojure.org/">Clojure</a>. Mon objectif est de fournir un registry simple à déployer et à administrer. Le code est disponible <a href="https://github.com/mcorbin/meuse">sur Github</a>.</p>
+</div>
+<div class="paragraph">
+<p>Le statut du projet est actuellement <code>ça marche sur ma machine</code>. il reste <code>beaucoup</code> de travail à faire, le code doit être remanié et beaucoup mieux testé. Toute la partie concernant l&#8217;authentification et la gestion des tokens est manquante.</p>
+</div>
+<div class="paragraph">
+<p>Mon premier objectif était de poser les bases du projet de voir un peu les difficultés que j&#8217;allais rencontrer. Mais j&#8217;ai déjà quelque chose d&#8217;intéressant:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">cargo publish --allow-dirty --registry custom
+    Updating `https://github.com/mcorbin/testregistry.git` index
+warning: manifest has no license, license-file, documentation, homepage or repository.
+See &lt;http://doc.crates.io/manifest.html#package-metadata&gt; for more info.
+   Packaging testpublish v0.1.13 (/home/mathieu/prog/rust/testpublish)
+   Verifying testpublish v0.1.13 (/home/mathieu/prog/rust/testpublish)
+   Compiling testpublish v0.1.13 (/home/mathieu/prog/rust/testpublish/target/package/testpublish-0.1.13)
+
+cargo yank --vers 0.1.13 --registry custom
+    Updating `https://github.com/mcorbin/testregistry.git` index
+        Yank testpublish:0.1.13
+
+cargo yank --undo --vers 0.1.13 --registry custom
+    Updating `https://github.com/mcorbin/testregistry.git` index
+      Unyank testpublish:0.1.13
+
+cargo owner --add user1 --registry custom    Updating `https://github.com/mcorbin/testregistry.git` index
+       Owner added user(s) user1 as owner(s) of crate testpublish
+
+cargo owner --list --registry custom
+    Updating `https://github.com/mcorbin/testregistry.git` index
+user1 (user1)
+
+cargo owner --remove user1 --registry custom
+    Updating `https://github.com/mcorbin/testregistry.git` index
+       Owner removing ["user1"] from crate testpublish
+
+cargo search --registry custom "project" -v
+testpublish = "0.1.13"    # This is a description of my project</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Je peux aussi récupérer des dépendances depuis le registry ;)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_fonctionnement">Fonctionnement</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>Meuse</code> utilise <code>PostgreSQL</code> comme base de données (crates et versions, categories, utilisateurs&#8230;&#8203;). La recherche (très basique pour l&#8217;instant) est également implémentée grâce au type <code>TSVECTOR</code> de PostgreSQL.</p>
+</div>
+<div class="paragraph">
+<p>Les registries Rust utilisent également un repository Git pour stocker les metadata des crates (versions, est ce qu&#8217;une crate est <code>yanked</code> ou non&#8230;&#8203; cf la <a href="https://doc.rust-lang.org/nightly/cargo/reference/registries.html">documentation</a>). <code>Meuse</code> va donc également intéragir avec un repository Git quand une crate est publiée ou "yankée".</p>
+</div>
+<div class="paragraph">
+<p>Enfin, les fichiers crates contenant le code source sont également gérés par <code>Meuse</code> qui se charge de les sauvegarder sur disque et de les exposer via HTTP (mais je prévois quelques fonctionnalités de ce côté là, comme par exemple le fait de pouvoir pousser les crates sur un object store compatible S3).</p>
+</div>
+<div class="paragraph">
+<p>Donc si vous avez une instance <code>PostgreSQL</code>, déployer votre registry ne sera que lancer un <code>java -jar</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_la_suite">La suite</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Le prochain mois sera consacré à stabiliser le projet, réécrire ce qui doit être réécrit, et ajouter la gestion des tokens,</p>
+</div>
+<div class="paragraph">
+<p>En plus de l&#8217;API <code>crate</code> utilisée par cargo, une autre API (que j&#8217;ai déjà commencé) permettra de gérer les catégories de vos crates, les utilisateurs etc&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Je pense également que j&#8217;écrirais une CLI pour intéragir avec le projet. Par contre, je ne ferais pas d&#8217;interface graphique (je suis trop mauvais en front et cela ne m&#8217;intéresse pas vraiment), libre à vous de faire ça de votre côté si vous êtes motivés ;)</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;espère pouvoir sortir une version à peu près fonctionnel avec un peu de documentation pour la fin du mois.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_appendice_pourquoi_clojure">Appendice: pourquoi Clojure ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Comme dit précédement, <code>Meuse</code> est écrit en Clojure. Parmis tous les langages que j&#8217;ai utilisé Clojure est celui où je suis le plus productif.</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;écosystème est très riche, avec des librairies de grandes qualitées (comme <a href="https://github.com/ztellman/aleph">Aleph</a> ou <a href="https://github.com/jkk/honeysql">HoneySQL</a>), et la façon de travailler avec le REPL (un <code>reloaded workflow</code> avec <a href="https://github.com/tolitius/mount">Mount</a> dans mon cas, qui fera d&#8217;ailleurs l&#8217;objet d&#8217;un article un jour ou l&#8217;autre) est géniale.</p>
+</div>
+<div class="paragraph">
+<p>On rajoute à ça un langage extrêmement bien designé, l&#8217;immutabilité, il y a de quoi être heureux (et non, le typage statique ne me manque pas).</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+    <a href="/tags/rust/">rust</a>
+    
+    <a href="/tags/meuse/">meuse</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-05-28-ansible-common/">&laquo; Ansible: common roles considered harmful</a>
+        
+        
+        <a class="right" href="/posts/2019-03-03-ebpf-xdp-introduction/">Introduction to eBPF and XDP &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

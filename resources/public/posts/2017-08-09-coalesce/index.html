@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): A tour of Riemann : Coalesce</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2017-08-09-coalesce/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">9 août 2017</div>
+        
+    </div>
+    <h2>A tour of Riemann : Coalesce</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>A small article about the Riemann coalesce stream.</p>
+</div>
+<div class="sect1">
+<h2 id="_how_it_works">How it works ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="http://riemann.io/api/riemann.streams.html#var-coalesce">API doc</a> is pretty clear. Coalesce remembers the most recent event for each host/service, and send every N seconds a vector containing the most recent states.</p>
+</div>
+<div class="paragraph">
+<p>For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(streams
+  (with :ttl 60
+    (coalesce 10
+     #(info %))))</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>At time <strong>t = 1</strong>  : Riemann receives `</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">{:host "foo" :service "bar" :metric 10 :time 1}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Coalesce instantly emits :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">[{:host "foo" :service "bar" :metric 20 :time 1}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Coalesce will always emit the first event it receives.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>At time <strong>t = 4</strong>  : Riemann receives</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">{:host "foo" :service "foobar" :metric 12 :time 4}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>At time <strong>t = 7</strong>  : Riemann receives</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">{:host "foo" :service "bar" :metric 30 :time 7}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>At time <strong>t = 11</strong> : Coalesce emits</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">[{:host "foo" :service "foobar" :metric 12 :time 4} {:host "foo" :service "bar" :metric 30 :time 7}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see, coalesce emits the last event seen for each host/service.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>At time <strong>t = 13</strong> : Riemann receives</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">{:host "foo" :service "bar" :metric 40 :time 13}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>At time <strong>t = 21</strong> : Coalesce emits</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">[{:host "foo" :service "foobar" :metric 12 :time 4} {:host "foo" :service "bar" :metric 40 :time 13}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Again, coalesce emits the last states for each host and service.</p>
+</div>
+<div class="paragraph">
+<p>Now, an example.
+I want to monitor a Cassandra cluster, and fire an email if the <code>cpu mean</code> of the cluster is greater than 60.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_code">The code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First, create a <code>mycorp/system/cpu.clj</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ns mycorp.system.cpu
+  "check cpu"
+  (:require [riemann.config :refer :all]
+            [riemann.streams :refer :all]
+            [riemann.test :refer :all]
+            [riemann.folds :as folds]
+            [mycorp.output.email :as email]
+            [clojure.tools.logging :refer :all]))
+
+(def cpu-mean-alert-cassandra
+  "A stream checking if the cpu mean for all hosts with service = `cpu` and tagged `cassandra` is &gt; to 60"
+  ;; filter by services and tags
+  (where (and (tagged "cassandra") (service "cpu"))
+  ;; every 10 seconds, send the last state for each host/service
+  ;; :service will always be "cpu" so we only have differents hosts on events
+    (coalesce 10
+      ;; apply mean using smap to compute the cpu mean
+      (smap folds/mean
+        ;; update the event, remove :host and update the description
+        (with {:host nil :service "cassandra-cpu-mean"}
+          ;; check if mean &gt; 60
+          (where (&gt; (:metric event) 60)
+            ;; send email
+            (io (email/email "foo@mcorbin.fr"))
+            ;; tap for tests
+            (tap :cpu-mean-alert-tap)))))))
+
+(tests
+  (deftest cpu-mean-alert-test
+    (let [result (inject! [mycorp.system.cpu/cpu-mean-alert-cassandra]
+                          [{:host "foo"
+                            :service "cpu"
+                            :metric 65
+                            :tags ["cassandra"]
+                            :ttl 60
+                            :time 1}
+                           {:host "bar"
+                            :service "cpu"
+                            :metric 50
+                            :tags ["cassandra"]
+                            :ttl 50
+                            :time 2}
+                           ;; not tagged
+                           {:host "baz"
+                            :service "cpu"
+                            :metric 99
+                            :tags []
+                            :ttl 60
+                            :time 3}
+                           {:host "foobar"
+                            :service "cpu"
+                            :metric 95
+                            :tags ["cassandra"]
+                            :ttl 60
+                            :time 12}
+                           {:host "foobar"
+                            :service "riemann"
+                            :metric 95
+                            :tags []
+                            :ttl 60
+                            :time 22}])]
+      (is (= (:cpu-mean-alert-tap result)
+            [{:service "cassandra-cpu-mean"
+              :metric 65
+              :tags ["cassandra"]
+              :ttl 60
+              :time 1}
+             {:service "cassandra-cpu-mean"
+              :metric 70
+              :tags ["cassandra"]
+              :ttl 60
+              :time 12}])))))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(Don&#8217;t forget to add <code>cpu.clj</code> file in your riemann.config file ;))</p>
+</div>
+<div class="paragraph">
+<p>In the <code>cpu-mean-alert-cassandra</code> stream, i first filter Cassandra/cpu events with <code>where</code>, and use <code>coalesce 10</code> (so coalesce will emit a vector of events every 10 seconds).</p>
+</div>
+<div class="paragraph">
+<p>After that, i use <code>smap</code> to apply <code>folds/mean</code> on the vector of events emitted by coalesce. I now have an event representing the <code>cpu mean</code> of the cluster.</p>
+</div>
+<div class="paragraph">
+<p>I use <code>with</code> to update the event, and <code>where</code> again to check the mean value against a threshold.
+If the mean is &gt; to 60, i fire an email.</p>
+</div>
+<div class="paragraph">
+<p>Easy !</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_more_use_cases">More use cases</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Use coalesce when you want to aggregate common events from multiple hosts.
+In the previous example, i used <code>folds/mean</code> to calculate the mean, but i could do anything i want, for example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Get max, min etc&#8230;&#8203; values.</p>
+</li>
+<li>
+<p>Check for unbalanced values between hosts, for example : why do i have 10 nodes at 30 % CPU but one constantly at 95 % ? I used coalesce to detects unbalanced partitions in Kafka topics (caused by a bad partition key) for example.</p>
+</li>
+<li>
+<p>&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_event_expiration">Event expiration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Coalesce takes care to expire events. From the <a href="http://riemann.io/api/riemann.streams.html#var-coalesce">API</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>When events expire, they are included in the emitted sequence of events once, and removed from the state table thereafter.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This stream is perfect for monitoring distributed systems.</p>
+</div>
+<div class="paragraph">
+<p>Code <a href="https://github.com/mcorbin/riemann-configuration-example">here</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+    <a href="/tags/riemann/">riemann</a>
+    
+    <a href="/tags/tour-of-riemann/">tour-of-riemann</a>
+    
+    <a href="/tags/english/">english</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2017-12-03-velocity-1/">&laquo; Velocity Londres 2017: jour 1</a>
+        
+        
+        <a class="right" href="/posts/2017-05-21-riemann-by-stream/">A tour of Riemann : check disk, by, throttle, email &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

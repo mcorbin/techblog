@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Use your Ansible logs !</title>
+    <link rel="canonical" href="https://mcorbin.fr/pages/logs-ansible-en/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="custom-page">
+    <div id="page-header">
+        <h2>Use your Ansible logs !</h2>
+    </div>
+    
+    <p><div id="post-meta">10 august 2016</div></p>
+<div class="paragraph">
+<p>I use Ansible on a daily basis. Everyday, my coworkers and i use it to configure our servers and deploy our applications. We use Jenkins to call Ansible commands.</p>
+</div>
+<div class="paragraph">
+<p>All of this generates a <strong>huge</strong> amount of logs. We do not do much with these logs, except consulting them after a deployment with the Jenkins interface.</p>
+</div>
+<div class="paragraph">
+<p>I explain in this post a way to exploit these logs, using Ansible callback plugins. With these plugins, it is possible to get detailed Ansible logs, and easily manipulate them to produce statistics and new information.</p>
+</div>
+<div class="sect1">
+<h2 id="_ansible_callback_plugins">Ansible callback plugins</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_strong_general_presentation_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>General presentation</strong></h3>
+<div class="paragraph">
+<p>Ansible can be "extended" with plugins. I will present here the callback plugin type <a href="http://docs.ansible.com/ansible/developing_plugins.html=callbacks">(documentation)</a>.
+The examples in this post used Ansible 1.X, but the Ansible 2.X callback plugins are almost the same as Ansible 1.X.</p>
+</div>
+<div class="paragraph">
+<p>This plugin allows to define an object whose functions will be called at different times during the Ansible execution. Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class CallbackModule(object):
+
+    def on_any(self, *args, *kwargs):
+        pass
+
+    def runner_on_failed(self, host, res, ignore_errors=False):
+        pass
+
+    def runner_on_ok(self, host, res):
+        pass
+
+    def runner_on_skipped(self, host, item=None):
+        pass
+
+    def playbook_on_start(self):
+        pass
+
+    def playbook_on_task_start(self, name, is_conditional):
+        pass
+
+    = etc...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A callback plugin is just a class implementing some functions. I put a few of them in this example, but there are many more for any Ansible event type (you can find these functions in the Ansible doc or in the callback plugins provided with Ansible).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_strong_detailed_presentation_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>Detailed presentation</strong></h3>
+<div class="paragraph">
+<p>For example, the <strong>runner_on_failed</strong> function will be called when an Ansible task fails, <strong>runner_on_ok</strong> when an Ansible task is successfull, <strong>runner_on_skipped</strong> when a task is skipped&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Functions which begin with <strong>playbook_on_</strong> will be executed by events related to playbooks (example: <strong>playbook_on_start</strong> when a playbook start&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>All these functions receive parameters. This is where it gets interesting. For example, <strong>runner_on_ok</strong> receives the <strong>self</strong>, <strong>host</strong>, and <strong>res</strong> parameters.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The <strong>host</strong> variable contains the host on which the task applies.</p>
+</li>
+<li>
+<p>The <strong>res</strong> variable contains some informations about the host (<strong>fact</strong> variables), as well as some informations about the task being called (task <strong>changed</strong> or not, Ansible module called in the task&#8230;&#8203;).</p>
+</li>
+<li>
+<p>The callback object <strong>self</strong> contains a lot of informations on the current Ansible execution. Let&#8217;s add <strong>import pdb; pdb.set_trace();</strong> in the <strong>runner_on_ok</strong> function (to use the Python debugger) and let&#8217;s start an Ansible deployment. A <strong>pp dir(self)</strong> allows to list the fields of the object:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>(Pdb) pp dir(self)
+['__class__',
+ '__delattr__',
+ '__dict__',
+ '__doc__',
+ '__format__',
+ '__getattribute__',
+ '__hash__',
+ '__init__',
+ '__module__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__weakref__',
+ 'on_any',
+ 'play',
+ 'playbook',
+ 'playbook_on_import_for_host',
+ 'playbook_on_no_hosts_matched',
+ 'playbook_on_no_hosts_remaining',
+ 'playbook_on_not_import_for_host',
+ 'playbook_on_notify',
+ 'playbook_on_play_start',
+ 'playbook_on_setup',
+ 'playbook_on_start',
+ 'playbook_on_stats',
+ 'playbook_on_task_start',
+ 'playbook_on_vars_prompt',
+ 'runner_on_async_failed',
+ 'runner_on_async_ok',
+ 'runner_on_async_poll',
+ 'runner_on_failed',
+ 'runner_on_no_hosts',
+ 'runner_on_ok',
+ 'runner_on_skipped',
+ 'runner_on_unreachable',
+ 'state',
+ 'task']</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <strong>self</strong> object is a gold mine ! Using pdb (<code>pp dir(self.task)</code>, <code>pp dir(self.play)</code> etc&#8230;&#8203;), we see that we have access to a huge amount of informations about our deployment. Detail of the current task (name, role&#8230;&#8203;), Ansible variables, information about the playbook&#8230;&#8203; Now we can use them !
+Of course, each function in the callback plugin will have differents parameters (but some are similar, like <strong>runner_on_failed</strong> and <strong>runner_on_ok</strong>).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_strong_playbook_on_start_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>playbook on start</strong></h3>
+<div class="paragraph">
+<p>The <strong>playbook_on_start</strong> function is called when a playbook is launched. I wanted to initialize some variables on the callback object from extra_vars passed to the <strong>ansible_playbook</strong> command. Here is a basic example (<strong>get_timestamp</strong> is a function returning the current timestamp is second):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def playbook_on_start(self):
+        extra_vars = self.playbook.extra_vars
+        self.project = extra_vars["project"]
+        self.version = extra_vars["version"]
+        self.environment = extra_vars["environment"]
+        self.start_timestamp = get_timestamp()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, i get 3 extra_vars variables (<strong>projet</strong>, the project i deploy, <strong>version</strong>, the deployed version, <strong>environment</strong>, the target environment : dev, prod&#8230;&#8203;) and set them to the self object. I also initialize a <strong>start_timestamp</strong> variable, which contains the time when the playbook begins.</p>
+</div>
+<div class="paragraph">
+<p>In short, it is easy to define more variables in the self object. These variables can be used later in others functions.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_strong_playbook_on_stats_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>playbook on stats</strong></h3>
+<div class="paragraph">
+<p>The <strong>playbook_on_stats</strong> function is called at the end of a deployment, and makes it possible to get the deployment summary (unreachable, skipped, changed tasks&#8230;&#8203;), by host. Example :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def playbook_on_stats(self, stats):
+    hosts = stats.processed.keys()
+    for h in hosts:
+        summary = stats.summarize(h)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can for example get a summary by host, or generates a global summary.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_log_generation_strong"><strong>Log generation</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now, you just need to write the callback object functions for generating logs to the desired format. Here is a simple example which sends (using the <strong>requests</strong> package) a log to a webserver when a task fails:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def runner_on_failed(self, host, res, ignore_errors=False):
+    task = self.task
+    result = {
+        "timestamp": get_timestamp(),
+        "host": host,
+        "type": "task_failed",
+        "task": task.name,
+        "role": task.role_name,
+        "result": json.dumps(res),
+        "version": self.version,  = variables from extra_vars (see before)
+        "environment": self.environment,
+        "project": self.project,
+        "start_timestamp": self.start_timestamp
+    }
+    requests.post(url_web_server, data=json.dumps(result))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This log will contain the timestamp of the task, the host, the task type <strong>task_failed</strong>), the task name, the role, and the self variables defined earlier in <strong>playbook_on_start</strong>.</p>
+</div>
+<div class="paragraph">
+<p>You can write a similar code in all other functions, and your web server will receive very interesting logs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_collect_and_store_your_logs_strong"><strong>Collect and store your logs</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Possibilities in callback plugins are endless. I chose to send my logs to a Python web server using Flask. Then, the web server sends the log to Kafka. Logstash collects the logs from Kafka, and push them into Elasticsearch.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ansible_log.png" alt="logs ansible"></span></p>
+</div>
+<div class="paragraph">
+<p>With Elasticsearch, you can make complex queries and graphs on your logs using Kibana and Grafana.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_exploit_logs_strong"><strong>Exploit logs</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With informations provided by a simple callback plugin, i can:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Make complex queries in Kibana (example: get all the failed tasks for my HAproxy role for a particular projet on the pre-production environment). Furthermore, all logs are centralized in the same place, and not scattered into multiples Jenkins instances/jobs.</p>
+</li>
+<li>
+<p>In Grafana, by project:</p>
+</li>
+<li>
+<p>Summaries of the last deployments (start time, environment, success or not, number of tasks skipped/changed/unreachable&#8230;&#8203;).</p>
+</li>
+<li>
+<p>List of all started deployments (including the current ones).</p>
+</li>
+<li>
+<p>List of all completed deployments.</p>
+</li>
+<li>
+<p>Numvber of task for each role with their types (changed, skipped, success&#8230;&#8203;).</p>
+</li>
+<li>
+<p>Number of time a role has failed.</p>
+</li>
+<li>
+<p>Least reliable roles list.</p>
+</li>
+<li>
+<p>Execution time of each role (max, min, average&#8230;&#8203;).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ansible_grafana1.png" alt="Grafana graph examples"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ansible_grafana2.png" alt="Grafana graph example"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>These two images (anomyzed) show these graphs. largest image format <a href="/img/ansible_grafana1.png">here</a> and <a href="/img/ansible_grafana2.png">here</a>.</em></p>
+</div>
+<div class="paragraph">
+<p>Considers transforming some logs, for example the <strong>res</strong> parameter. These parameters can be very long (thousands of characters), particularly on certain tasks like <strong>unarchive</strong>. You can for example truncate too long messages.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_ansible_2_strong"><strong>Ansible 2</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="https://docs.ansible.com/ansible/porting_guide_2.0.html">porting guide</a> shows how to use the callback plugins in Ansible 2. Unfortunaly, parts of the code must change :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>extra_vars are not accessibles in <strong>playbook_on_start</strong> but only from <strong>v2_playbook_on_play_start</strong>, in a different way:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">extra_vars = play.get_variable_manager().extra_vars</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The role name is accessible in <strong>v2_playbook_on_task_start</strong>. You can do for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">if task._role is not None:  = on verifie si c'est un role ou non
+    task.role_name = task._role._role_name</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_conclusion_strong"><strong>Conclusion</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can do a lot of things with Ansible callback plugins. I think it is possible to build with them a real Ansible control center (with statistics, alerting&#8230;&#8203;).</p>
+</div>
+</div>
+</div>
+
+    <div id="prev-next">
+        
+        
+        
+        <a href="/pages/meuse-rust-registry/">Meuse, a free Rust private Registry &raquo;</a>
+        
+    </div>
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

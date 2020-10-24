@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): My go-to Clojure libraries</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-08-10-clojure-libraries/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">10 août 2020</div>
+        
+    </div>
+    <h2>My go-to Clojure libraries</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>I started developing in Clojure at the end of 2014, and I use it professionally since 2018. With time, I built a list of libraries which are for me essential when I work with Clojure. Some of these libraries were written at Exoscale, where I work. A big thanks to all maintainers and contributors ;)</p>
+</div>
+<div class="sect1">
+<h2 id="_error_handling">Error handling</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I always had troubles managing errors in Clojure until I discovered <a href="https://github.com/exoscale/ex">ex</a> (written by a coworker, thanks to him :p). This library was a game changer for me.</p>
+</div>
+<div class="paragraph">
+<p><code>ex</code> allows you to define exception types in the ex data by setting the <code>:exoscale.ex/type</code> key. You can then use the <code>try+</code> macro to catch Exceptions with a given type, like in this example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ex/try+
+
+  (throw (ex-info "Argh" {:type ::bar :foo "a foo"}))
+
+  (catch ::foo data
+    (prn :got-ex-data data))
+
+  (catch ::bar {:as data :keys [foo]}
+    ;; in that case it would hit this one
+    (prn :got-ex-data-again foo))
+
+  (catch ExceptionInfo e
+   ;; this would match an ex-info that didn't get a hit with catch-ex-info)
+
+  (catch Exception e (prn :boring))
+
+  (finally (prn :boring-too))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>ex</code> also provides default types like <code>:exoscale.ex/not-found</code>, <code>:exoscale.ex/forbidden</code> and helper functions to create exceptions (like <code>(exoscale.ex/ex-not-found "not found !" {:foo "bar"})</code> to create an exception of type <code>:exoscale.ex/not-found</code>, or <code>exoscale.ex/ex-not-found!</code> to create and throw it).</p>
+</div>
+<div class="paragraph">
+<p><code>ex</code> also allows you to derive exceptions types from other types.<br>
+Let&#8217;s take an example. You might want have multiple types for authentication errors, like <code>::invalid-api-key</code> or <code>::invalid-token</code>, but make them all derive from <code>::ex/forbidden</code> to be able to convert them easily to an HTTP response:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(ex/derive ::invalid-api-key ::ex/forbidden)
+(ex/derive ::invalid-token ::ex/forbidden)
+
+(defmulti ex-&gt;response
+  (fn [e]
+    (some-&gt; e ex-data :type))
+  :hierarchy exoscale.ex/hierarchy)
+
+(defmethod ex-&gt;response ::ex/forbidden [e]
+  {:body (ex-message e)
+   :status 403})
+
+(defmethod ex-&gt;response ::ex/not-found [e]
+  {:body (ex-message e)
+   :status 404})
+
+(defmethod ex-&gt;response :default [_]
+  {:body "default error message"
+   :status 500})</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s generate some errors:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>(ex-&gt;response (ex/ex-not-found "thing not found"))
+{:body "thing not found", :status 404}
+
+(ex-&gt;response (ex-info "invalid token" {:type ::invalid-token}))
+{:body "invalid token", :status 403}
+
+(ex-&gt;response (ex-info "invalid api key" {:type ::invalid-api-key}))
+{:body "invalid api key", :status 403}
+
+(ex-&gt;response (ex-info "error !" {}))
+{:body "default error message", :status 500}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can do tons of things with this library !</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_http">HTTP</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I like <a href="https://github.com/ring-clojure/ring/tree/master/ring-jetty-adapter">Ring Jetty Adapter</a> as a HTTP server. I use a lot <a href="https://github.com/ztellman/aleph">Aleph</a> at my job, but the current state of the project is not reassuring. I&#8217;ve recently started migrating my side projects to Jetty, and it works perfectly.<br>
+Performances are also great: one of my coworker used Ring Jetty to serve thousands of requests per seconds on commodity hardware. it seems everyone want reactive/async softwares today (which is possible with Jetty), but I think blocking is alright for most projects.</p>
+</div>
+<div class="paragraph">
+<p>I don&#8217;t use ring middlewares because I prefer the Interceptor pattern. For that, I use the <a href="https://github.com/exoscale/interceptor">Interceptor</a> library from Exoscale. This library also supports async interceptors (based on Manifold, core.async or CompletableFuture).</p>
+</div>
+<div class="paragraph">
+<p>For me, it&#8217;s easier to reason about my request pipeline using interceptors rather than middlewares. It&#8217;s also easy to convert Ring middlewares to interceptors, for example for cookies:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(def cookies
+  {:name ::cookies
+   :enter (fn [ctx] (update ctx :request #(cookies/cookies-request % {})))
+   :leave (fn [ctx] (update ctx :response #(cookies/cookies-response % {})))})</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here, I reuse functions from <code>ring.middleware.cookies</code> in my interceptor.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_json">json</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I always used <a href="https://github.com/dakrone/cheshire">cheshire</a> and never had issues with it, so I will continue to use it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_http_client">HTTP client</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/dakrone/clj-http">clj-http</a> is what you want.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_crypto">Crypto</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I like <a href="https://github.com/weavejester/crypto-random">crypto-random</a> to generate random bytes and <a href="https://github.com/weavejester/crypto-password">crypto-password</a> to manage passwords.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration_loading">Configuration loading</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/juxt/aero">Aero</a> is a very good library if you want to load EDN configurations. For YAML, I use <a href="https://github.com/exoscale/yummy">Yummy</a> which supports tons of YAML tags (like <code>!keyword</code>, <code>!envvar</code>&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>If I have to read things from environment variables, I use the <a href="https://github.com/weavejester/environ">environ</a> library.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ssl">SSL</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/aphyr/less-awful-ssl">Less-awful-ssl</a> is <strong>mandatory</strong> to create SSL contexts from certificates files.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sql">SQL</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I use <a href="https://github.com/seancorfield/next-jdbc">next-jdbc</a> to access SQL databases. The API is nice and it&#8217;s easy to use.</p>
+</div>
+<div class="paragraph">
+<p>For database migrations, I use <a href="https://github.com/weavejester/ragtime">Ragtime</a>. Again, it&#8217;s easy to use and I never had issues with it.</p>
+</div>
+<div class="paragraph">
+<p>I use <a href="https://github.com/brettwooldridge/HikariCP">HikariCP</a> for my databases connection pools. It&#8217;s a Java library but it&#8217;s easy to use from Clojure. Here is an example for Postgresql:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>(defn pool
+  [{:keys [user password host port name max-pool-size key cert cacert ssl-password ssl-mode schema]}]
+  (let [url (format "jdbc:postgresql://%s:%d/%s"
+                    host port name)
+        config (doto (HikariConfig.)
+                 (.setMetricRegistry metric/registry)
+                 (.setJdbcUrl url)
+                 (.addDataSourceProperty "user" user)
+                 (.addDataSourceProperty "password" password)
+                 (.setMaximumPoolSize (or max-pool-size default-pool-size)))]
+    (when schema
+        (.addDataSourceProperty config "currentSchema" schema))
+    (when key
+      (.addDataSourceProperty config "ssl" true)
+      (.addDataSourceProperty config
+                              "sslfactory"
+                              "org.postgresql.ssl.jdbc4.LibPQFactory")
+      (.addDataSourceProperty config "sslcert" cert)
+      (.addDataSourceProperty config "sslkey" key)
+      (.addDataSourceProperty config "sslrootcert" cacert)
+      (.addDataSourceProperty config "sslmode" (or ssl-mode
+                                                   default-ssl-mode)))
+    (HikariDataSource. config)))</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_eql">EQL</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>EQL <a href="https://github.com/edn-query-language/eql">EDN Query Language</a> is a language to query data using EDN datastructures.
+The <a href="https://github.com/exoscale/seql/">seql</a> library takes inspiration from EQL and can be used to access (and mutate) entities stored on SQL databases.</p>
+</div>
+<div class="paragraph">
+<p>The documentation could be improved (I plan to write an article explaining how seql works in details), but you can check the <a href="https://github.com/exoscale/seql/blob/master/doc/quickstart.md">quickstart</a> for basic examples.</p>
+</div>
+<div class="paragraph">
+<p>It supports for example listeners (functions which will be executed when a mutation is successfully executed), preconditions (when a mutation is performed, you can add checks to verify the database state. Preconditions are executed in the same transaction than the mutation).<br>
+t will also automatically verify (using clojure spec) if the parameters passed to mutations are valid or not, and even automatically coerce parameters (like string to uuid, string to keywords&#8230;&#8203;) to the right type !</p>
+</div>
+<div class="paragraph">
+<p>Everything (the database schema, the mutations, the queries to execute &#8230;&#8203;) is represented as EDN.</p>
+</div>
+<div class="paragraph">
+<p>We use seql intensively at Exoscale. it&#8217;s a powerful library which I really like to use.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_logging">Logging</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I use <a href="https://github.com/clojure/tools.logging">tools.logging</a> to log things, and <a href="https://github.com/pyr/unilog">unilog</a> to configure the logger. Unilog is simple to use and allows you to choose the logging format (<code>json</code> for example), log things in files, control the log level of your loggers&#8230;&#8203;<br>
+Unilog also allows you to add a context to your log (new keys if the logs are json formatted for example) by using the <code>unilog.context/with-context</code> macro.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_metrics">Metrics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I think the best solution today is to wrap the Java <a href="https://micrometer.io/">Micrometer</a> library. It&#8217;s easy to use, supports tags, has tons of outputs (Prometheus, Graphite, Datadog&#8230;&#8203;). It&#8217;s just what I want from a metric library.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tests">Tests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I use the default <code>clojure.test</code> runner, but for me <a href="https://github.com/pjstadig/humane-test-output">humane-test-output</a> to pretty print test outputs is mandatory. Here is an example without and with <code>humane-test-output</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(deftest foo-test
+  (is (= {:foo 1 :bar 2}
+         {:baz 3})))
+
+;; without
+
+expected: (= {:foo 1, :bar 2} {:baz 3})
+
+  actual: (not (= {:foo 1, :bar 2} {:baz 3}))
+
+;; with
+
+expected: {:foo 1, :bar 2}
+
+  actual: {:baz 3}
+    diff: - {:foo 1, :bar 2}
+          + {:baz 3}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For mocks, the <a href="https://github.com/alexanderjamesking/spy">spy</a> library allows you to easily mock protocols, functions&#8230;&#8203; and check how many time things were called and with which parameters. I always include this library in my <code>:dev</code> profile.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_linter">Linter</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://github.com/borkdude/clj-kondo">clj-kondo</a> is <strong>amazing</strong>, and brings me joy.</p>
+</div>
+<div class="paragraph">
+<p>And you, what are your favorite libraries ?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+    <a href="/tags/programming/">programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-09-09-meuse-1.0.0/">&laquo; Meuse 1.0.0 released!</a>
+        
+        
+        <a class="right" href="/posts/2020-08-08-estimations/">Développement et estimation de temps &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

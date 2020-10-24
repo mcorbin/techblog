@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Cloud, Gaia-X: le faux débat du vendor lock-in</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-06-20-cloud-vendor-lock-in/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">20 juin 2020</div>
+        
+    </div>
+    <h2>Cloud, Gaia-X: le faux débat du vendor lock-in</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>En ce moment d&#8217;annonces concernant Gaia-X, le "meta-cloud" européen (on y reviendra), on parle beaucoup de multi-cloud (le fait de pouvoir facilement déployer son application sur plusieurs Cloud, ou changer facilement de Cloud) et de vendor lock-in. Je donnerai dans cet article mon avis sur ces sujets, et expliquerai pourquoi le lock-in est selon moi un faux sujet dans ce cas.</p>
+</div>
+<div class="paragraph">
+<p>Je voudrais également préciser que comme d&#8217;habitude c&#8217;est mon opinion personnelle que j&#8217;exprime dans cet article, et non celle de mon employeur.</p>
+</div>
+<div class="sect1">
+<h2 id="_les_dernières_annonces">Les dernières annonces</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>J&#8217;ai déjà eu plusieurs fois des discussions sur le Cloud et le lock-in, mais c&#8217;est surtout l&#8217;annonce de Gaia-X qui m&#8217;a donné envie d&#8217;écrire cet article.<br>
+Avant de commencer, il faut énoncer une chose: ce qu&#8217;est vraiment Gaia-X n&#8217;est clair pour personne. Après m&#8217;être documenté et assisté à un talk sur le sujet, voici ce que j&#8217;ai cru comprendre.</p>
+</div>
+<div class="paragraph">
+<p>Gaia-X serait donc un produit créé par un consortium d&#8217;entreprise (quelques Cloud providers, entreprises "clientes" de Cloud&#8230;&#8203;) dont l&#8217;objectif serait d&#8217;interfacer les Cloud entre eux dans le but de créer un "meta Cloud" européen. Il n&#8217;y a pas vraiment d&#8217;autres informations sur le sujet, les articles de la presse généraliste et technique ne faisant que répéter la communication officielle (qui elle même ne veut pas dire grand chose).</p>
+</div>
+<div class="paragraph">
+<p>Pour l&#8217;instant, la seule fonctionnalité présentée de Gaia-X est un catalogue. L&#8217;utilisateur pourra rechercher dans ce catalogue des produits Cloud en fonction de différents critères, comme "Je veux un Cloud hébergé en France, je veux pouvoir faire du S3&#8230;&#8203;" ou des choses comme ça. Bref, c&#8217;est la version Cloud Native de la Redoute.</p>
+</div>
+<div class="paragraph">
+<p>Mais qui va sincèrement choisir son Cloud Provider (et donc l&#8217;architecture de son projet) sur catalogue ? La documentation, la qualité et cohérence des produits proposés, la qualité du support, le tooling disponible, la facilité d&#8217;utilisation, le prix&#8230;&#8203; sont autant de facteurs qui vont influer le choix, bien plus que des résultats de recherches répondants à des critères simples.<br>
+Je vois déjà les managers arriver un matin en disant "bon, on utilisera maintenant Tartempion pour nos projets, j&#8217;ai mis les critères de l&#8217;appel d&#8217;offre dans la moulinette et c&#8217;était la première réponse".</p>
+</div>
+<div class="paragraph">
+<p>Ca parle aussi de certifications Gaia-X, donc peut être qu&#8217;on peut s&#8217;attendre à des appels d&#8217;offres demandant le tampon Gaia-X, comme pour les certifications ISO actuellement (histoire de rajouter un peu de bureaucratie).</p>
+</div>
+<div class="paragraph">
+<p>Le but à terme serait aussi  d&#8217;interconnecter les Cloud pour pouvoir passer facilement d&#8217;un Cloud à l&#8217;autre. Comment ? On ne sait pas. Une API commune peut être ?</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, peu d&#8217;informations pour l&#8217;instant. Mais la volonté d&#8217;interconnecter les Clouds semble là. Mais même sans parler de Gaia-X, est ce vraiment utile et possible ?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_des_api_communes">Des API communes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On pourrait se dire "ce serait quand même plus simple si tout le monde fournissait le même produit". Je ne crois pas du tout à cette approche. Je m&#8217;explique.</p>
+</div>
+<div class="paragraph">
+<p>Il y a déjà un certain nombre de Cloud existants sur le marché. D&#8217;ailleurs, le mot Cloud veut tout et rien dire. On parle de quoi là ? De IaaS ? de PaaS ? De Cloud fournissant des services spécifiques (comme le Cloud InfluxDB, Sentry, Datadog&#8230;&#8203;) ? Est-il possible de faire rentrer des produits aussi différents dans le même catalogue, et surtout vouloir construire quelque chose permettant de passer de l&#8217;un à l&#8217;autre sans aucun effort ?</p>
+</div>
+<div class="paragraph">
+<p>Prenons le monde de l&#8217;IaaS, que je connais bien. On retrouve entre les différents Cloud des produits qui de prime abord semblent assez proches: machines virtuelles, réseaux privés, load balancers, IP "Elastiques" ou "Flottantes" selon les Cloud &#8230;&#8203; Mais le diable se cache dans les détails.</p>
+</div>
+<div class="paragraph">
+<p>Quand on parle d&#8217;un load balancer, on parle de quoi ? Un load balancer TCP, UDP, HTTP ? Qui fait terminaison ou non ? Qui supporte le proxy protocol ? Et les healthchecks, on les définit comment ? Comment le load balancer détecte-il les machines backends, faut-il les ajouter une par une, il y a t-il la notion de groupes de machines ? Je pourrai continuer comme ça pendant longtemps, et faire cela sur tous les produits.<br></p>
+</div>
+<div class="paragraph">
+<p>Chaque Cloud Provider a fait, et va faire des choix. En fonction de son existant (en effet, un Cloud ce n&#8217;est pas selon moi des produits sans cohérences entre eux, généralement on construit sur les produits précédents), de ses compétences en interne, des outils choisis pour réaliser telle tâche, voir du matériel physique utilisé.<br>
+Si demain on décidait de définir une API commune à tout le monde, on choisit quoi ? Celle du plus gros Cloud Provider, et les autres réimplémentent leurs produits ? Ou bien on construit une API géante, supportant tous les produits de tout le monde, avec toutes les variations possible, mais qui sera de ce fait une usine à gaz inutilisable ?<br></p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai aussi déjà eu des discussions où l&#8217;on me disait "ce serait bien que tout le monde soit sur Openstack, au moins on passerait facilement d&#8217;un Cloud à un autre". C&#8217;est selon moi le meilleur moyen de tuer l&#8217;innovation.<br></p>
+</div>
+<div class="paragraph">
+<p>Imaginons que vous êtes CTO d&#8217;un Cloud tournant sur Openstack (ou autre produit de plateforme Cloud, ce n&#8217;est pas important). Déjà, il faut savoir que vous n&#8217;utiliserez probablement qu&#8217;une petite partie du code du produit (vu que c&#8217;est un produit très générique fait pour tourner dans pleins de contextes), et que vous aurez probablement à maintenir un fork interne à vie car vous aurez forcément des problèmes spécifique.<br>
+Vos clients utilisent donc le tooling Openstack (Terraform, Ansible&#8230;&#8203;) pour déployer de l&#8217;infrastructure chez vous.</p>
+</div>
+<div class="paragraph">
+<p>Mais vous avez maintenant une super idée de produit ! Vous allez rajouter rajouter de nouveaux endpoints dans l&#8217;API, et pourquoi pas modifier un peu l&#8217;API des machines virtuelles pour rajouter plus d&#8217;options.<br>
+Mais il se pose maintenant un problème: vous n&#8217;êtes dorénavant plus un Cloud proposant de l&#8217;Openstack, mais un Openstack légèrement modifié. Vous n&#8217;êtes plus compatible avec le tooling (et les mainteneurs refusent de faire une exception pour vous).<br></p>
+</div>
+<div class="paragraph">
+<p>On parle beaucoup de vendor lock-in, dans le sens "l&#8217;entreprise proposant un service verrouille le client". Mais attention à l&#8217;effet inverse où c&#8217;est l&#8217;entreprise qui se fait lock-in. Et c&#8217;est le risque de notre meta-Cloud européen.</p>
+</div>
+<div class="paragraph">
+<p>Maîtriser à 100 % sa stack technique est ce qui permet selon moi de développer des produits de qualité rapidement.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_vendor_lock_in">Vendor lock-in</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Le vendor lock-in existe-il ? Oui.</p>
+</div>
+<div class="paragraph">
+<p>Quand vous déployez votre infrastructure ou applications chez un Cloud A, il faudra un peu de travail pour passer sur le Cloud B. Selon les Cloud ça peut se faire assez bien, parfois ça peut être compliqué.</p>
+</div>
+<div class="paragraph">
+<p>Par exemple, migrer des machines virtuelles d&#8217;un Cloud à un autre, ce n&#8217;est selon moi pas compliqué. La plupart des Cloud permettent d&#8217;ailleurs de pousser vos propres images de machines virtuelles, donc il est facile d&#8217;utiliser la même image de base sur de nombreux Cloud.</p>
+</div>
+<div class="paragraph">
+<p>Par contre, si vous utilisez des services très spécifiques d&#8217;AWS, Google Cloud ou autre (base de données présentes que chez eux par exemple), là ça peut être un peu plus compliqué. Mais ce n&#8217;est pas la faute du Cloud Provider, qui est selon moi tout à fait en droit de proposer un service non présent chez la concurrence. C&#8217;est de la votre.</p>
+</div>
+<div class="paragraph">
+<p>Il y a des moments dans la vie d&#8217;un projet où il faut faire des choix. Des choix de technologies, de langages, d&#8217;hébergement. Ces choix auront une conséquence sur l&#8217;avenir du projet.<br>
+Vous pouvez partir "all-in" sur un Cloud, utiliser tous ses services dont ceux pouvant éventuellement vous verrouiller, ou bien n&#8217;utiliser qu&#8217;une partie des services, ou bien partir sur plusieurs Cloud différents dès le début&#8230;&#8203;<br>
+Vous pouvez essayer de concevoir vos applications <a href="https://mcorbin.fr/posts/2020-01-06-plateforme-execution/">pour être indépendantes de la plateforme d&#8217;exécution</a>, et qu&#8217;elles puissent être déployées dans différents contextes (PaaS, machines virtuelles, Kubernetes &#8230;&#8203;), ou bien utiliser des produits qui vous feront peut être gagner du temps mais vous enfermeront dans un écosystème.</p>
+</div>
+<div class="paragraph">
+<p>Il n&#8217;y a pas un bon choix et un mauvais choix, c&#8217;est des choix que vous devez faire selon votre contexte et dont vous serez responsable. A vous de définir votre limite dans le lock-in et de choisir en conséquence. Choix qui, soit dit en passant, demandent de bonnes connaissances pour juger les pour et les contre, et c&#8217;est peut être ça qui manque un peu dans certaines entreprises, surtout si la personne qui prend la décision ne fait que prendre le Cloud proposé par la SSII du coin.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_standards">Standards</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Est-ce une raison pour se passer totalement de standards ? Non.</p>
+</div>
+<div class="paragraph">
+<p>Il y a déjà des protocoles standards qu&#8217;on utilise tous les jours. A nous de construire sur ces standards. Des standards pour communiquer avec des bus de messages, des standards pour le format d&#8217;une métrique, ou bien des standards pour décrire une API tout en pouvant générer des clients et de la documentation, des standards décrivant des langages de requêtage de base de données&#8230;&#8203;<br>
+Construisez vos applications sur ces standards, et ne vous enfermez pas sur des technologies propriétaires. Demandez vous toujours quelle serait la difficulté de redéployer vos applications sur un autre Cloud Provider, ou de passer d&#8217;un produit fournit par le Cloud à un produit hébergé en interne. C&#8217;est de cette façon que vous éviterez le lock-in.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cloud_européen">Cloud Européen</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Est ce que créer le CORBA du Cloud européen permettra de concurrencer les GAFAM sur ce domaine ? Je ne pense pas.</p>
+</div>
+<div class="paragraph">
+<p>Il est vrai que les Cloud américains fournissent généralement plus de produits que les Cloud européens, mais je pense que le retard s&#8217;amenuise peu à peu, surtout si l&#8217;on compare les moyens disponibles de chaque côté.<br>
+Je pense que tous les acteurs européens ne demandent qu&#8217;à faire leurs preuves. Que des entreprises partent sur des produits américains, très bien, je n&#8217;aime pas d&#8217;ailleurs le marketing visant presque à culpabiliser les gens allant sur des GAFAM. Être européen ne fait pas tout, et non les clients ne font pas utiliser un produit mal ficelé juste par ce qu&#8217;il est européen.</p>
+</div>
+<div class="paragraph">
+<p>Mais je pense qu&#8217;aujourd&#8217;hui on trouve des produits et entreprises de qualité en Europe, et qui n&#8217;ont selon moi pas que ça à faire que de participer à des consortium aux objectifs peu clairs. Et ces acteurs ne demandent qu&#8217;une chose: qu&#8217;on leur laisse leur chance.<br>
+Testez ces plateformes, faites des retours, dites ce qui va et ce qui ne va pas. Essayez de pousser les décideurs à investiguer d&#8217;autres choix que les GAFAM sélectionnés par défaut. C&#8217;est comme cela qu&#8217;un écosystème européen se construira.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/cloud/">cloud</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-06-24-cabourotte-release/">&laquo; Cabourotte: un outil de monitoring pour tester l&#39;état de vos services</a>
+        
+        
+        <a class="right" href="/posts/2020-05-02-meuse-0.5.0/">Meuse 0.5.0 released ! &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Un exemple d&#39;infrastructure automatisée et scalable</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2019-11-20-un-exemple-infra-intro/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">20 novembre 2019</div>
+        
+    </div>
+    <h2>Un exemple d&#39;infrastructure automatisée et scalable</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Cela faisait longtemps que je voulais écrire une série d&#8217;articles sur le déploiement d&#8217;une infrastructure et la gestion des applications qui tournent dessus, le tout répondant à certains critères:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Déploiement automatisé, que ce soit pour l&#8217;infrastructure en elle même ou bien pour les applications.</p>
+</li>
+<li>
+<p>Pouvant monter en charge si besoin.</p>
+</li>
+<li>
+<p>Utilisant un certain nombre d&#8217;outils qui se combinent bien ensemble.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Chaque article sera consacré à une partie de l&#8217;infrastructure ou à un sujet plus "applicatif": gestion de machines virtuelles, déploiement de l&#8217;infrastructure, intégration continue, packaging et déploiement des applications, load balancing, monitoring, métriques&#8230;&#8203; j&#8217;essayerais aussi de justifier mes choix, en pesant le pour et le contre par rapport à d&#8217;autres produits que ceux présentés.</p>
+</div>
+<div class="paragraph">
+<p>Tout cela va probablement prendre pas mal de temps. Je prendrais peut être parfois quelques raccourcis si je vois qu&#8217;une section me prend trop de temps.</p>
+</div>
+<div class="sect1">
+<h2 id="_et_ce_sera_déployé_où">Et ce sera déployé où ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nous déploierons l&#8217;infrastructure chez un cloud provider.</p>
+</div>
+<div class="paragraph">
+<p>Toute l&#8217;infrastructure sera déployée sur <a href="https://www.exoscale.com/">Exoscale</a>, qui est aussi mon employeur (vous allez dire que je prêche pour ma paroisse).</p>
+</div>
+<div class="paragraph">
+<p>D&#8217;ailleurs, si vous recherchez un cloud provider européen avec du bon tooling, un catalogue produit sympa, un support très réactif (car géré par l&#8217;équipe tech), jetez un coup d&#8217;oeil (et on a plusieurs nouveaux produits qui arrivent très prochainement, et une grosse roadmap pour 2020 :p).</p>
+</div>
+<div class="paragraph">
+<p>Les articles peuvent également s&#8217;appliquer à d&#8217;autres cloud en changeant quelques configurations dans certains outils, car je veillerais à rester général (et pour beaucoup d&#8217;articles, le choix du cloud provider ne sera pas du tout important).</p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez retrouver dès à présent <a href="https://mcorbin.fr/posts/2019-11-21-exemple-infra-vm-image/">le premier article de cette série</a>, qui concerne la gestion des images de nos futures machines virtuelles !</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/cloud/">cloud</a>
+    
+    <a href="/tags/exemple-infra/">exemple-infra</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-11-21-exemple-infra-vm-image/">&laquo; Un exemple d&#39;infrastructure: gestion des images</a>
+        
+        
+        <a class="right" href="/posts/2019-11-11-meuse-0.2.0/">What&#39;s new in Meuse 0.2.0 &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

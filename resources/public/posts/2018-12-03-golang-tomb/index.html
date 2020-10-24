@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Golang: gérez l&#39;arrêt de vos systèmes avec Tomb</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2018-12-03-golang-tomb/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">3 décembre 2018</div>
+        
+    </div>
+    <h2>Golang: gérez l&#39;arrêt de vos systèmes avec Tomb</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>On cite souvent Go comme un langage de programmation facilitant la programmation concurrente et parallèle via les goroutines. Les goroutines ne sont pourtant pas si faciles que ça à utiliser correctement. Voyons comment utiliser la bibliothèque <code>tomb</code> pour les contrôler.</p>
+</div>
+<div class="sect1">
+<h2 id="_une_goroutine_réalisant_des_requêtes_http">Une goroutine réalisant des requêtes HTTP</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Voici un simple programme réalisant plusieurs choses:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Un channel nommé <code>stop</code> est initialisé.</p>
+</li>
+<li>
+<p>Une goroutine est démarrée. Cette goroutine va réaliser une requête HTTP sur <code><a href="https://mcorbin.fr" class="bare">https://mcorbin.fr</a></code> toutes les 2 secondes.</p>
+</li>
+<li>
+<p>Une deuxième goroutine est démarrée. Cette goroutine écoute les signaux <code>SIGTERM</code> envoyés à l&#8217;application et poussera une valeur dans le channel <code>stop</code> lors de la réception d&#8217;un signal.</p>
+</li>
+<li>
+<p><code>&#8592;stop</code> bloquera tant qu&#8217;une valeur n&#8217;aura pas été poussée dans ce channel (ce qui ne se produit qu&#8217;en cas de réception d&#8217;un <code>SIGTERM</code>).</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-golang" data-lang="golang">package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+)
+
+func main() {
+	stop := make(chan string)
+	go func() {
+		for {
+			time.Sleep(2 * time.Second)
+
+			r, err := http.Get("https://mcorbin.fr")
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Printf("%d\n", r.StatusCode)
+		}
+	}()
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGTERM)
+		s := &lt;-sig
+		fmt.Printf("received signal %s\n", s)
+		stop &lt;- "done"
+	}()
+	&lt;-stop
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si vous compilez et lancez ce programme, vous devrez avoir cet output:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$ ./example
+200
+200
+200
+200
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>En récupérant le PID du processus (avec <code>ps aux</code> par exemple), vous pouvez envoyer un signal <code>SIGTERM</code> avec la commande <code>kill PID</code>. L&#8217;output de votre programme devrait être:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>...
+200
+received signal terminated</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ce programme semble fonctionner comme attendu mais présente un défaut majeur. Ici, la goroutine réalisant les requêtes HTTP sera terminée brutalement lors de l&#8217;arrêt du programme. Ce n&#8217;est pas très grave, mais imaginons que votre goroutine fasse des choses plus importantes. Peut être aimeriez-vous la terminer proprement ?</p>
+</div>
+<div class="paragraph">
+<p>Cela serait par exemple possible en utilisant un autre channel qui lui contrôlera l&#8217;arrêt de la goroutine. Le programme suivant réalise cela:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+)
+
+func main() {
+	stop := make(chan string)
+	done := make(chan string)
+	go func() {
+		for {
+			time.Sleep(2 * time.Second)
+			select {
+			case &lt;-done:
+				fmt.Println("terminate the goroutine")
+				stop &lt;- "done"
+				return
+			default:
+				r, err := http.Get("https://mcorbin.fr")
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Printf("%d\n", r.StatusCode)
+			}
+		}
+	}()
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGTERM)
+		s := &lt;-sig
+		fmt.Printf("received signal %s\n", s)
+		done &lt;- "done"
+	}()
+	&lt;-stop
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, la goroutine gérant les signaux poussera une valeur dans le channel <code>done</code> en cas de <code>SIGTERM</code>. Ce channel est ensuite utilisé dans la première goroutine, qui captera cette valeur, poussera une nouvelle valeur dans le channel <code>stop</code> ce qui terminera le programme.
+De cette façon, vous avez la garantie que le traitement dans la clause <code>default</code> du <code>select</code> se terminera avant l&#8217;arrêt du programme.</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;inconvénient de ce genre de système est la multiplication des channels, et le manque de gestion d&#8217;erreurs (la goroutine ne peut pas informer si elle s&#8217;est correctement terminée ou non).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tomb">Tomb</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://godoc.org/gopkg.in/tomb.v2">Tomb</a> est une petite bibliothèque permettant de gérer de façon efficace l&#8217;arrêt de vos goroutines. Voici le programme précédent réécrit en utilisant <code>tomb</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-golang" data-lang="golang">package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"gopkg.in/tomb.v2"
+)
+
+func main() {
+	var t tomb.Tomb
+	t.Go(func() error {
+		for {
+			time.Sleep(2 * time.Second)
+			select {
+			case &lt;-t.Dying():
+				fmt.Println("terminate the goroutine")
+				return nil
+			default:
+				r, err := http.Get("https://mcorbin.fr")
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Printf("%d\n", r.StatusCode)
+			}
+		}
+	})
+	t.Go(func() error {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGTERM)
+		s := &lt;-sig
+		fmt.Printf("received signal %s\n", s)
+		t.Kill(nil)
+		return nil
+	})
+	err := t.Wait()
+	if err != nil {
+		fmt.Println(err)
+	}
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Tout d&#8217;abord, une variable <code>t tomb.Tomb</code> est déclarée. Pas besoin de plus pour initialiser une tomb, les valeurs par défaut suffisent.</p>
+</div>
+<div class="paragraph">
+<p>On voit ensuite que les goroutines sont démarrées via <code>t.Go(&#8230;&#8203;)</code>. Cette fonction est semblable à la fonction <code>go</code> de Golang, sauf qu&#8217;ici la tomb "controlera" la goroutine. De plus, l&#8217;argument de <code>t.Go(&#8230;&#8203;)</code> doit forcément être une fonction retournant une erreur.</p>
+</div>
+<div class="paragraph">
+<p>Autre changement, nous vérifions si notre goroutine se termine en consommant le channel <code>t.Dying()</code>.<br>
+Ensuite, dans notre goroutine gérant les signaux, la fonction <code>t.Kill(nil)</code> est appelé en cas de <code>SIGTERM</code>. Cette fonction placera la tomb dans l&#8217;état <code>dying</code>, et fermera le channel <code>t.Dying()</code> (ce qui terminera donc notre première goroutine).<br>
+Le paramètre de la fonction <code>Kill</code> est la raison de l&#8217;état de l&#8217;arrêt de la goroutine, et doit être une <code>error</code> ou <code>nil</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gestion_des_erreurs">Gestion des erreurs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La fonction passée en paramètre de <code>t.Go</code> doi, comme dit précédemment, forcément retourner une erreur. D&#8217;ailleurs, voici ce que la documentation de <code>tomb</code> indique à son sujet:</p>
+</div>
+<div class="paragraph">
+<p><code>If f returns a non-nil error, t.Kill is called with that error as the death reason parameter.</code></p>
+</div>
+<div class="paragraph">
+<p>Il est donc possible de terminer une tomb en retournant une erreur depuis la goroutine, la fonction <code>Kill</code> n&#8217;a donc pas pas être appelée explicitement.</p>
+</div>
+<div class="paragraph">
+<p>La raison (e.g l&#8217;erreur) de la mort de la goroutine peut donc avoir deux sources: l&#8217;appel manuel à <code>t.Kill</code> en passant une valeur non <code>nil</code>, ou bien via une goroutine retournant une erreur.</p>
+</div>
+<div class="paragraph">
+<p>Dans mon code précédent, j&#8217;appelle également <code>err := t.Wait()</code>. La fonction <code>Wait()</code> va bloquer jusqu&#8217;à ce que la tomb meurt, et que <code>toutes les goroutines</code> gérées par la tomb soient terminées. La fonction retourne ensuite la raison de la mort de la goroutine.<br>
+Cette fonction a l&#8217;avantage de nous garantir que les goroutines sont bien terminées lorsqu&#8217;elle se "débloque" (mais attention aux deadlocks !).</p>
+</div>
+<div class="paragraph">
+<p>D&#8217;autres fonctions existent, comme <code>Alive</code> ou <code>Dead</code>, et sont très bien expliquées dans la  <a href="https://godoc.org/gopkg.in/tomb.v2">documentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>Petite précision sur <code>Wait()</code>: la fonction bloquera pour toujours si aucune goroutine n&#8217;est managée par la tomb (cf <a href="https://github.com/go-tomb/tomb/issues/17">cette issue</a>).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_context">Context !</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>En Go, on utilise généralement les <a href="https://golang.org/pkg/context/">context</a> pour annuler/arrêter une requêtes, gérer des timeouts etc&#8230;&#8203; Cet article n&#8217;a pas vocation à présenter les context en détail, mais il est à noter que <code>tomb</code> supporte les context.</p>
+</div>
+<div class="paragraph">
+<p>Le bloc <code>default</code> de notre première goroutine pourrait par exemple ressembler à ça:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-go" data-lang="go">ctx := t.Context(nil)
+timeoutCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+defer cancel()
+req, err := http.NewRequest("GET", "https://mcorbin.fr", nil)
+if err != nil {
+	return err
+}
+req = req.WithContext(timeoutCtx)
+client := http.DefaultClient
+r, err := client.Do(req)
+if err != nil {
+	return err
+}
+fmt.Printf("%d\n", r.StatusCode)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, nous créons un premier context depuis la tomb, puis un second context (gérant le timeout) depuis le premier context.<br>
+Lorsque la tomb sera tuée, le context sera automatiquement terminé également, ce qui peut s&#8217;avérer utile pour être sûr que certains appels (ici notre appel HTTP) soient terminés le plus vite possible.</p>
+</div>
+<div class="paragraph">
+<p>Vous pourrez par exemple voir ce genre de messages lorsque vous envoyez un <code>SIGTERM</code> à l&#8217;application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$ ./example
+200
+received signal terminated
+Get https://mcorbin.fr: context canceled</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>tomb</code> est une bibliothèque extrêmement pratique, et est une brique de base pour mes projets Go. N&#8217;hésitez pas à utiliser plusieurs tomb dans vos programmes, rien de nous force à contrôler toutes vos goroutines avec la même tomb (ce qui peut s&#8217;avérer dangereux).<br></p>
+</div>
+<div class="paragraph">
+<p>J&#8217;espère vous avoir convaincu de l&#8217;utilité de cette bibliothèque ;)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/programming/">programming</a>
+    
+    <a href="/tags/golang/">golang</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-02-15-kubernetes-overdose/">&laquo; Kubernetes overdose</a>
+        
+        
+        <a class="right" href="/posts/2018-05-12-ansible-naming/">Ansible naming conventions &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

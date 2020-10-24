@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Use your Ansible logs ! / Exploitez vos logs Ansible !</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2016-08-10-logs-ansible/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">10 août 2016</div>
+        
+    </div>
+    <h2>Use your Ansible logs ! / Exploitez vos logs Ansible !</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p><strong>English version <a href="https://mcorbin.fr/pages/logs-ansible-en/">here</a></strong><br>
+J&#8217;utilise Ansible au quotidien. Tous les jours, mes collègues et moi même l&#8217;utilisons pour configurer nos serveurs et déployer nos applications, sur de nombreux environnements. Nous utilisons Jenkins pour piloter Ansible.</p>
+</div>
+<div class="paragraph">
+<p>Tout cela génère une <strong>énorme</strong> quantité de logs, dont nous ne faisons pas grand chose à part une consultation après un déploiement via l&#8217;interface de Jenkins.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;expliquerais dans cet article une façon d&#8217;exploiter ces logs, en s&#8217;appuyant sur les plugins callback d&#8217;Ansible. Grâce à ces plugins, il est possible d&#8217;obtenir des logs beaucoup plus détaillés que les logs Ansible de base, ainsi que de facilement les manipuler pour en tirer un maximum d&#8217;informations et de statistiques.</p>
+</div>
+<div class="sect1">
+<h2 id="_les_callbacks_plugins_d_ansible">Les callbacks plugins d&#8217;Ansible</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_strong_présentation_générale_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>Présentation générale</strong></h3>
+<div class="paragraph">
+<p>Ansible peut être "étendu" avec des plugins. Je vais présenter ici les plugins de type callback <a href="http://docs.ansible.com/ansible/developing_plugins.html=callbacks">(documentation)</a>. Les examples ici concernent Ansible 1.X, mais le fonctionnement est quasiment identique en version 2 et plus.</p>
+</div>
+<div class="paragraph">
+<p>Ce plugin permet de définir un objet dont les fonctions seront appelées à différents moments lors de l&#8217;exécution d&#8217;Ansible. Exemple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">class CallbackModule(object):
+
+    def on_any(self, *args, *kwargs):
+        pass
+
+    def runner_on_failed(self, host, res, ignore_errors=False):
+        pass
+
+    def runner_on_ok(self, host, res):
+        pass
+
+    def runner_on_skipped(self, host, item=None):
+        pass
+
+    def playbook_on_start(self):
+        pass
+
+    def playbook_on_task_start(self, name, is_conditional):
+        pass
+
+    = etc...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Un callback plugin est donc juste une classe implémentant un certain nombre de méthodes. J&#8217;en ai mis quelques unes dans cet exemple, mais il en existe beaucoup plus pour tout type d&#8217;événements (vous pouvez retrouver ces fonctions dans la doc d&#8217;Ansible ou dans les plugins callbacks fournis avec Ansible).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_strong_fonctionnement_détaillé_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>Fonctionnement détaillé</strong></h3>
+<div class="paragraph">
+<p>Par exemple, la fonction <strong>runner_on_failed</strong> sera appelé quand une task Ansible échouera. De la même façon, <strong>runner_on_ok</strong> sera appelé lorsque qu&#8217;une tâche sera en succès, <strong>runner_on_skipped</strong> lors d&#8217;une tâche ignorée etc&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Les fonctions de type <strong>playbook_on_</strong> seront elles exécutées lors d&#8217;évènements liés aux playbooks (<strong>playbook_on_start</strong> lors du démarrage du playbook etc&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Toutes ces fonctions recoivent des paramètres. C&#8217;est là que ça devient intéressant. Par exemple, nous disposons dans <strong>runner_on_ok</strong> des variables <strong>self</strong>, <strong>host</strong>, et <strong>res</strong> :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Commençons par la variable <strong>host</strong>. Comme son nom l&#8217;indique, cette variable contient l&#8217;host sur lequel s&#8217;applique la task.</p>
+</li>
+<li>
+<p>La variable <strong>res</strong> contient les différentes informations sur la machine comme par exemple les variables de type <strong>fact</strong>, ainsi que quelques informations sur la task (état <strong>changed</strong>, module appelé&#8230;&#8203;).</p>
+</li>
+<li>
+<p>L&#8217;objet callback <strong>self</strong> contient un grand nombre d&#8217;informations sur l&#8217;exécution en cours. Rajoutons par exemple <strong>import pdb; pdb.set_trace();</strong> dans la fonction <strong>runner_on_ok</strong> (pour utiliser le débugger Python) et lançons un déploiement. Un <strong>pp dir(self)</strong> pour lister les champs de l&#8217;objet donne:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>(Pdb) pp dir(self)
+['__class__',
+ '__delattr__',
+ '__dict__',
+ '__doc__',
+ '__format__',
+ '__getattribute__',
+ '__hash__',
+ '__init__',
+ '__module__',
+ '__new__',
+ '__reduce__',
+ '__reduce_ex__',
+ '__repr__',
+ '__setattr__',
+ '__sizeof__',
+ '__str__',
+ '__subclasshook__',
+ '__weakref__',
+ 'on_any',
+ 'play',
+ 'playbook',
+ 'playbook_on_import_for_host',
+ 'playbook_on_no_hosts_matched',
+ 'playbook_on_no_hosts_remaining',
+ 'playbook_on_not_import_for_host',
+ 'playbook_on_notify',
+ 'playbook_on_play_start',
+ 'playbook_on_setup',
+ 'playbook_on_start',
+ 'playbook_on_stats',
+ 'playbook_on_task_start',
+ 'playbook_on_vars_prompt',
+ 'runner_on_async_failed',
+ 'runner_on_async_ok',
+ 'runner_on_async_poll',
+ 'runner_on_failed',
+ 'runner_on_no_hosts',
+ 'runner_on_ok',
+ 'runner_on_skipped',
+ 'runner_on_unreachable',
+ 'state',
+ 'task']</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>L&#8217;objet <strong>self</strong> est une vraie mine d&#8217;or ! A coup de pdb (<code>pp dir(self.task)</code>, <code>pp dir(self.play)</code> etc&#8230;&#8203;) on se rend compte que l&#8217;on a accès à une énorme quantité d&#8217;informations sur notre déploiement. Détail de la tâche en cours (nom, rôle associé&#8230;&#8203;), variables, informations sur le playbook&#8230;&#8203; Il ne reste plus qu&#8217;à piocher dans ce qui nous intéresse ! Bien sûr, chaque fonction du plugin callback aura des paramètres différents (même si l&#8217;on retrouve des similarités, comme par exemple entre <strong>runner_on_failed</strong> et <strong>runner_on_ok</strong>).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_strong_playbook_on_start_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>playbook on start</strong></h3>
+<div class="paragraph">
+<p>La méthode <strong>playbook_on_start</strong> s&#8217;exécute, comme son nom l&#8217;indique, au lancement d&#8217;un playbook. Je voulais initialiser quelques variables à partir d&#8217;extra_vars, j&#8217;ai donc utilisé cette fonction pour le faire. Voici un exemple basique (je considère qu&#8217;une fonction <strong>get_timestamp</strong> me retourne le timestamp actuel) :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def playbook_on_start(self):
+        extra_vars = self.playbook.extra_vars
+        self.project = extra_vars["project"]
+        self.version = extra_vars["version"]
+        self.environment = extra_vars["environment"]
+        self.start_timestamp = get_timestamp()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, je récupère trois variables que je sais présentes en extra_vars. Une variable <strong>projet</strong> (le projet à déployer), une variable <strong>version</strong> (la version à déployer), une variable <strong>environment</strong> (dev, préprod, prod&#8230;&#8203;), et le timestamp du démarrage du déploiement. J&#8217;utilise ces quatres informations pour identifier précisément un déploiement.</p>
+</div>
+<div class="paragraph">
+<p>Bref, il est très facile de pouvoir rendre accessibles certaines variables en enrichissant <strong>self</strong> lors de l&#8217;exécution des fonctions (l&#8217;objet callback étant toujours le même dans un déploiement). Les autres variables de <strong>self</strong> sont bien sûr également accessibles si besoin.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_strong_playbook_on_stats_strong">&nbsp;&nbsp;&nbsp;&nbsp; <strong>playbook on stats</strong></h3>
+<div class="paragraph">
+<p>Une autre fonction intéressante est <strong>playbook_on_stats</strong>. Cette fonction est appelée à la fin du déploiement, et contient le résumé du déploiement. Voici par exemple la façon de récupérer le résumé (contenant les tasks unreachable, skipped, changed&#8230;&#8203;) du déploiement par host :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def playbook_on_stats(self, stats):
+    hosts = stats.processed.keys()
+    for h in hosts:
+        summary = stats.summarize(h)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Je récupère personnellement le résumé du déploiement par host, mais aussi un résumé global en additionnant chaque type de task (ok, skipped&#8230;&#8203;) de chaque host.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_la_génération_des_logs_strong"><strong>La génération des logs</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Il ne vous reste plus qu&#8217;à compléter les différentes fonctions du plugin callback pour générer des logs au format souhaité. Voici par exemple un exemple tout bête qui envoie (via http en utilisant le package <strong>requests</strong>) un log à un web server lorsqu&#8217;une task échoue:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">def runner_on_failed(self, host, res, ignore_errors=False):
+    task = self.task
+    result = {
+        "timestamp": get_timestamp(),
+        "host": host,
+        "type": "task_failed",
+        "task": task.name,
+        "role": task.role_name,
+        "result": json.dumps(res),
+        "version": self.version,  # Cette variable et les suivantes sont initialisées comme précédemment
+        "environment": self.environment,
+        "project": self.project,
+        "start_timestamp": self.start_timestamp
+    }
+    requests.post(url_web_server, data=json.dumps(result))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On aura ici accès au timestamp, à l&#8217;host, au type d&#8217;évènement (task_failed), au nom de la task, au rôle associé à la task si il existe, au résultat détaillé de l&#8217;exécution de la task, et enfin aux variables définies plus tôt dans <strong>playbook_on_start</strong> (ces variables sont communes à tous les logs d&#8217;un même déploiement et permettent ensuite d&#8217;identifier les logs pour un déploiement donné).</p>
+</div>
+<div class="paragraph">
+<p>Il ne reste plus qu&#8217;à écrire un code similaire dans les autres fonctions du plugin callback (en l&#8217;adaptant à chaque fois), et on arrive déjà sans grand effort à collecter des logs très intéressants !</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_collectez_et_stockez_vos_logs_strong"><strong>Collectez et stockez vos logs</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Les possibilités avec les plugins Ansible sont infinies. J&#8217;ai choisi de les envoyer comme dans l&#8217;exemple précédent dans un service web (9 lignes de Python avec Flask + kafka-python). Ce service ne réalise qu&#8217;une seule chose : après réception d&#8217;un log, il l&#8217;envoie dans Kafka. Un Logstash collecte ensuite les logs de Kafka pour les indexer dans Elasticsearch. J&#8217;ai essayé d&#8217;envoyer directement du plugin dans kafka, mais Ansible semble gérer bizarrement le cycle de vie de ses objets, ce qui posait quelques soucis avec kafka-python.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ansible_log.png" alt="logs ansible"></span></p>
+</div>
+<div class="paragraph">
+<p>Vous pourriez très bien écrire les logs sur disque, ou les envoyer dans une base de données&#8230;&#8203; Tout dépend de ce que voulez en faire. L&#8217;avantage d&#8217;Elasticsearch est qu&#8217;il est très facile ensuite de réaliser des requêtes complexes/des graphes sur les logs via Kibana/Grafana.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_exploitation_des_logs_strong"><strong>Exploitation des logs</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Rien qu&#8217;avec les informations fournies précédemment par le plugin callback, je peux :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Réaliser des recherches complexes dans Kibana (exemple : récupérer les tasks en échec pour le rôle HAproxy d&#8217;un projet donné ces 90 derniers jours sur la préprod). De plus, tous les logs sont centralisés au même endroit, ça évite d&#8217;avoir à se balader de jobs Jenkins en jobs Jenkins pour visualiser les logs (qui sont souvent illisibles avec l&#8217;option <strong>-vvvv</strong> d&#8217;Ansible)</p>
+</li>
+<li>
+<p>Dans Grafana, par projet:</p>
+</li>
+<li>
+<p>Résumé des derniers déploiements (heure de début, environnement, succès ou non, nombre de tasks skipped/changed/unreachable etc&#8230;&#8203;)</p>
+</li>
+<li>
+<p>Liste des déploiements lancés (ceux en cours sont donc lancés mais non terminés).</p>
+</li>
+<li>
+<p>Nombre de déploiements terminés sur une période de temps</p>
+</li>
+<li>
+<p>Nombre de déploiements lancés sur une période de temps (permet de comparer avec le nombre de déploiements terminés).</p>
+</li>
+<li>
+<p>Nombre de task pour chaque rôle sur une période de temps en fonction du type de la task (skipped, changed&#8230;&#8203;)</p>
+</li>
+<li>
+<p>Nombre de fois qu&#8217;un rôle a été en échec.</p>
+</li>
+<li>
+<p>Rôles les moins fiables (le plus souvent en échec).</p>
+</li>
+<li>
+<p>Temps d&#8217;exécution de chaque rôle rôle (minimum, maximum, moyenne&#8230;&#8203;).</p>
+</li>
+<li>
+<p>Dans Grafana, tous les graphes cités précédemment mais de façon globale (donc sans la notion de projet).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ansible_grafana1.png" alt="Exemple de graphes avec Grafana"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ansible_grafana2.png" alt="Exemple de graphes avec Grafana"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Ces deux images présentent quelques graphes Grafana (anonymisées) générés via les statistiques récoltées par le plugin. Liens vers les images en tailles réelles <a href="/img/ansible_grafana1.png">ici</a> et <a href="/img/ansible_grafana2.png">ici</a>.</em></p>
+</div>
+<div class="paragraph">
+<p>Le temps par rôle peut être calculé assez simplement. Lors de l&#8217;exécution d&#8217;une task, on a accès dans le plugin au rôle associé à la task. J&#8217;initialise un dictionnaire où la clé est le nom du rôle, et la valeur un tableau de deux élements. Le premier élément est le timestamp de la première task du rôle. Je mets ensuite à jour le second élément (la date de fin du rôle) à chaque nouvelle task.
+J&#8217;envoie ensuite ces statistiques pour chaque rôle (si il n&#8217;y a pas eu de plantage pouvant causer de fausses durées) en fin de déploiement.</p>
+</div>
+<div class="paragraph">
+<p>Pensez également à pré-traiter certains logs, comme par exemple les paramètres <strong>res</strong> des fonctions. Ces paramètres peuvent être trèèèèès longs (des dizaines de milliers de caractères), notamment lors de téléchargements volumineux avec Ansible en mode <strong>-vvvv</strong>. Je remplace généralement les résultats trop longs par un message de type <strong>résultat trop long</strong> (ce sont généralement des données inexploitables).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_ansible_2_strong"><strong>Ansible 2</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Le <a href="https://docs.ansible.com/ansible/porting_guide_2.0.html">porting guide</a> d&#8217;Ansible livre quelques informations pour porter les plugins Callback en Ansible 2. Malheureusement, le fonctionnement interne d&#8217;Ansible ayant bougé, il faudra réadapter le code. En vrac :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Les extra_vars ne sont plus accessibles dans <strong>playbook_on_start</strong> mais seulement à partir de <strong>v2_playbook_on_play_start</strong>, et d&#8217;une façon un peu différente :</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">extra_vars = play.get_variable_manager().extra_vars</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Le nom du rôle est accessible dans <strong>v2_playbook_on_task_start</strong>. Pour garder une certaine compatibilité avec du code Ansible 1.X, vous pouvez faire :</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">if task._role is not None:  # on verifie si c'est un role ou non
+    task.role_name = task._role._role_name</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_strong_conclusion_strong"><strong>Conclusion</strong></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Les possibilités du plugin callback sont infinies. Je pense sincèrement qu&#8217;en prenant le temps, il est possible de réaliser de nombreuses statistiques sur les déploiements (ainsi que de l&#8217;alerting, de la corrélation avec d&#8217;autres métriques comme des métriques systèmes&#8230;&#8203;), surtout avec des outils puissants comme Kibana/Grafana. Bref, à creuser !</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/ansible/">ansible</a>
+    
+    <a href="/tags/english/">english</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2017-04-05-a-propos-clojure/">&laquo; A propos de Clojure</a>
+        
+        
+        <a class="right" href="/posts/2016-04-22-lesspipe/">One day one manpage / Un jour une manpage : lesspipe &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Un exemple d&#39;infrastructure: création avec Terraform</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-01-01-exemple-infra-terraform/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">1 janvier 2020</div>
+        
+    </div>
+    <h2>Un exemple d&#39;infrastructure: création avec Terraform</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Dans la <a href="https://mcorbin.fr/posts/2019-11-21-exemple-infra-vm-image/">partie précédente</a>, nous avons vu comment créer des images de machines virtuelles. Dans cet article, nous allons déployer notre infrastructure.</p>
+</div>
+<div class="sect1">
+<h2 id="_l_infrastructure_à_déployer">L&#8217;infrastructure à déployer</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Voici l&#8217;infrastructure que nous allons déployer aujourd&#8217;hui:</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/exemple-infra/terraform/infra-example-terraform.png" alt="Infrastructure à déployer avec Terraform"></span></p>
+</div>
+<div class="paragraph">
+<p>Cette infrastucture, qui est assez simple, est susceptible d&#8217;évoluer dans les articles suivants, notamment sur un article dédié au load balancing. Comme vous pouvez le voir, elle est actuellement composée de plusieurs éléments:</p>
+</div>
+<div class="paragraph">
+<p><strong>Les machines</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Deux machines <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/frontend.tf">frontend</a> qui seront les points d&#8217;entrées sur notre infrastructure.</p>
+</li>
+<li>
+<p>Trois machines <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/master.tf">consul_master</a> sur lesquelles nous déploierons, comme leurs noms l&#8217;indique, Consul dans un prochain article.</p>
+</li>
+<li>
+<p>Un <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/worker.tf">Instance Pool</a> qui se chargera de gérer nos workers et sur lesquels nous déploierons nos applications. Comme indiqué dans <a href="https://community.exoscale.com/documentation/compute/instance-pools/">la documentation</a> d&#8217;Exoscale, un Instance Pool est un groupe de machines identiques dont la taille peut être variable (pour s&#8217;adapter aux besoins).</p>
+</li>
+<li>
+<p>Une machine <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/database.tf">database</a> sur laquelle nous déploierons une petite application qui simulera une base de données.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Réseau</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Un <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/network.tf">réseau privé</a> dans lequel sera placé toutes les machines. Un serveur DHCP (géré automatiquement par Exoscale) fournira aux interfaces privées une IP comprise dans la plage d&#8217;adresse <code>10.240.0.1</code>-<code>10.240.0.220</code>.</p>
+</li>
+<li>
+<p>Un <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/firewall.tf">security group</a> (notre firewall) qui nous permet d&#8217;accéder par SSH aux machines, et qui ouvrent les ports 80 et 443 en sortie des machines.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Une <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/keypair.tf">clé SSH publique</a> sera créée et déployée sur les machines, et un <a href="https://github.com/mcorbin/exemple-infra/blob/master/terraform/data.tf">fichier de configuration</a> Cloud Init nous permettra entre autre de configurer l&#8217;interface <code>eth1</code> de nos machines.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_terraform">Terraform</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Terraform est un outil développé par Hashicorp qui simplifie la gestion d&#8217;infrastructures. Vous définissez vos ressources (réseaux, machines virtuelles, clés ssh&#8230;&#8203;) dans des fichiers d&#8217;une manière déclarative, et Terraform se chargera de les créer.</p>
+</div>
+<div class="paragraph">
+<p>Comme toujours, avoir sa configuration dans des fichiers texte permet de la pousser sur Git et de traiter l&#8217;infrastructure comme du code (reviews de pull requests etc&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Terraform gère l&#8217;infrastructure comme un graphe où chaque ressource peut avoir des dépendances sur d&#8217;autres. Par exemple, une machine peut avoir besoin d&#8217;une clé SSH. Cette machine peut être elle même dans un réseau privé. Terraform se chargera de créer (et détruire) les ressources dans le bon ordre.<br>
+Terraform possède même une commande (<code>terraform graph</code>) permerttant de générer le graphe de vos ressources au format.dot. Voici le nôtre (cliquez pour agrandir):</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><a class="image" href="/img/exemple-infra/terraform/graph.png"><img src="/img/exemple-infra/terraform/graph.png" alt="graphe de notre infrastructure"></a></span></p>
+</div>
+<div class="paragraph">
+<p>Comme tous les outils Hashicorp, Terraform est un outil très bien pensé, supporté par la plupart des Cloud du marché, et qui est devenu de facto un outil de plus en plus utilisé lorsqu&#8217;il faut gérer de l&#8217;infrastructure.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_le_fichier_state">Le fichier state</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Terraform maintient son état dans un fichier <code>state</code>. Ce fichier contient l&#8217;état de votre infrastructure vu par Terraform. Il ne faut jamais modifier ce fichier manuellement, Terraform s&#8217;en chargera lorsqu&#8217;il exécutera des actions.</p>
+</div>
+<div class="sect2">
+<h3 id="_remote_backend">Remote backend</h3>
+<div class="paragraph">
+<p>Ce fichier peut être stocké sur votre système de fichier (par défaut), ou bien sur un <code>remote backend</code>. Cela est notamment utile pour plusieurs raisons:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Cela permet de conserver le fichier state si vous perdez votre ordinateur par exemple.</p>
+</li>
+<li>
+<p>Il est plus simple de travailler en équipe et de partager son fichier state entre plusieurs personnes.</p>
+</li>
+<li>
+<p>Certains backends supportent le chiffrement du fichier state. En effet, ce fichier peut contenir des informations sensibles à propos de votre infrastructure.</p>
+</li>
+<li>
+<p>Enfin, certains backends permettent de poser un lock sur le fichier state. Cela permet d&#8217;éviter les opérations concurrentes sur l&#8217;infrastructure.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Vous pouvez retrouver dans la <a href="https://www.terraform.io/docs/backends/types/index.html">documentation</a> les backends existants. Par exemple, le backend S3 est très intéressant.</p>
+</div>
+<div class="sect3">
+<h4 id="_backend_s3">Backend S3</h4>
+<div class="paragraph">
+<p>Ce backend permet de stocker le fichier sur un stockage compatible S3. Il fonctionne par exemple sur l&#8217;<a href="https://www.exoscale.com/object-storage/">Object Storage</a> d&#8217;Exoscale qui est compatible S3.</p>
+</div>
+<div class="paragraph">
+<p>Ce backend supporte aussi d&#8217;autres fonctionnalités seulement disponible sur Amazon, comme la gestion du chiffrement ou l&#8217;ajout du lock sur le fichier.</p>
+</div>
+<div class="paragraph">
+<p>Pour le configurer (et aussi configurer le provider Exoscale présenté plus loin), vous devez définir quelques variables d&#8217;environnements:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>export TF_VAR_exoscale_api_key=&lt;exoscale key&gt;
+export TF_VAR_exoscale_secret_key=&lt;exoscale secret&gt;
+export AWS_ACCESS_KEY_ID=${TF_VAR_exoscale_api_key}
+export AWS_SECRET_ACCESS_KEY=${TF_VAR_exoscale_secret_key}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_description_de_la_configuration">Description de la configuration</h3>
+<div class="paragraph">
+<p>Vous pouvez regarder les différents fichiers dont j&#8217;ai mis les liens précédemment pour voir à quoi ressemble la configuration de Terraform, mais voici quelques explications.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variables">Variables</h3>
+<div class="paragraph">
+<p>Il est possible de vérifier des variables dans la configuration. Par exemple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>variable "ssh_public_key_path" {
+  description = "Path to the ssh public key"
+  default     = "/home/mathieu/.ssh/example-infra/id_rsa.pub"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, je déclare une variable nommée <code>ssh_public_key_path</code>. Cette variable a une description et une valeur par défaut.</p>
+</div>
+<div class="paragraph">
+<p>Il est ensuite possible de surcharger cette variable lors de l&#8217;exécution de Terraform de plusieurs manières:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Passage d&#8217;une variable d&#8217;environnement nommée TF_VAR_&lt;nom de la variable&gt;, comme par exemple <code>TF_VAR_ssh_public_key_path</code>.</p>
+</li>
+<li>
+<p>Passage lors de l&#8217;appel de Terraform en passant une option <code>-var="ssh_public_key_path=value"</code>.</p>
+</li>
+<li>
+<p>Ajout des valeurs des variables dans un fichier et passage de ce fichier lors de l&#8217;appel de Terraform de cette façon: <code>-var-file="file.vars</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Dans mon exemple de configuration, j&#8217;ai besoin par exemple de passer des variables pour configurer mon provider.</p>
+</div>
+<div class="sect3">
+<h4 id="_configuration_du_provider">Configuration du provider</h4>
+<div class="paragraph">
+<p>Il existe un grand nombre de provider Terraform. Les providers sont utilisés pour créer des ressources sur différents systèmes (Exoscale, Openstack, Cloudflare&#8230;&#8203;). Voici par exemple comment configurer le provider Exoscale:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>provider "exoscale" {
+  version = "~&gt; 0.15"
+  key = var.exoscale_api_key
+  secret = var.exoscale_secret_key
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On voit qu&#8217;il est possible de configurer la version du provider utilisée par Terraform.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuration_du_backend_s3">Configuration du backend S3</h4>
+<div class="paragraph">
+<p>Voici un exemple où je configure le backend S3 pour le faire fonctionner sur Exoscale:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>terraform {
+  backend "s3" {
+    bucket   = "mcorbin-example-infra-tf"
+    key    = "mcorbin-example-infra.tfstate"
+    region = "ch-gva-2"
+
+    endpoint = "https://sos-ch-gva-2.exo.io"
+
+    # Deactivate the AWS specific behaviours
+    #
+    # https://www.terraform.io/docs/backends/types/s3.html#skip_credentials_validation
+    skip_credentials_validation = true
+    skip_get_ec2_platforms      = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On configure tout simplement le bucket où le fichier state sera stocké.</p>
+</div>
+<div class="paragraph">
+<p>Les options <code>skip_</code> sont là pour désactiver certains comportements spécifiques à S3. Il n&#8217;y a pas d&#8217;inquiétide à avoir, par exemple <code>skip_credentials_validation</code> ne veut pas dire que votre fichier state sera public.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_les_datasources">Les datasources</h4>
+<div class="paragraph">
+<p>Les datasources dans Terraform permettent de récupérer de l&#8217;information. Un exemple concret est par exemple récupérer un template de machine virtuelle selon différents critères. Ce template peut ensuite être utilisé dans les ressources décrivant les machines virtuelles par exemple.</p>
+</div>
+<div class="paragraph">
+<p>Voici un exemple d&#8217;utilisation d&#8217;une datasource (cf le mot clé <code>data</code>) servant à récupérer le template que nous avons construit dans l&#8217;article précédent sur Packer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>data "exoscale_compute_template" "debian" {
+  zone = var.exoscale_zone
+  name = "Debian 10 1574286847"
+  filter = "mine"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Comme nous le verrons ensuite, nous pourrons utiliser dans d&#8217;autres ressources les informations récupérées.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_cloud_init">Cloud Init</h4>
+<div class="paragraph">
+<p>Terraform permet bien sûr de déployer des machines virtuelles en passant un fichier Cloud Init. Cela se fait également via une datasource de manière très simple. Il est également possible de passer des variables au fichier Cloud Init chargé, qui sera donc un template (cela est utile pour avoir un fichier différent par host si besoin).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_count">Count</h4>
+<div class="paragraph">
+<p>Si vous voulez déployer une ressource plusieurs fois (comme par exemple déployer plusieurs machines virtuelles identiques), vous pouvez utiliser l&#8217;attribut <code>count</code> sur les ressources. Un exemple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-nginx" data-lang="nginx">resource "exoscale_compute" "consul_master" {
+  count = 3
+
+  display_name = "consul-master-${count.index}"
+  template_id  = "${data.exoscale_compute_template.debian.id}"
+
+  zone = var.exoscale_zone
+
+  size            = "tiny"
+  disk_size       = 20
+  key_pair        = exoscale_ssh_keypair.example-infra-perso.name
+  security_groups = [exoscale_security_group.example-infra-common.name]
+  tags = {
+    ansible_groups = "consul-master"
+  }
+
+  user_data = data.template_cloudinit_config.config.rendered
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Je déploie ici 3 machines virtuelles (<code>count = 3</code>). A part leurs noms, ces machines seront identiques. On voit que j&#8217;utilise dans le nom de la machine (paramètre <code>display_name</code>) une variable <code>${count.index}</code>. Mes machines seront donc nommées <code>consul-master-0</code>, <code>consul-master-1</code> et <code>consul-master-2</code>.</p>
+</div>
+<div class="paragraph">
+<p>Cet exemple montre aussi comment cette ressource de type <code>exoscale_compute</code> référence d&#8217;autres ressources et variables:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Le template est configuré en récupérant l&#8217;ID exposé par la datasource de type template présentée précédemment: <code>"${data.exoscale_compute_template.debian.id}"</code></p>
+</li>
+<li>
+<p>La zone est configurée via <code>var.exoscale_zone</code></p>
+</li>
+<li>
+<p>La keypair, le security group, et les user data (pour cloud init) sont également configurés via référencement.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Il est également possible d&#8217;itérer sur des ressources déclarées avec un <code>count</code>. Par exemple, je souhaite placer ces machines dans un réseau privé. Cela se fait de cette façon:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>resource "exoscale_nic" "eth_consul_master" {
+  count = length(exoscale_compute.consul_master)
+
+  compute_id = exoscale_compute.consul_master.*.id[count.index]
+  network_id = exoscale_network.example-infra.id
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>La variable <code>exoscale_compute.consul_master.*.id[count.index]</code> permettra de créer une ressource de type <code>exoscale_nic</code> par machine virtuelle, et donc permettra d&#8217;attacher chaque machine au réseau.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_init">Init</h3>
+<div class="paragraph">
+<p>La première commande Terraform à lancer est <code>terraform init</code>. Cette commande sert tout simplement à initialiser le backend utilisé.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_plan">Plan</h3>
+<div class="paragraph">
+<p>Une fois que votre configuration est écrite, vous pouvez lancer <code>terraform plan</code>. Cette commande crée et affiche le plan d&#8217;exécution. Ce dernier permet de voir toutes les actions que réalisera Terraform: création, suppression, mise à jour de ressources. Il peut par exemple être intéressant d&#8217;attacher la sortie de <code>terraform plan</code> en commentaire d&#8217;une pull request lorsque l&#8217;on travaille avec Terraform.</p>
+</div>
+<div class="paragraph">
+<p>Il est toujours important de regarder ce que va faire Terraform avant de réaliser un déploiement. En effet, il est très facile de détruire des ressources avec Terraform. Une ressource est détruite (ou reconstruite) si:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Elle a été supprimée du plan.</p>
+</li>
+<li>
+<p>Un champ immuable a été mis à jour. Par exemple, si je change le template utilisé par une machine virtuelle, Packer essayera de la recréer (donc de détruire la machine existante et de la reconstruire).</p>
+</li>
+<li>
+<p>Si la ressource dépend d&#8217;une autre ressource qui sera elle même détruite. Comme dit précédemment, si une ressource est détruite ou reconstruite, les ressources dépendantes le seront aussi.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_apply">Apply</h3>
+<div class="paragraph">
+<p>La commande <code>terraform apply</code> appliquera les modifications à votre infrastructure. Terraform affichera encore une fois le plan, et demandera une confirmation.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_destroy">Destroy</h3>
+<div class="paragraph">
+<p>La commande <code>terraform destroy</code> vous permet de détruire votre infrastructure.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_cycle_de_vie">Cycle de vie</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Terraform présente selon moi une difficulté majeure: la gestion du cycle de vie des ressources.</p>
+</div>
+<div class="paragraph">
+<p>Reprenons mon exemple précédent: je veux changer le template utilisé par mes machines virtuelles. Vous voulez probablement faire ça régulièrement sur certaines machines (cf mon article précédent sur Packer où j&#8217;expose quelques raisons pour reconstruire régulièrement ses templates).</p>
+</div>
+<div class="paragraph">
+<p>Par défaut, Terraform voudra détruire et recréer toutes mes machines. Bien sûr, ce n&#8217;est pas ce que nous voulons. Ce problème se retrouve un peu partout dans Terraform (vous modifiez une ressource et Terraform décide que cela provoquera la reconstruction de votre infrastructure).</p>
+</div>
+<div class="paragraph">
+<p>Il est possible de contrôler le comportement de Terraform sur ce point.</p>
+</div>
+<div class="sect2">
+<h3 id="_depends_on">depends_on</h3>
+<div class="paragraph">
+<p>Tout d&#8217;abord, il est possible de forcer la dépendance entre deux ressources via l&#8217;option <code>depends_on</code> sur une ressource. Cela peut être utile parfois pour forcer une destruction qui ne se produirait pas par défaut par exemple.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_lifecycle">lifecycle</h3>
+<div class="paragraph">
+<p>L&#8217;option <code>lifecycle</code> sur une ressource permet, comme son nom l&#8217;indique, de contrôler le cycle de vie d&#8217;une ressource. Voyons quelques exemples.</p>
+</div>
+<div class="sect3">
+<h4 id="_ignore_changes">ignore_changes</h4>
+<div class="paragraph">
+<p><code>ignore_changes</code> permet d&#8217;indiquer à Terraform de ne pas reconstruire une ressource si le ou les attributs spécifiés ont été mis à jour.</p>
+</div>
+<div class="paragraph">
+<p>Par exemple, sur une ressource de type <code>exoscale_compute</code>, indiquer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>lifecycle {
+    ignore_changes = [key_pair]
+  }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>permettra d&#8217;éviter la reconstruction de la machine si la keypair référencée par la ressource est modifiée.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_prevent_destroy">prevent_destroy</h4>
+<div class="paragraph">
+<p>Cette option indiquer tout simplement à Terraform de ne jamais détruire la ressource. Par exemple, si j&#8217;indique <code>prevent_destroy = true</code> pour une ressource de type <code>exoscale_compute</code> et que j&#8217;essaye de détruire cette resource, j&#8217;obtiendrais:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>Error: Instance cannot be destroyed
+
+  on master.tf line 2:
+   2: resource "exoscale_compute" "consul_master" {
+
+Resource exoscale_compute.consul_master[1] has lifecycle.prevent_destroy set,
+but the plan calls for this resource to be destroyed. To avoid this error and
+continue with the plan, either disable lifecycle.prevent_destroy or reduce the
+scope of the plan using the -target flag.</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_create_before_destroy">create_before_destroy</h4>
+<div class="paragraph">
+<p>Une fois ajoutée sur une ressource, cette option permet de recréer une ressource <strong>avant</strong> sa destuction.</p>
+</div>
+<div class="paragraph">
+<p>Prenons par exemple le cas d&#8217;une ressource de type <code>exoscale_compute</code>. Si on modifie le template de la ressource, Terraform voudra par défaut détruire puis reconstruire la ressource.<br>
+Grâce à l&#8217;option <code>create_before_destroy = true</code>, la nouvelle machine sera créée avant la destruction de l&#8217;ancienne machine.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_provisioners">Provisioners</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Les provisioners permettent tout simplement d&#8217;exécuter une action après la création d&#8217;une ressource, comme par exemple exécuter un script ou bien déployer un fichier sur une instance nouvellement créée.</p>
+</div>
+<div class="paragraph">
+<p>Cela permet par exemple d&#8217;attendre qu&#8217;un service soit démarré avant de considérer une machine comme créée par Terraform.</p>
+</div>
+<div class="paragraph">
+<p>Par exemple, si j&#8217;ajoute sur une ressource de type <code>exoscale_compute</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>provisioner "local-exec" {
+  command = "echo 'create' &amp;&amp; sleep 10"
+}
+
+provisioner "local-exec" {
+  when = "destroy"
+  command = "echo 'destroy' &amp;&amp; sleep 20"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Le premier provisioner sera appelé lors de la création (ou recréation) d&#8217;une ressource, et le second lors d&#8217;une destruction. Dans mon exemple de configuration, j&#8217;utilise par exemple un provisioner de type <code>local-exec</code> pour ajouter des tags sur les machines virtuelles de mon instance pool.</p>
+</div>
+<div class="paragraph">
+<p>Comme indiqué dans la <a href="https://www.terraform.io/docs/provisioners/index.html#provisioners-are-a-last-resort">documentation de Terraform</a>, il ne faut pas abuser des provisioners. De plus, certains problèmes existent avec les provisioners. Par exemple, si j&#8217;ajoute sur une ressource:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>lifecycle {
+  create_before_destroy = true
+}
+
+provisioner "local-exec" {
+  command = "echo 'create' &amp;&amp; sleep 10"
+}
+
+provisioner "local-exec" {
+  when = "destroy"
+  command = "echo 'destroy' &amp;&amp; sleep 20"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Bizarrement, le provisioner <code>destroy</code> ne sera pas appelé (cf <a href="https://github.com/hashicorp/terraform/issues/13395">cette issue</a> sur Github).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_terraform_vs_gestionnaire_de_configuration">Terraform vs gestionnaire de configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Terraform est très bon pour créer de l&#8217;infrastructure, mais selon moi pas pour configurer des serveurs ou faire de l&#8217;orchestration (même si cela peut être possible via les provisioners).</p>
+</div>
+<div class="paragraph">
+<p>Je pense qu&#8217;il est important de ne pas essayer d&#8217;utiliser un seul outil pour tout faire. Il vaut mieux restreindre Terraform à faire ce qu&#8217;il fait bien, et utiliser par exemple Ansible pour la configuration, le déploiement d&#8217;applications, l&#8217;orchestration&#8230;&#8203; Nous verrons ça dans les articles suivants.</p>
+</div>
+<div class="paragraph">
+<p>De même, je préfère éviter de créer de l&#8217;infrastucture avec Ansible (la capacité de Terraform à gérer les dépendances entre ressources étant un gros plus).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pour_aller_plus_loin">Pour aller plus loin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Je n&#8217;ai pas parlé de tout ce qui est possible de faire avec Terraform. Par exemple, les <a href="https://www.terraform.io/docs/modules/index.html">modules</a> permettent de créer des morceaux de configurations réutilisables. Cela est très utile pour éviter d&#8217;avoir à se répéter, par exemple pour la création de machines virtuelles partageant certaines choses en commun.</p>
+</div>
+<div class="paragraph">
+<p>Terraform ne se limite pas à la création d&#8217;infrastructure. Il permet de configurer des applications comme RabbitMQ, PostgresSQL, MySQL&#8230;&#8203; Vous pouvez jeter un coup d&#8217;oeil à la liste des <a href="https://www.terraform.io/docs/providers/index.html">providers</a> disponibles. A vous de trancher ce qui doit être géré par Terraform ou par un autre outil.</p>
+</div>
+<div class="paragraph">
+<p>Il n&#8217;est pas toujours évident de mettre à jours des ressources nécessitant une destruction avec Terraform (surtout si ces ressources sont référencées par d&#8217;autres ressources). Utiliser les provisioners comme par exemple <a href="https://www.hashicorp.com/blog/zero-downtime-updates-with-terraform">dans cet article d&#8217;Hashicorp</a> peut fonctionner, mais il est selon moi plus simple (et plus sûr) de dupliquer l&#8217;infrastructure dans ce cas (et donc faire du déploiement blue/green).</p>
+</div>
+<div class="paragraph">
+<p>Terraform est aussi un outil dangereux: un mauvais <code>terraform destroy</code> peut détruire toute votre infrastructure. Faites toujours très attention à ce que vous faites, et n&#8217;hésitez pas à utiliser <code>prevent_destroy</code> sur vos ressources.</p>
+</div>
+<div class="paragraph">
+<p>N&#8217;hésitez pas non plus à découper votre déploiement en plusieurs projets Terraform (par environnement, client, provider etc&#8230;&#8203;), ce sera comme cela plus simple à gérer.</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est tout pour cet article, dans l&#8217;article suivant on parlera de déploiement et d&#8217;Ansible.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/cloud/">cloud</a>
+    
+    <a href="/tags/exemple-infra/">exemple-infra</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-01-06-plateforme-execution/">&laquo; Développement d&#39;applications, conteneurs et plateforme d&#39;exécution</a>
+        
+        
+        <a class="right" href="/posts/2019-12-08-meuse-0.3.0/">Meuse 0.3.0 released ! &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

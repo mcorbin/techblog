@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Ansible: common roles considered harmful</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2019-05-28-ansible-common/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">28 mai 2019</div>
+        
+    </div>
+    <h2>Ansible: common roles considered harmful</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p><strong>English version <a href="https://mcorbin.fr/pages/ansible-common/">here</a></strong><br>
+C&#8217;est un classique des projets Ansible: un rôle appelé <code>common</code> ou assimilé. Vous savez, ce genre de rôles où l&#8217;angoisse vous saisit quand vous l&#8217;ouvrez. Voyons ensemble les problèmes de ce type de rôle, et parlons de la granularité des rôles Ansible.</p>
+</div>
+<div class="sect1">
+<h2 id="_les_rôles_poubelles">Les rôles poubelles</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ce rôle <code>common</code> est généralement un rôle poubelle. Tout ce que les gens ne savent pas où mettre va dans common. J&#8217;ai travaillé dans plusieurs entreprises faisant du Ansible, et toutes avaient un rôle <code>common</code>. J&#8217;ai moi même contribué à un rôle common pendant quelque temps lors de ma première mission Ansible avant de le détruire définiivement.</p>
+</div>
+<div class="paragraph">
+<p>Cela donne généralement un rôle inmaintenable, faisant des tâches diverses et variées mais sans rapport entre elles.</p>
+</div>
+<div class="paragraph">
+<p>Prenons un rôle <code>common</code> fictif. Ce rôle ferait peut être</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>La mise à jour de la distribuction Linux (Debian par exemple).</p>
+</li>
+<li>
+<p>La configuration des clés SSH de la machine.</p>
+</li>
+<li>
+<p>La configuration de base de syslog.</p>
+</li>
+<li>
+<p>La configuration de DHCP.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Avec le temps, ce rôle va grossir, de nouvelles choses finiront dedans, et le rôle finit par devenir du gloubi boulga.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ansible_common/gloubi_boulga.png" alt="gloubi boulga"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Vous ne voulez pas en manger du gloubi boulga ? Vraiment pas ?</em></p>
+</div>
+<div class="paragraph">
+<p>Ce genre de rôle doit être explosé en plusieurs rôles, cbaque rôle devant faire une action spécifique. Vous pourriez par exemple avoir à la place de ce rôle <code>common</code> des rôles:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>debian</p>
+</li>
+<li>
+<p>ssh</p>
+</li>
+<li>
+<p>syslog</p>
+</li>
+<li>
+<p>dhcp</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Ce sera beaucoup plus lisible, testable et maintenable.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_la_granularité_des_rôles">La granularité des rôles</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Finalement, tout est une question de granularité. Je suis partisan d&#8217;un découpage fin des rôles Ansible, chaque rôle ayant une petite responsabilité (cette expérience vient de l&#8217;écriture et de la maintenance de <code>centaines</code> de rôles dans différents contextes).</p>
+</div>
+<div class="paragraph">
+<p>Beaucoup de gens essayent de faire trop de choses au sein des rôles. Prenons par exemple un rôle installant <code>Kafka</code>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Vous utilisez Collectd dans votre entreprise. Est ce que ce rôle doit également déployer la configuration Collectd nécessaire pour monitorer Kafka ? La réponse est non. Cela donnerait un rôle inutilisable dans un autre contexte où Collectd n&#8217;est pas utilisé.</p>
+</li>
+<li>
+<p>Est ce que la remontée des logs doit être gérée dans le rôle ? Là encore, je préfère externaliser (même si ça se discute pour logrotate/syslog), car peut être que j&#8217;utilise syslog-ng, ou bien filebeat, ou logstash. Je ne veux pas lier ces technologies à ce rôle.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Les rôles <code>doivent rester simple</code>, faire une seule chose et la faire bien.</p>
+</div>
+<div class="paragraph">
+<p>Un autre exemple: Vous voulez déployer Kubernetes avec Ansible. A votre avis, c&#8217;est quoi le plus maintenable et le plus réutilisable niveau rôle:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>common</p>
+</li>
+<li>
+<p>master</p>
+</li>
+<li>
+<p>worker</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>ou bien:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>kubelet</p>
+</li>
+<li>
+<p>kube-proxy</p>
+</li>
+<li>
+<p>kube-dns</p>
+</li>
+<li>
+<p>ssh</p>
+</li>
+<li>
+<p>etcd</p>
+</li>
+<li>
+<p>calico</p>
+</li>
+<li>
+<p>&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Dans le second cas, il sera beaucoup plus simple de maintenir de petits rôles. Cela simplifiera aussi les déploiements, et évitera les accidents de type <code>oups, j&#8217;ai redéployé kube-dns mais en fait ça a aussi upgrade etcd</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_les_playbooks_à_la_rescousse">Les playbooks à la rescousse</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On a tendance à oublier les playbooks, et à ne les utiliser que pour appeler des rôles. Mais les playbooks sont également un super moyen d&#8217;écrire des scénarios de déploiement.</p>
+</div>
+<div class="paragraph">
+<p>Un rolling-upgrade d&#8217;un cluster doit vivre dans un playbook, et non dans le rôle de l&#8217;application par exemple. De même, pour de petites tâches comme lancer un <code>dist-upgrade</code>, les playbooks font sens (pas la peine d&#8217;utiliser un rôle pour ça).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gardez des rôles simples, et vous aurez un déploiement simple.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/ansible/">ansible</a>
+    
+    <a href="/tags/english/">english</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-06-13-one-year-of-go/">&laquo; One year of Golang</a>
+        
+        
+        <a class="right" href="/posts/2019-05-01-meuse-rust-registry/">Meuse, a free Rust private Registry &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

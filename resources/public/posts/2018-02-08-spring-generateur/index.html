@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Spring, générateurs, des amis qui vous veulent du bien</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2018-02-08-spring-generateur/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">8 février 2018</div>
+        
+    </div>
+    <h2>Spring, générateurs, des amis qui vous veulent du bien</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Aujourd&#8217;hui, j&#8217;ai vu passer un tweet qui fut la goutte d&#8217;eau après des mois de frustrations avec Spring. Il faut que je vous parle de Spring. Spring ? C&#8217;est LE framework web Java. Il faut dire que c&#8217;est tellement simple, surtout avec Spring Boot et un générateur du type JHipster. Simple, rly ?</p>
+</div>
+<div class="sect1">
+<h2 id="_simple_rly">Simple, rly ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On le sait tous au fond de nous, Spring n&#8217;est pas simple. Sous le capot, ça fait beaucoup, beaucoup de choses.<br>
+Des états mutables partout, rapidement des dizaine de classes dans le projet (surtout quand on rajoute bonne vieille archi N tiers resources services repository DAO DTO VO WTF, et les mappers entre chaque classe), un arbre de dépendance chaotique avec des conflits permanents entre dépendances (merci les spring boot starter pour rajouter un peu plus de chaos dans l&#8217;arbre de dépendance), toujours 10 façons de faire les choses, des montées de versions compliquées, des surcouches de surcouches, l&#8217;injection de dépendance qui devient vite un bordel sans nom&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Même les experts sur la techno passeront de longues heures de debugging dans les tréfonds du framework et de Stackoverflow, car au fond personne ne sait vraiment pourquoi son bean est à null.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/spring/fine.jpg" alt="everything is fine"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em> Cette image de Kyle Kingsbury tirée d&#8217;un talk sur <a href="http://jepsen.io/">jepsen</a> résume bien la situation </em></p>
+</div>
+<div class="paragraph">
+<p>Rajoutez à tout ça du Spring Security, du Spring Data, un Spring Cloud, des abstractions louches du type Spring Kafka, un peu d&#8217;AspectJ ou encore un bon vieux Hibernate des familles, et bienvenue en enfer.</p>
+</div>
+<div class="paragraph">
+<p>Bon, au moins, vous aurez le temps de prendre votre café le temps que votre microservice démarre.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_les_générateurs">Les générateurs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Mais heureusement, les générateurs type JHipster sont là pour nous sauver. En un clic, j&#8217;ai un projet qui démarre.<br>
+Un projet qui démarre, mais avec une archi prédifinie probablement non adaptée à votre use case et difficilement modifiable sans tout péter. Un projet qui utilise vous ne savez quoi comme librairie, configuré vous ne savez comment.</p>
+</div>
+<div class="paragraph">
+<p>Votre pom fait également maintenant plus de 1000 lignes, vous tirez des dizaines de dépendances, un gros tas de plugins Maven. Vous ne maitrisez plus votre projet.</p>
+</div>
+<div class="paragraph">
+<p>La slide suivante, tirée du célèbre <a href="https://www.infoq.com/presentations/Simple-Made-Easy">Simple Made Easy</a> de Rich Hickey résume là encore parfaitement la situation:</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/spring/simple.jpg" alt="simple made easy"></span></p>
+</div>
+<div class="paragraph">
+<p>Spring et les générateurs sont faciles. Vous avez une appli qui boot en 2 minutes, mais je reste persuadé que sur le long terme, vous êtes perdant (du vécu sur un gros projet).</p>
+</div>
+<div class="paragraph">
+<p>D&#8217;ailleurs, une autre citation du talk est parfaitement dans le sujet:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>So the word in this case is about being familiar.<br>
+<br>
+I think that, collectively, we are infatuated with these two notions of easy. We are just so self-involved in these two aspects; it&#8217;s hurting us tremendously. Right? All we care about is, you know, can I get this instantly and start running it in five seconds? It could be this giant hairball that you got, but all you care is, you know, can you get it.
+ [&#8230;&#8203;]<br>
+<br>
+In particular, if you want everything to be familiar, you will never learn anything new because it can&#8217;t be significantly different from what you already know and not drift away from the familiarity.
+[&#8230;&#8203;]<br>
+<br>
+And it is, and I think you really have to ask yourself, you know, are you programming with a loom? You know, you&#8217;re having a great time. You&#8217;re throwing that shuttle back and forth. And what&#8217;s coming out the other side is this knotted, you know, mess. I mean it may look pretty, but you have this problem. Right? What is the problem? The problem is the knitted castle problem. Right?</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Bon je vais m&#8217;arrêter là avec les citations du talk car en fait je me rend compte que je pourrais mettre ici tout le transcript.</p>
+</div>
+<div class="paragraph">
+<p>Un projet informatique, c&#8217;est pas une conférence où je montre que je peux boot une appli en 30 minutes sous les applaudissements de la salle.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lock_in">Lock in</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Vous avez commencé votre projet avec Spring, et maintenant vous voulez changer sans tout péter car Spring ne vous convient plus.<br></p>
+</div>
+<div class="paragraph">
+<p>On entre dans le fameux débat framework vs librairie. Un framework comme Spring conditionnera votre façon de coder, posera un cadre extrêmement rigide sur ce que vous pouvez faire, et il sera très dur de sortir de ce cadre. C&#8217;est généralement à ce moment que les gros hacks pour contourner le framework apparaissent dans le projet.</p>
+</div>
+<div class="paragraph">
+<p>Vous êtes malheureusement condamné à utiliser Spring jusqu&#8217;à la mort du projet, deal with it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_spring_5">Spring 5</h2>
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p><strong>Bob, revenant du DevoxxFR</strong>: Mais Spring 5 arrive, c&#8217;est reactive !<br>
+<strong>Alice</strong>: Oui mais peut être que ce paradigme-<br>
+<strong>Bob</strong>: Non mais mon programme sera reactive ! Spring en reactive c&#8217;est génial ! En plus je peux le faire en Kotlin !<br>
+<strong>Alice</strong>: &#8230;&#8203;</p>
+</div>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Oui, j&#8217;aurais pû mettre des balises &lt;rant&gt;&lt;/rant&gt; autour de ce post, et c&#8217;est peut être légèrement (?) exagéré. Vous ne serez probablement pas d&#8217;accord avec moi.</p>
+</div>
+<div class="paragraph">
+<p>Pas grave, suis un sysadmin au quotidien, donc Spring ou pas Spring finalement&#8230;&#8203;</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/gif/dontcare.gif" alt="i don&#8217;t care"></span></p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/rant/">rant</a>
+    
+    <a href="/tags/programming/">programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2018-05-12-ansible-naming/">&laquo; Ansible naming conventions</a>
+        
+        
+        <a class="right" href="/posts/2018-01-26-ansible-templating/">Ansible role configuration: best practice &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

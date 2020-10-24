@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Velocity Londres 2017: jour 1</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2017-12-03-velocity-1/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">3 décembre 2017</div>
+        
+    </div>
+    <h2>Velocity Londres 2017: jour 1</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>J&#8217;étais à O&#8217;Reilly Velocity Londres les 19 et 20 Octobre 2017, et cet article résumera ma première journée de conférence.</p>
+</div>
+<div class="paragraph">
+<p>Je ne parlerais pas forcément de tous les talks ou keynotes que j&#8217;ai vu, mais ceux qui furent selon moi les plus intéressants.</p>
+</div>
+<div class="sect1">
+<h2 id="_l_organisation_de_la_conférence">L&#8217;organisation de la conférence</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Tout d&#8217;abord, bravo aux organisateurs !
+La conférence est parfaitement organisée.
+Elle se déroulait à l&#8217;hôtel Hilton Métropole, et on sent le professionnalisme.</p>
+</div>
+<div class="paragraph">
+<p>Il y a de l&#8217;espace, les salles sont grandes, bien équipées, l&#8217;image et le son sont parfaits. Il y avait en tout 6 salles de conférences (donc 6 talks en parallèle), et les keynotes étaient réalisées dans une énorme salle (en fait 2 salles classiques rassemblées).</p>
+</div>
+<div class="paragraph">
+<p>Il y avait également un grande salle contenant l&#8217;espace sponsor avec des stands. C&#8217;est aussi dans cette salle que l&#8217;on prenait le repas du midi notamment.
+J&#8217;ai d&#8217;ailleurs trouvé ce repas assez moyen, mais bon ce n&#8217;est pas le plus important.</p>
+</div>
+<div class="paragraph">
+<p>Concernant les sujets des talks et keynotes, c&#8217;est technique, assez spécialisé, et pile dans mon domaine. En même temps, une conférence qui titre <code>Build &amp; maintain complex distributed systems</code>, ça ne pouvait que m&#8217;intéresser :)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_keynotes">Keynotes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Après être arrivé assez tôt, avoir pris mon petit déjeuner (gratuit chaque matin de conférence) et participé à un speed networking (histoire de faire connaissance avec d&#8217;autres participants et de parler un peu anglais), je m&#8217;installe confortablement pour les keynotes.</p>
+</div>
+<div class="sect2">
+<h3 id="_cloud_native_security_threat_or_opportunity">Cloud native: Security threat or opportunity?</h3>
+<div class="paragraph">
+<p>Une Keynote intéressante fut celle de Liz Rice sur la sécurité des architectures dites <strong>Cloud natives</strong>: les vm, conteneurs, orchestrateurs, et tout ce qui va avec.</p>
+</div>
+<div class="paragraph">
+<p>Tout d&#8217;abord, Liz Rice nous explique qu&#8217;aujourd&#8217;hui, on le sait pas forcément où le code tourne.
+On a des centaines de VM/serveurs, certaines applications sont composées de dizaines de microservices, et les containers et orchestrateurs rajoutent une couche de complexité au dessus de tout ça.</p>
+</div>
+<div class="paragraph">
+<p>La speaker expliquait aussi la différence entre <strong>l&#8217;ancien temps</strong> (ou le présent si vous travaillez pour un grand groupe Français ^^) où les serveurs étaient patchés (à la main ?) et maintenus en vie sur de longues périodes, là ou aujourd&#8217;hui on va plutôt essayer de mettre en place des infrastructures immuables (en gros on pète et on reconstruit).</p>
+</div>
+<div class="paragraph">
+<p>Mais quid de la sécurité dans ces nouvelles architectures ? Vu la multiplicité des briques logicielles et la complexité des architectures, elle doit être intégrée directement dans le pipeline de déploiement.</p>
+</div>
+<div class="paragraph">
+<p>Par exemple, on peut scanner nos containers avant et après le build pour rechercher des vulnérabilités: voir les versions des produits déployés, vérifier que l&#8217;utilisateur lançant un process n&#8217;est pas root, vérifier l&#8217;isolation du container par rapport à l&#8217;host&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Concernant l&#8217;host, des OS spécialisés pour faire tourner des containers (CoreOS, RancherOS&#8230;&#8203;) peuvent également être une solution. Je n&#8217;ai personnellement pas d&#8217;avis sur ces OS, ne les ayant jamais utilisés.</p>
+</div>
+<div class="paragraph">
+<p>Bien sûr, les IDS traditionnels peuvent toujours être utilisés si besoin.</p>
+</div>
+<div class="paragraph">
+<p>Concernant le réseau, là aussi il faut sécuriser les communications, que ce soit au niveau chiffrement, authentification, ou restrictions (j&#8217;évite que des services qui n&#8217;ont pas à discuter entre eux puissent le faire).</p>
+</div>
+<div class="paragraph">
+<p>Enfin, des protections "au runtime" comme SELinux ou AppArmor ont été évoquées.
+La présentation s&#8217;est finie sur une petite démo de la faille Shellshock où un serveur httpd pouvait exécuter du code arbitraire.</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, une keynote intéressante, mais un détail méritait d&#8217;être évoqué et ne l&#8217;a pas été selon moi. La meilleure sécurité, c&#8217;est quand même d&#8217;essayer d&#8217;avoir une architecture la plus simple et comprehensible possible avec les contraintes de scalabilité/tolérance aux pannes de notre produit. Restez simple !</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_why_an_interactive_picture_is_worth_a_thousand_numbers">Why an interactive picture is worth a thousand numbers ?</h3>
+<div class="paragraph">
+<p>Peut être ma keynote préférée des deux jours, ça envoyait du lourd ! Sara-Jane Dunn travaille pour Microsoft Research, et nous expliquait ici l&#8217;importance des visualisations par rapport notamment à des chiffres bruts.</p>
+</div>
+<div class="paragraph">
+<p>Aujourd&#8217;hui, on a de plus en plus de données, de logs&#8230;&#8203; On calcule souvent des statistiques sur ces données, mais ces statistiques sont parfois trompeuses !</p>
+</div>
+<div class="paragraph">
+<p>Deux jeux de données peuvent produire des statistiques (moyennes, médianes&#8230;&#8203;) semblables alors que les données n&#8217;ont rien à voir.</p>
+</div>
+<div class="paragraph">
+<p>De plus, on doit parfois partager ces données avec des collègues, pas forcément de notre domaine (par exemple avec des scientifiques en biologie alors que nous on est informaticien).</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est là que les visualisations interviennent.
+Pouvoir représenter et explorer des données de façon graphique est devenu indispensable aujourd&#8217;hui.</p>
+</div>
+<div class="paragraph">
+<p>La speaker, à l&#8217;aide de nombreux exemples, nous montrait comment des visualisations aident à résoudre des problèmes parfois très complexes. Les exemples venaient du monde de la biologie, où un chercheur a même avoué que sans l&#8217;outil de visualisation développé par la speaker, ces recherches n&#8217;auraient probablement pas abouties.
+Les visualisations lui avaient permis de voir son problème sous un angle totalement différent.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/velocity/visu1.jpg" alt="Exemples de deux visualisations représentant les mêmes données mais où une est meilleure."></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Ici, on voit clairement que la visualisation 2 (avec les courbes) est plus parlante que la première (avec les couleurs).</em></p>
+</div>
+<div class="paragraph">
+<p>La speaker présentait ensuite quelques techniques pour créer des visualisations pertinentes. Cette slide montre bien par exemple qu&#8217;une visualisation à base de formes/graphes est largement plus pertinente qu&#8217;une visualisation à base de couleurs.
+L&#8217;intéractivité est aussi aujourd&#8217;hui la clé de visualisations pertinentes.</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, investissez du temps pour créer les outils permettant de visualiser vos données !</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_talks">Talks</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_consumer_driven_contract_testing_with_pact_and_docker">Consumer-driven contract testing with Pact and Docker</h3>
+<div class="paragraph">
+<p>Ce talk, donné par Harry Winser, expliquait les stratégies et les outils et process développés pour valider des API HTTP dans une architecture microservice.</p>
+</div>
+<div class="paragraph">
+<p>Les problèmes pour les API HTTP sont toujours les mêmes. Comment gérer la montée de version d&#8217;un service ? Comment je m&#8217;assure que les clients d&#8217;une version antérieure sont toujours compatibles avec la nouvelle version ?</p>
+</div>
+<div class="paragraph">
+<p>Une solution peut être les <strong>consumer driven contracts</strong>. On définit un contrat d&#8217;interface pour notre API. Cela permet aux équipes de travailler de manière indépendantes, et d&#8217;écrire des tests pour valider nos contrats.
+Une phrase prononcée intéressante était <strong>write your consumer first</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Attention, ces contrats ne concernent que la partie API, et ne permet donc pas de vérifier la logique métier des applications.</p>
+</div>
+<div class="paragraph">
+<p>Le speakeur utilisait dans son entreprise un format appelé Pact, Ce format permet de décrire une requête HTTP, et s&#8217;intègre facilement dans des pipelines de déploiements grâce à une intégration avec de nombreux langages/plateformes (comme par exemple la JVM).</p>
+</div>
+<div class="paragraph">
+<p>Les contrats Pact sont stockés dans une base appelée <strong>Pact broker</strong>. Quand une application est build, son artifact (comme par exemple son .jar pour une application Java) est poussée dans un Nexus ou autre, et les contrats Pact de cette application (et pour cette version) dans le broker.
+Il est aussi important de stocker des stubs/mock de l&#8217;API de l&#8217;application, qui seront ensuite utilisés par la suite.</p>
+</div>
+<div class="paragraph">
+<p>Dans l&#8217;intégration continue des consumers d&#8217;une API, on utilise les stubs de l&#8217;API générés précédemment et les fichiers Pact présent dans le broker pour vérifier que l&#8217;API correspond bien à un ou des contrats Pact et si les clients peuvent communiquer avec.<br>
+Par exemple, un client communiquant avec 3 API pourra tester si il valide le contrat Pact pour ces 3 services.</p>
+</div>
+<div class="paragraph">
+<p>Il est aussi possible de tester différentes versions de l&#8217;API, pour voir si on garde une rétrocompatibilité en cas d&#8217;une montée de version par exemple.
+Ensuite, le résultat de ces tests sont publiés pour être exploités.</p>
+</div>
+<div class="paragraph">
+<p>Ce talk était intéressant. Je n&#8217;avais jamais entendu parler de Pact, le format et l&#8217;écosystème autour semblent prometteurs.</p>
+</div>
+<div class="paragraph">
+<p><a href="../../pdf/velocity_2017/pact_docker.pdf">Slides</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_real_world_consistency_explained">Real-world consistency explained</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Attention, on passe au meilleur talk des deux jours !</p>
+</div>
+<div class="paragraph">
+<p>Ce talk, donné par Uwe Friedrichsen, parlait de systèmes distribués, de consensus, de niveaux d&#8217;isolations dans les base de données&#8230;&#8203; Bref, d&#8217;un sujet super important mais que l&#8217;on ne croise pas souvent.<br>
+je consacrerais d&#8217;ailleurs un article sur ces sujets prochainement.</p>
+</div>
+<div class="sect3">
+<h4 id="_le_passé">Le "passé"</h4>
+<div class="paragraph">
+<p>Le speaker commence tout d&#8217;abord à parler du "passé" (les guillemets sont importante).</p>
+</div>
+<div class="paragraph">
+<p>On a donc depuis longtemps des bases de données relationnelles, avec des propriétés ACID (Atomicité, Cohérence, Isolation, Durabilité), Ces base de données fonctionnent très bien, il est facile de raisonner avec (ACID apporte sur le papier des propriétés fortes intéressantes).</p>
+</div>
+<div class="paragraph">
+<p>Mais (car il y a toujours un mais), ACID != Serializability (en résumé que les transactions sont exécutées sans se marcher dessus) ! Des anomalies peuvent apparaîtres, et les transactions ne sont pas si isolées qu&#8217;on ne le pense (d&#8217;où les différents niveaux d&#8217;isolations dans les bases de données: read commited, snapshot isolation, serializability&#8230;&#8203;).</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/velocity/write_skew.jpg" alt="exemple de write skew"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Exemple de write skew tiré de l&#8217;excellent <a href="https://dataintensive.net/">Designing Data-Intensive Applications</a> de Martin Kleppmann. Ici, deux transactions se chevauchent et provoquent un bug dans le système (plus aucun médecin n&#8217;est d&#8217;asteinte). Cette erreur peut se produire en snapshot isolation.</em></p>
+</div>
+<div class="paragraph">
+<p>le problème du mode serializable dans une base de donnée est la grande perte de performance associée (il faut par exemple parfois locker complètement les tables pour avoir ce niveau d&#8217;isolation, ce qui diminue fortement les performances).</p>
+</div>
+<div class="paragraph">
+<p>De plus, les configurations par défaut des bases de données n&#8217;activent pas la sérialization.<br>
+Ces configurations par défaut, couplées à une méconnaissance des différents niveaux d&#8217;isolations des bases de données, peuvent causer de sérieux soucis (et difficilement détectables) en production.</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, les bases de données ACID sont très utiles, fournissent un certain nombre de garanties, mais il faut faire attention car des problèmes de cohérences peuvent toujours se produire.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/velocity/consistencyfull.jpg" alt="Les différents niveaux d isolations des transactions dans une base de données"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Vous croyez le monde des transactions facile ?</em></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_le_présent">Le "présent"</h4>
+<div class="paragraph">
+<p>Cloud, NoSQL, microservices&#8230;&#8203; On a maintenant des architectures distribués. Et cela <strong>doit</strong> vous inquiéter ! Notamment les architectures microservices, où un mauvais découpage peut avoir des conséquences désastreuses.</p>
+</div>
+<div class="paragraph">
+<p>Parlons maintenant un peu de NoSQL. On avait avant les propriétés ACID pour les bases de données traditionnelles, on parle parfois de BASE (Basically Available, Soft state, Eventual consistency) pour les base de données NoSQL.</p>
+</div>
+<div class="paragraph">
+<p>Mais en dehors de l&#8217;aspect technologique, un gros problème de ces base de données est le marketing et le buzz qui font que les gens l&#8217;utilisent sans n&#8217;avoir aucune connaissance sur la technologie ou des systèmes distribués en général.</p>
+</div>
+<div class="paragraph">
+<p>Les choix de base de données se font donc pour des raisons non techniques, ce qui conduit inévitablement à la catastrophe.
+Anecdote personnelle, mais j&#8217;ai déjà vu des décideurs hésiter entre entre Couchbase et Cassandra (wtf) ou entre Cassandra et Redis (wtf^10000), sans même vraiment connaître ni le besoin ni ces technos !</p>
+</div>
+<div class="paragraph">
+<p>Un grand nombre de projets n&#8217;ont pas besoin de bases NoSQL. Le speaker donnait l&#8217;exemple de MySQL qui peut très bien traiter plusieurs milliards d&#8217;enregistrements.</p>
+</div>
+<div class="paragraph">
+<p>Les base de données NoSQL ont des use cases, mais il est limité ! Il faut également très bien comprendre les garanties (et l&#8217;absence de garanties) qu&#8217;offrent les base de données NoSQL, notamment les garanties de cohérences des données et de disponibilité de la base.</p>
+</div>
+<div class="paragraph">
+<p>Le speaker a ensuite présenté différents problèmes pouvant se produire dans une base de données distribuée, comme par exemple le fameux <strong>read your own write</strong>, ou alors que contrairement à une croyance populaire, définir un quorum en lecture ne veut pas dire avoir un état cohérent.</p>
+</div>
+<div class="paragraph">
+<p>Etait également présenté quelques techniques pour gérer ces problèmes de cohérences, comme par exemple le <strong>read repair</strong>. Etait évoqué également les difficultés à travailler côté développement avec une base de données BASE, où l&#8217;absence de transactions et les joies des systèmes distribués peuvent causer des surprises.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_en_conclusion">En conclusion</h3>
+<div class="paragraph">
+<p>Il existe aujourd&#8217;hui une multitude d&#8217;outils, ces derniers étant quelque part  entre ACID et BASE niveau cohérence des données, le choix des technologies doit donc se faire de manière intelligence.</p>
+</div>
+<div class="paragraph">
+<p>Attention au marketing et aux promesses des vendeurs qui viennent vous vendre du rêve.
+Attention aux base de données NoSQL et aux architectures distribuées en général, et toujours se poser la question <strong>"est ce que j&#8217;ai vraiment besoin de ça ?"</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Il faut également comprendre son système, et les différents incidents qui peuvent se produire.
+Même les personnes d&#8217;administrant pas mais utilisant les outils doivent le comprendre, comme par exemple les développeurs.
+Ces derniers doivent connaître les potentiels problèmes pouvant se produire avec des bases de données NoSQL (ou même SQL avec un niveau d&#8217;isolation faible) pour pouvoir les requêter correctement.</p>
+</div>
+<div class="paragraph">
+<p>Et surtout, surtout, <strong>pas</strong> de transactions entre différents services/outils de storage.</p>
+</div>
+<div class="paragraph">
+<p>Encore merci au speaker pour ce talk génial, que l&#8217;on devrait diffuser à chaque personne prononçant les mots <strong>NoSQL</strong> et <strong>microservice</strong> en entreprise.</p>
+</div>
+<div class="paragraph">
+<p><a href="../../pdf/velocity_2017/real_world_consistency.pdf">Slides</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_surviving_failure_in_rabbitmq">Surviving failure in RabbitMQ</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ce talk donné par  Lorna Mitchell traitait des queues de messages et plus particulièrement de RabbitMQ.</p>
+</div>
+<div class="paragraph">
+<p>La speakeur commençait par décrire l&#8217;utilité d&#8217;une queue de message: asynchronisme/communication entre applications, mise en place assez facile, nombre de workers ajustables en fonction de la charge&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>Mais comme d&#8217;habitude, on peut avoir des erreurs. Un message peut ne pas être traité. Il faut donc se poser la question les garanties de traitement de notre système (at least once, at most once&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Ces garanties de traitements nous forcent donc à réaliser du code défensif (par exemple avec une garantie <strong>at least once</strong> au niveau du broker, il est possible d&#8217;éviter de traiter deux fois le même message en faisant le travail côté application).</p>
+</div>
+<div class="paragraph">
+<p>Il est également possible d&#8217;essayer de récupérer des erreurs en poussant un message traité comme erreur dans un exchange particulier du broker (dead letter dans RabbitMQ), pour éventuellement le traiter ultérieurement.</p>
+</div>
+<div class="paragraph">
+<p>La speakeur insistait également sur l&#8217;obligation de monitorer les queues de messages, comme par exemple en reportant le nombre de messages dans les différentes queues, ou encore le temps de traitement des messages par les workers.</p>
+</div>
+<div class="paragraph">
+<p>Configurer une taille de queue maximale et un TTL sur les messages pour éviter qu&#8217;une queue grandisse pour toujours peut également être intéressant. De plus, les messages rejetés peuvent éventuellement être injectés dans l&#8217;exchange <strong>dead letter</strong> et traités ensuite.</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, un talk intéressant sur les queues de messages, avec RabbitMQ comme exemple.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_traefik_make_load_balancing_great_again">Traefik: Make load balancing great again</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ce talk donné par Emile Vauge nous présentait Traefik. Tout d&#8217;abord, ça fait du bien d&#8217;enfin voir un speaker Français ;)</p>
+</div>
+<div class="paragraph">
+<p>Emile nous expliquait donc ce qu&#8217;est <a href="https://traefik.io/">Traefik</a>, que je connaissais déjà très bien pour connaître l&#8217;équipe autour et avoir déjà utilisé Traefik.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image right"><img src="/img/velocity/traefik.png" alt="logo de Traefik"></span></p>
+</div>
+<div class="paragraph">
+<p>Traefik est donc un reverse proxy conçu pour les infrastructures d&#8217;aujourd&#8217;hui, c&#8217;est à dire où les serveurs et applications vont et viennent.
+Les solutions de load balancing traditionnelles ne sont pas vraiment prévues pour ce genre d&#8217;infrastructures (bien que beaucoup d&#8217;efforts sont actuellement fait sur des produits comme HAproxy pour que ce soit le cas).</p>
+</div>
+<div class="paragraph">
+<p>Traefik peut donc se brancher sur un backend (un orchestrateur comme Kubernetes ou Mesos, Docker Swarm, Consul, Etcd&#8230;&#8203;) et générer sa configuration à partir de celà. En cas de changement sur le backend (par exemple, un nouveau pod démarre sur votre cluster Kubernetes), Traefik mettra automatiquement à jour sa configuration.</p>
+</div>
+<div class="paragraph">
+<p>Traefik supporte également nativement <a href="https://letsencrypt.org">Let&#8217;s Encrypt</a> pour générer des certificats.</p>
+</div>
+<div class="paragraph">
+<p>Plusieurs slides étaient consacrés aux dernières releases de Traefik, et la quantité de nouveautés à chaque release est impressionnante: Custom headers, statd/datadog integration, proxy protocol, HTTP2, Websockets&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>On a également eu droit à une démo où on pouvait voir la réactivité de Traefik lorsque la configuration du backend change, et des stickers ;)</p>
+</div>
+<div class="paragraph">
+<p>Bravo à Emile et à toute la team de <a href="https://containo.us/">Containous</a> pour le travail accompli. Je suis sûr que Traefik est un produit que l&#8217;on rencontrera de plus en plus.</p>
+</div>
+<div class="paragraph">
+<p><a href="../../pdf/velocity_2017/traefik.pdf">Slides</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cette première journée s&#8217;est ensuite terminée dans un bar/restaurant privatisé pour l&#8217;occasion avec pizza/bières gratuites ;)</p>
+</div>
+<div class="paragraph">
+<p>j&#8217;ai aussi découvert ce superbe nom de restaurant sur le chemin du retour vers mon Airbnb:</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/velocity/chien.jpg" alt="Un restaurant nommé les couilles du chien"></span></p>
+</div>
+<div class="paragraph">
+<p>J&#8217;aimerais conclure par la chose qui m&#8217;a le plus plût durant cette conférence: les gens (speaker comme spectateurs) savaient de quoi ils parlaient et connaissaient les tradeoff des différentes technologies qu&#8217;ils ou elles utilisent.</p>
+</div>
+<div class="paragraph">
+<p>Personne ne vendait de solutions miracles, et beaucoup de gens étaient très critiques envers le <strong>buzzword driven development</strong>. Et ça, ça fait plaisir !</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/conference/">conference</a>
+    
+    <a href="/tags/velocity/">velocity</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2018-01-26-ansible-templating/">&laquo; Ansible role configuration: best practice</a>
+        
+        
+        <a class="right" href="/posts/2017-08-09-coalesce/">A tour of Riemann : Coalesce &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

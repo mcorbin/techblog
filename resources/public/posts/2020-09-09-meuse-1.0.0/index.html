@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Meuse 1.0.0 released!</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-09-09-meuse-1.0.0/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">9 septembre 2020</div>
+        
+    </div>
+    <h2>Meuse 1.0.0 released!</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Today, I released the version <strong>1.0.0</strong> of <a href="https://github.com/mcorbin/meuse">Meuse</a>, a free private registry for the Rust programming language.</p>
+</div>
+<div class="paragraph">
+<p>Everything started last year when I read the <a href="https://blog.rust-lang.org/2019/04/11/Rust-1.34.0.html#alternative-cargo-registries">release note</a> of Rust 1.34. The release note was mentioning the support for alternate registries in Cargo.<br>
+This day, I decided to write my own one.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/meuse100/first_commit.png" alt="first commit screenshot for the meuse project"></span></p>
+</div>
+<div class="paragraph">
+<p>I quickly pushed some code, and added new features little by little, including for example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A full implementation of the alternative registries RFC.</p>
+</li>
+<li>
+<p>Storing crates on various backends, including S3.</p>
+</li>
+<li>
+<p>Crates.io mirroring (with also S3 support).</p>
+</li>
+<li>
+<p>User, roles, tokens and crates management using a simple API.</p>
+</li>
+<li>
+<p>A small frontend to browse crates.</p>
+</li>
+<li>
+<p>And tons of other things !</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There is always new things to add, but I&#8217;m already very happy with the state of the project, and that&#8217;s why I decided to release the version <strong>1.0.0</strong>. I will of course continue to add new things in the future.</p>
+</div>
+<div class="paragraph">
+<p>Some work will also be needed in Cargo. For example, Cargo does not pass the authentication token for the search and download commands (you can check <a href="https://github.com/rust-lang/cargo/issues/7091">the issue</a> for more information), which is my main issue today (I would like to enable authentication on all endpoints).</p>
+</div>
+<div class="paragraph">
+<p>P.S: I&#8217;m a very bad frontend developer. If a frontend dev would like to help me create a prettier and easier to use frontend for Meuse, please ping me ;)</p>
+</div>
+<div class="sect1">
+<h2 id="_new_features_in_this_release">New features in this release</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>PostgreSQL schema configuration: a new configuration key was added to make the PostgreSQL schema used by Meuse configurable.</p>
+</li>
+<li>
+<p>New metrics were added to the jgit crate index implementation.</p>
+</li>
+<li>
+<p>The project was migrated from Aleph to Jetty for the HTTP server.</p>
+</li>
+<li>
+<p>Better error handling when a crate fails to be created (clever rollbacks) to prevent the registry to have partial data saved on one part of the system (for example, having the crate created in the database but not in the crate index).</p>
+</li>
+<li>
+<p>Tokens: save the last usage date. Everytime a token is used, the date is saved in the database. It can help you detect used and unused tokens.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+    <a href="/tags/rust/">rust</a>
+    
+    <a href="/tags/meuse/">meuse</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-10-21-meuse-1.1.0/">&laquo; Meuse 1.1.0 released!</a>
+        
+        
+        <a class="right" href="/posts/2020-08-10-clojure-libraries/">My go-to Clojure libraries &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

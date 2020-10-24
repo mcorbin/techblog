@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Ansible role configuration: best practice</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2018-01-26-ansible-templating/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">26 janvier 2018</div>
+        
+    </div>
+    <h2>Ansible role configuration: best practice</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Let&#8217;s take for example HAProxy. This wonderful piece of software can be configured with hundreds of options. How to write an Ansible role to handle this, AND share this role accross multiple projects/teams/companies ?</p>
+</div>
+<div class="sect1">
+<h2 id="_the_naive_solution_the_boss_template">The naive solution: the boss template</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you use Ansible, you may have met the boss template: a big template, with dozens of variables (frequently nested) to handle all available configuration options, {% if %} and {% for %} jinja2 everywhere&#8230;&#8203; And when someone needs a new option, a new variable is added.</p>
+</div>
+<div class="paragraph">
+<p>Theses roles are nightmares to maintain. For <a href="https://www.haproxy.org/download/1.8/doc/configuration.txt">HAproxy</a>, your template will be huge. Same thing for other softwares (softwares like Kafka, Elasticsearch&#8230;&#8203; also have a lot of configuration options).</p>
+</div>
+<div class="paragraph">
+<p>Furthermore, these roles are impossible to share between teams/open source, because they are often designed for a specific company use case, with a specific configuration.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_move_configuration_outside_of_the_role">Move configuration outside of the role.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s continue with HAProxy. Just write a simple HAProxy role: installing HAProxy, templating a default configuration, and dealing with restart/reload on configuration change. But let the person using the role override the default configuration files.<br>
+You can see my HAProxy role <a href="https://github.com/mcorbin/haproxy-ansible-role">on Github</a>.</p>
+</div>
+<div class="paragraph">
+<p>In <code>defaults/main.yml</code>, define a variable containing a list of templates (HAProxy does not support loading configuration from a directory, so these files will be assembled together by the role):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">haproxy_templates:
+  - src: haproxy.config.j2
+    dest: 01_haproxy_config</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>haproxy.config.j2</code> contains the default HAProxy configuration (the same you have when you install HAProxy using <code>apt-get</code>).</p>
+</div>
+<div class="paragraph">
+<p>Now, in <code>playbook_dir</code> you will probably have this arborescence:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>playbook.yml
+group_vars/
+    haproxy.yml
+templates/
+    haproxy/
+         my-config.j2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The user can now provide his own configuration for HAProxy, by overriding <code>haproxy_templates</code> in <code>group_vars/haproxy.yml</code> for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">haproxy_templates:
+  - src: haproxy/my-config.j2
+    dest: 01_my_config</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The user can put everything he wants in <code>my-config.j2</code>, use his own configuration variables in the file without polluting the role.</p>
+</div>
+<div class="paragraph">
+<p>The role stay simple and the user can do everything he wants.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Moving the configuration out of a role is often the right thing to do. Just let the user override the whole role templates, and don&#8217;t over conplexify the role itself. Simplicity is the key.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/ansible/">ansible</a>
+    
+    <a href="/tags/haproxy/">haproxy</a>
+    
+    <a href="/tags/english/">english</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2018-02-08-spring-generateur/">&laquo; Spring, générateurs, des amis qui vous veulent du bien</a>
+        
+        
+        <a class="right" href="/posts/2017-12-03-velocity-1/">Velocity Londres 2017: jour 1 &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

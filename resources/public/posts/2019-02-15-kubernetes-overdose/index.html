@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Kubernetes overdose</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2019-02-15-kubernetes-overdose/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">15 février 2019</div>
+        
+    </div>
+    <h2>Kubernetes overdose</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Sur le net, en conférence, en entreprise, tout le monde en parle: Kubernetes est sur toutes les lèvres. Il permet de résoudre tous nos problèmes, réchauffement climatique et faim dans le monde inclus (surtout couplé à une architecture microservice !). Quand est-il vraiment en réalité ? Existe-il des alternatives ?</p>
+</div>
+<div class="sect1">
+<h2 id="_docker">Docker</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La route vers Kubernetes commence généralement par Docker. Les entreprises veulent absolument packager leurs applications avec Docker, pour différentes raisons. Parfois, elles pensent que cela simplifiera le packaging de leurs applications (pas de dépendances système, image immutable&#8230;&#8203;), parfois le déploiement.</p>
+</div>
+<div class="paragraph">
+<p>Je trouve que Docker est une technologie intéressante, mais comme toute technologie ce n&#8217;est pas la solution à tout. J&#8217;aimerais que les gens ayant un existant et voulant se tourner vers Docker se posent déjà ces questions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Avez vous une plateforme d&#8217;intégration continu ?</p>
+</li>
+<li>
+<p>Pouvez vous mettre en production vos applications à tout moment ? Changer rapidement la version d&#8217;une application sur un environnement ?</p>
+</li>
+<li>
+<p>Etes vous capable de reconstruire rapidement un environnement semblable à la prod "from scratch" ?</p>
+</li>
+<li>
+<p>Pouvez vous facilement provisioner de nouveaux serveurs ? Votre infrastructure est-elle totalement automatisée ?</p>
+</li>
+<li>
+<p>Etes vous tolérant aux pannes ?</p>
+</li>
+<li>
+<p>Monitorez-vous vos applications et serveurs (logs, metriques, alertes en cas d&#8217;incidents&#8230;&#8203;) ?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Si vous répondez "non" à ces questions, vous n&#8217;avez probablement pas la maturité suffisante pour faire des conteneurs en production. Pensez vous vraiment que rajouter Docker à une architecture bancale réglera vos soucis ?</p>
+</div>
+<div class="paragraph">
+<p>Pour l&#8217;anecdote personnelle, j&#8217;ai connu une entreprise qui voulait se mettre à Docker, par contre les outils d&#8217;automatisations comme Ansible étaient interdit car <code>trop avancés/compliqués</code>. Et ça, c&#8217;est le problème numéro un de Docker: la technologie est souvent utilisée car "aujourd&#8217;hui il faut tout passer sur Docker", sans vraiment de justifications.<br>
+En passant, c&#8217;est la même chose pour les architectures microservices que l&#8217;on voit fleurir un peu partout on ne sait trop pourquoi (et qui d&#8217;ailleurs viennent souvent avec Kubernetes).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_orchestrateurs">Orchestrateurs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ca y est, l&#8217;entreprise commence à build ses premiers conteneurs, il faut maintenant les déployer. Pas question de lancer des <code>docker run</code> à la main (ou avec Ansible ou autre) sur les machines, il faut un orchestrateur pour les gérer !</p>
+</div>
+<div class="paragraph">
+<p>Premier problème: aujourd&#8217;hui, Kubernetes a littéralement cannibalisé l&#8217;écosystème conteneur: Rancher s&#8217;est tourné vers Kubernetes, Docker Swarm se rend compatible Kubernetes, on entend plus trop parler non plus de Mesos/Marathon, le seul orchestrateur faisant un peu de résistance étant <code>Nomad</code> de <code>Hashicorp</code> (mais qui reste largement moins populaire que Kubernetes).</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;espère que d&#8217;autres solutions arriveront à tirer leurs épingles du jeu. Je ne veux personnellement pas être forcé à utiliser Kubernetes pour l&#8217;unique raison que c&#8217;est la seule solution sur le marché.
+De plus, comme je le montrerais ensuite, Kubernetes est une solution complexe à mettre en oeuvre.<br>
+Je suis persuadé qu&#8217;il existe un marché pour un orchestrateur simple, permettant de déployer des conteneurs sur quelques dizaines ou centaines de noeuds (ce qui couvrirait le besoin de 99 % des entreprises).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_l_intégration_de_kubernetes_dans_un_existant">L&#8217;intégration de Kubernetes dans un existant</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Enfin, vous décidez de partir sur Kubernetes. Un grand nombre de gens arrêtent leur analyse ici quand il s&#8217;agit de déployer Kubernetes en production.</p>
+</div>
+<div class="paragraph">
+<p>Pourtant, Kubernetes va amener plein de nouvelles problématiques, par exemple:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Comment je monitore les composants de mon cluster ainsi que les conteneurs tournant dessus ?</p>
+</li>
+<li>
+<p>Comment je gère les logs de mes conteneurs ?</p>
+</li>
+<li>
+<p>Comment le gère le cycle de vie de mon Cluster Kubernetes (déploiement, montée de version, ajout/suppression de noeuds&#8230;&#8203;)</p>
+</li>
+<li>
+<p>Comment je gère mes manifests et le déploiement de ces manifests sur le cluster ?</p>
+</li>
+<li>
+<p>Comment je construis mes images Docker ?</p>
+</li>
+<li>
+<p>Comment je gère le réseau de mon cluster/route vers mes pods/m&#8217;intègre avec les services qui sont hors du cluster ?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/k8s_overdose/pelote.png" alt="etes vous prêt à dérouler la pelote de laine Kubernetes ?"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Etes vous prêt à dérouler la pelote Kubernetes jusqu&#8217;au bout ?</em></p>
+</div>
+<div class="paragraph">
+<p>Vous n&#8217;utilisiez pas Prometheus pour le monitoring de vos applications ? Pas de chance, c&#8217;est plus ou moins l&#8217;unique solution aujourd&#8217;hui pour monitorer Kubernetes. Votre solution de collecte de logs a du mal à travailler avec Kubernetes ? Là aussi, on vous dira de passer sur fluentd, outil conseillé par la Cloud Native Computing Foundation (CNCF).</p>
+</div>
+<div class="paragraph">
+<p>Sans trop vous en rendre compte, vous commencez à refondre l&#8217;intégralité de votre SI pour intégrer <strong>une</strong> techno. Ce n&#8217;est pas Kubernetes qui s&#8217;adaptera à vous, c&#8217;est à vous de vous adapter à Kubernetes, et ce coût d&#8217;adaptation est généralement élevé.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gestion_du_cluster">Gestion du cluster</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Et ensuite, il vous restera à trouver comment déployer et mettre à jour le cluster. Je ne crois pas du tout aux solutions comme <code>kops</code> ou <code>kubespray</code>. Ces solutions sont le meilleur moyen de se retrouver avec un cluster configuré de la mauvaise façon: en gros, c&#8217;est comme ça qu&#8217;on finit avec son cluster ouvert sur Internet.<br>
+Ce <a href="https://stripe.com/blog/operating-kubernetes">super article</a> de Julia Evans me confirme dans mon opinion que ces solutions de déploiement de cluster ne sont pas faites pour de la production. C&#8217;est seulement en déployant vous même Kubernetes que vous comprendrez comment tous ses composants s&#8217;assemblent et se paramètrent.</p>
+</div>
+<div class="paragraph">
+<p>Ensuite, amusez vous bien avec la gestion des permissions (RBAC). J&#8217;espère aussi que vous avez un bon ingénieur réseau sous la main (Calico, Flannel, BGP, VXLAN &#8230;&#8203; ça vous parle ?).</p>
+</div>
+<div class="paragraph">
+<p>Mais c&#8217;est pas fini ! Il faut aussi que vous passiez sur Istio/Envoy comme Ingress (c&#8217;est votre archi revenant de $CONFERENCE qui vous l&#8217;a dit), que vous ajoutiez un outil de tracing (bah oui, sinon comment vous allez analyser performances dans tout ce machin) etc&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_buzzword_driven_development">Buzzword driven development</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La communauté est responsable de cela.</p>
+</div>
+<div class="paragraph">
+<p>Jamais on ne parle aux conférences de la difficulté de maintenir un cluster Kubernetes en production, des problématiques de monitoring, des problèmes réseaux ou même des problèmes qu&#8217;apportent les systèmes distribués de façon générale&#8230;&#8203;<br>
+Non, on veut faire du "Wahoo", on montre que nous on peut "scaler", on présente de beaux dashboards&#8230;&#8203; Peut être aussi parce que pas mal de gens présentant Kubernetes ne l&#8217;utilisent en fait pas en production ?</p>
+</div>
+<div class="paragraph">
+<p>On parle également rarement du <code>pourquoi Kubernetes</code>. Ou alors on l&#8217;évoque en disant <code>comme ça je peux déployer facilement plusieurs instances de mon application</code>. Très bien, mais on sait faire cela depuis très longtemps. Qu&#8217;apporte vraiment Kubernetes ?</p>
+</div>
+<div class="paragraph">
+<p>Quand je vais à une conférence et que les talks sur Kubernetes s&#8217;enchainent toute la journée, je comprends également que les gens aient l&#8217;impression d&#8217;être "à la traine" si ils ne font pas eux même du Kubernetes.</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est le problème avec le buzzword driven dévelopment: ça s&#8217;auto alimente. On a des gens qui vont faire du Kubernetes car c&#8217;est la techno du moment, et ces gens là parleront ensuite de Kubernetes à des gens qui se diront <code>ah mais moi j&#8217;en fais pas, faut que je m&#8217;y mette aussi !</code>.<br></p>
+</div>
+<div class="paragraph">
+<p>Puis les entreprises s&#8217;y mêlent (rien ne me fait plus marrer que les boites qui se vendent en disant <code><strong>nous</strong>, on fait du Kubernetes et du microservice</code> comme si c&#8217;était un gage de qualité). On commence à voir des offres d&#8217;emplois demandant de l&#8217;expérience en Kubernetes, les nouveaux projets partent directement sur Kubernetes pour attirer le chaland, et la boucle est bouclée.</p>
+</div>
+<div class="paragraph">
+<p>On ne parle également jamais des solutions alternatives qui ont fait leurs preuves. Pourquoi cette course en avant sur Docker et Kubernetes alors qu&#8217;il est tout à fait possible d&#8217;avoir des architectures robustes (et beaucoup plus simples) sans tout cela ?</p>
+</div>
+<div class="paragraph">
+<p>Je pense également qu&#8217;une partie du problème est que ces technologies sont généralement poussées voir mises en place par des développeurs. Quand j&#8217;étais en société de service, il était rare de voir de vrais profils <code>ops</code> sur les projets. On avait donc les devs n&#8217;ayant jamais gêré un serveur de leur vie qui poussaient allègrement Kubernetes en production.<br></p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/k8s_overdose/dev_prod.jpg" alt="Enfin, les développeurs ont pris le contrôle de la production"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Enfin, les développeurs ont pris le contrôle de la production !</em></p>
+</div>
+<div class="paragraph">
+<p>Cela se voit aussi aux conférences "mainstream" (du moins en France): généralement pas d&#8217;ops dans les speakers ni dans le public. Le devops en 2019, c&#8217;est un développeur Java faisant vite fait du Docker, du Jenkins et qui sait écrire un playbook Ansible.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_commencer_par_le_commencement">Commencer par le commencement</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Essayez déjà de répondre aux questions que je pose en début d&#8217;article. Mettez en place une plateforme de continuous delivery, gérez vos logs et métriques correctement, automatisez le provisioning de votre infrastructure et vos déploiements&#8230;&#8203;<br>
+Cela est 100 % réalisable sans conteneurs et sans Kubernetes (ce sera probablement l&#8217;occasion d&#8217;un prochain article de ma part).</p>
+</div>
+<div class="paragraph">
+<p>De plus, faire tourner Kubernetes ne vous dispensera pas de provisioner votre infrastructure de façon automatisée, d&#8217;avoir du monitoring solide, une plateforme d&#8217;intégration continue efficace&#8230;&#8203; Kubernetes viendra <code>en plus</code> de tout cela.</p>
+</div>
+<div class="paragraph">
+<p>Ce que vous ferez ne sera pas perdu. Vous aurez également <code>toujours</code> des applications qui tourneront en dehors du cluster, qui elles aussi devront être correctement déployées.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_kubernetes_as_a_service">Kubernetes as a service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La majorité des entreprises n&#8217;ont selon moi pas le besoin (et souvent pas les compétences) de déployer du Kubernetes par elles même. L&#8217;avenir est-il sur les solutions de Kubernetes as a service que l&#8217;on rencontre de plus en plus ?</p>
+</div>
+<div class="paragraph">
+<p>Peut être, mais je ne crois pas au <code>tout Kubernetes</code> Il y aura toujours des services et applications en dehors du cluster (car certains trucs n&#8217;ont pas d&#8217;intêret à être "Dockerisés"). Vouloir partir sur du Kubernetes trop vite est clairement une erreur selon moi.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kubernetes est une technologie intéressante, et je suis sûr qu&#8217;elle résout de nombreux problêmes dans de nombreuses entreprises.
+Sauf que tout le monde n&#8217;a pas les mêmes besoins que Netflix, et ce n&#8217;est pas une solution miracle.<br>
+Il est également de notre responsabilité de proposer à nos entreprises et clients les technologies permettant de mener à bien un projet, et non de se construire un CV (pratique malheureusement courante).</p>
+</div>
+<div class="paragraph">
+<p>les grands gagnants de tout cela ? Les sociétés de service. Entre la réécriture des applications monolithiques en microservice, les passages sur Kubernetes, le déploiement et maintien de tout ça en production, c&#8217;est le jackpot. Il y a quelques années, la vache à lait était le Big Data et le NoSQL, on peut maintenant rajouter Kubernetes et les microservices.</p>
+</div>
+<div class="paragraph">
+<p>Le projet avec une architecture simple et efficace qui devrait demander 5 personnes en demande 50 aujourd&#8217;hui, pour un truc souvent compliqué à maintenir en prod.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/k8s_overdose/money.jpg" alt="personnes dormant sur un lit de billet"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Les commerciaux de votre société de service quand le client accepte la refonte de son application legacy en microservice.</em></p>
+</div>
+<div class="paragraph">
+<p>la mode dans pas mal de groupes étant de ne plus recruter de profils technique en interne et de tout déléguer aux sociétés de service n&#8217;arrange rien: les entreprises ne sont même plus capables de juger si ce qu&#8217;on leur vend est pertinent ou pas. Ce sujet mériterait d&#8217;ailleurs un article à lui tout seul&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, ne sautez pas trop vite dans le train Kubernetes. Choisissez vos technologies pour de bonnes raisons.</p>
+</div>
+<div class="paragraph">
+<p>A suivre.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/ansible/">ansible</a>
+    
+    <a href="/tags/rant/">rant</a>
+    
+    <a href="/tags/kubernetes/">kubernetes</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-03-03-ebpf-xdp-introduction/">&laquo; Introduction to eBPF and XDP</a>
+        
+        
+        <a class="right" href="/posts/2018-12-03-golang-tomb/">Golang: gérez l&#39;arrêt de vos systèmes avec Tomb &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Ansible tip: configuration, assemble and idempotence</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2019-06-28-ansible-assemble-config/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">28 juin 2019</div>
+        
+    </div>
+    <h2>Ansible tip: configuration, assemble and idempotence</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Il arrive parfois que vous ayez à configurer avec Ansible un logiciel n&#8217;acceptant qu&#8217;un fichier de configuration, et où il est impossible d&#8217;inclure un autre fichier ou dossier depuis ce fichier.
+Je présenterais ici une astuce pour gérer cela avec Ansible et le module <code>assemble</code>.</p>
+</div>
+<div class="sect1">
+<h2 id="_le_problème">Le problème</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Prenons par exemple <code>haproxy</code>. <span class="line-through">Il est impossible d&#8217;inclure depuis le fichier de configuration principal d&#8217;autres fichiers ou dossiers (bien qu&#8217;il soit possible de passer plusieurs fichiers de configuration en passant plusieurs fois le paramètre <code>-f`</code> à la commande de lancement).</span><br>
+<strong>EDIT</strong>: faux ! Il est en fait possible de passer un répertoire à HAProxy. Mais nous utiliserons quand même HAProxy comme exemple dans cet article ;)</p>
+</div>
+<div class="paragraph">
+<p>Il existe une solution élégante avec Ansible permettant de découper cette configuration en plusieurs fichiers dans un dossier, tout en ayant un déploiemnt idempotent.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_la_solution">La solution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nous allons créer plusieurs fichiers dans un dossier, puis les concaténer pour obtenir le fichier final.</p>
+</div>
+<div class="paragraph">
+<p>On commence par supprimer ledit dossier, par exemple <code>/etc/haproxy/haproxy.d</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- name: delete haproxy.d directory
+  become: true
+  file:
+    path: /etc/haproxy/haproxy.d
+    state: absent
+  changed_when: false</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notez le <code>changed_when: false</code>: Ansible ne considérera pas qu&#8217;il y a eu un changement si le dossier est effectivement supprimé.</p>
+</div>
+<div class="paragraph">
+<p>Puis on recrée ce répertoire:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- name: create haproxy.d directory
+  become: true
+  file:
+    path: /etc/haproxy/haproxy.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  changed_when: false</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Là aussi, on a un <code>changed_when: false</code>. A cette étape du rôle, on a donc la garantie d&#8217;avoir un dossier <code>/etc/haproxy/haproxy.d</code> vide.</p>
+</div>
+<div class="paragraph">
+<p>Ensuite, on utilise la directive <code>template</code> pour déployer dans ce nouveau dossier nos fichiers de configuration. Attention, il faut que les fichiers soient ordonnés par ordre alphabétique. Par exemple, je pourrais préfixer chaque fichier par un numéro:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">haproxy_configuration_templates:
+  - src: haproxy/haproxy.cfg.j2
+    dest: 01_haproxy.cfg
+  - src: haproxy/frontend.j2
+    dest: 02_frontend.cfg
+  - src: haproxy/blog.j2
+    dest: 03_blog.cfg
+  - src: haproxy/meuse.j2
+    dest: 03_meuse.cfg
+  - src: haproxy/tour.j2
+    dest: 03_tour.cfg</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ensuite, je template ces fichiers:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">- name: template haproxy configuration in haproxy.d
+  become: true
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/haproxy/haproxy.d/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ haproxy_configuration_templates }}"
+  changed_when: false</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici aussi on a un <code>changed_when: false</code>, ce qui est très important. Cette tâche ne provoquera aucun changement lors de son exécution.</p>
+</div>
+<div class="paragraph">
+<p>Ensuite, je concatène tous ces fichiers ensemble en utilisant <code>assemble</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>- name: assemble haproxy.d configuration
+  become: true
+  assemble:
+    src: /etc/haproxy/haproxy.d
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: 0644
+  notify: haproxy | reload</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Un handler me permet de reload HAProxy en cas de changement. <code>assemble</code> ne provoquera un changement que si le résultat de l&#8217;assemblage des fichiers est différent de l&#8217;état existant.</p>
+</div>
+<div class="paragraph">
+<p>Et c&#8217;est fini.</p>
+</div>
+<div class="paragraph">
+<p>Si une configuration identique est déployée, les <code>changed_when: false</code> feront qu&#8217;Ansible ne détectera pas de changement. Si une configuration différente est déployée, on aura un changement sur la tâche <code>assemble</code>.</p>
+</div>
+<div class="paragraph">
+<p>Le fait de supprimer et recréer le dossier contenant les fichiers est obligatoire pour gérer le cas d&#8217;un fichier template qui serait supprimé de la liste des fichiers à déployer. Dans ce cas, on ne veut pas avoir des fichiers non voulus dans <code>/etc/haproxy/haproxy.d</code> venant d&#8217;un ancien déploiement (d&#8217;où le nettoyage).</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/ansible/">ansible</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-07-11-repl-driven-development/">&laquo; REPL Driven Development et gestion des états</a>
+        
+        
+        <a class="right" href="/posts/2019-06-13-one-year-of-go/">One year of Golang &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

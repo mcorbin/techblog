@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Git: une introduction</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-06-26-git-introduction/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">26 juin 2020</div>
+        
+    </div>
+    <h2>Git: une introduction</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Que vous soyez dev ou ops, Git est devenu aujourd&#8217;hui indispensable. J&#8217;expliquerai dans cet article dont la cible sont les personnes débutants avec l&#8217;outil les commandes et le fonctionnement de base de Git. Dans <a href="https://mcorbin.fr/posts/2020-06-27-git-avancee/">l&#8217;article suivant</a>, je montrerai des utilisations avancées.</p>
+</div>
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://git-scm.com/">Git</a> est un logiciel de gestion de versions distribué. Créé par Linus Torvalds pour la gestion des sources de Linux, il s&#8217;est imposé face à ses concurrents et est aujourd"hui l&#8217;outil de gestion de versions le plus utilisé.</p>
+</div>
+<div class="paragraph">
+<p>Dans Git, le code source des projets est stocké sur la machine de chaque personne travaillant sur le projet et sur des dépots distants nommés "remote".</p>
+</div>
+<div class="paragraph">
+<p>Chaque modification est stockée sous la forme d&#8217;un "commit", qui correspond à l&#8217;état de votre projet à un instant T (vous pouvez retrouver plus d&#8217;informations sur le fonctionnement bas niveau de Git <a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">dans la documentation</a>).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_commandes">Commandes</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_git_init">Git init</h3>
+<div class="paragraph">
+<p>Tout d&#8217;abord, créez un répertoire nommé "test" sur votre machine. Naviguez dans ce répertoire avec votre terminal et exécutez <code>git init</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ git init
+Dépôt Git vide initialisé dans /home/mathieu/prog/test/.git/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette commande initialise un projet git. Vous pouvez d&#8217;ailleurs voir qu&#8217;un répertoire <code>.git</code> a été créé à la racine du répertoire.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_git_add_et_status">Git add et status</h3>
+<div class="paragraph">
+<p>Créons maintenant un fichier, et lançons la commande <code>git add</code> dessus:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ echo "test" &gt; foo
+$ git add foo
+$ git status
+Sur la branche master
+
+Aucun commit
+
+Modifications qui seront validées :
+  (utilisez "git rm --cached &lt;fichier&gt;..." pour désindexer)
+
+	nouveau fichier : foo</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vous vous pouvez le voir, nous utilisons aussi la commande <code>git status</code> pour voir l&#8217;état actuel de notre projet. On voit ici que le nouveau fichier a été ajouté à l&#8217;index. Cela veut dire que ce fichier est prêt à être commité, mais rien d&#8217;autre. Cela sert juste d&#8217;indication à <code>git commit</code>.</p>
+</div>
+<div class="paragraph">
+<p>A noter: <code>git add .</code> vous permet d&#8217;ajouter tous les fichiers en cours de modification à l&#8217;index.</p>
+</div>
+<div class="paragraph">
+<p>Créons maintenant un commit.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_git_commit">Git commit</h3>
+<div class="paragraph">
+<p>Exécutez la commande suivante:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">git commit -m "first commit" -m "ceci est mon premier commit git"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Je crée ici un commit dont le titre sera "first commit" et la description "ceci est mon premier commit git". La description est optionnelle ici, mais c&#8217;est une bonne pratique d&#8217;ajouter une description détaillée à chaque commit.</p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez aussi configurer git pour ouvrir votre éditeur sur la commande <code>git commit</code>, ce qui vous permet d&#8217;écrire plus facilement la description (sur plusieurs lignes par exemple). Dans le fichier <code>~/.gitconfig</code> de votre machine (où se configurent les options génériques de Git), ajoutez:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>[core]
+    editor = emacsclient</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, la commande <code>emacsclient</code> (qui m&#8217;ouvre le fichier dans Emacs) sera automatiquement appelée lors d&#8217;une action Git nécessitant un éditeur. Vous pouvez remplacer cette valeur par votre éditeur préféré.</p>
+</div>
+<div class="paragraph">
+<p>Regardons maintenant l&#8217;état de notre projet avec <code>git status</code>, et <code>git log</code> qui permet de voir notre historique Git:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ git status
+Sur la branche master
+rien à valider, la copie de travail est propre
+
+$ git log
+commit f87ebd782f2b4512b0c192e56d310c8bb618dfc8 (HEAD -&gt; master)
+Author: mcorbin &lt;corbin.math@gmail.com&gt;
+Date:   Thu Jun 25 23:04:21 2020 +0200
+
+    first commit
+
+    ceci est mon premier commit git</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On voit que notre fichier a été commité. On voit que notre commit est associé à un hash (<code>f87ebd782f2b4512b0c192e56d310c8bb618dfc8</code>).<br>
+Les 7 premiers caractères des hash (<code>f87ebd7</code> dans notre) sont souvent utilisés en abbréviation dans l&#8217;outillage ou certaines commandes git.</p>
+</div>
+<div class="paragraph">
+<p>Voici donc l&#8217;état de notre projet local:</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/git_intro/git1.png" alt="Premier commit"></span></p>
+</div>
+<div class="paragraph">
+<p>On a donc maintenant un commit sur notre branche principale (appelée <code>master</code>). Nous verrons plus tard ce qu&#8217;est une branche.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_remote">Remote</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Poussons maintenant notre travail sur un dépôt distant. Par exemple, créez un projet sur Github (ou Gitlab, bitbucket&#8230;&#8203;)</p>
+</div>
+<div class="paragraph">
+<p>Ici, je vais créer par exemple un projet nommé "test1" sur mon compte Github. Une fois le projet créé, je vais l&#8217;ajouter en tant que "remote" sur mon projet:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">git remote add origin git@github.com:mcorbin/test1.git</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Je crée ici un remote appelé <code>origin</code>. La commande <code>git remote</code> (qui supporte une option <code>-v</code> pour avoir plus d&#8217;informations`) vous permet de lister les remotes de votre projet.</p>
+</div>
+<div class="paragraph">
+<p>Poussons maintenant notre code sur ce remote:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">git push -u origin master
+Énumération des objets: 3, fait.
+Décompte des objets: 100% (3/3), fait.
+Écriture des objets: 100% (3/3), 620 bytes | 620.00 KiB/s, fait.
+Total 3 (delta 0), réutilisés 0 (delta 0)
+To github.com:mcorbin/test1.git
+ * [new branch]      master -&gt; master
+La branche 'master' est paramétrée pour suivre la branche distante 'master' depuis 'origin'.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, nous poussons notre état local sur le dépôt "origin" et sur la branche "master". L&#8217;option <code>-u</code> nous permet d&#8217;indiquer à Git que notre branche "master" locale correspond à notre branche "master" distante.</p>
+</div>
+<div class="paragraph">
+<p>Mais qu&#8217;est ce qu&#8217;une branche ?</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_branches">Branches</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La commande <code>git branch</code> permet de lister vos branches. Seulement "master" existe pour l&#8217;instant.<br>
+Créons une nouvelle branche appelée "my-feature" avec <code>git branch my-feature</code>. Votre nouvelle branche est créée.</p>
+</div>
+<div class="paragraph">
+<p>Les branches permettent de travailler en isolation de la branche principale de votre projet. Vous pouvez, comme sur master, créer des commits, push vos modifications sur une branche distante&#8230;&#8203; sans risquer de tout casser. Pour cela, vous devez commencer par vous "déplacer" sur votre branche nouvellement créée.</p>
+</div>
+<div class="paragraph">
+<p>La comande <code>git checkout</code> permet cela. Ici, <code>git checkout my-feature</code> vous positionnera sur votre nouvelle branche dans votre projet local. Vous pouvez vérifier cela avec <code>git status</code> ou <code>git branch</code> à tout moment si vous avez un doute sur le positionnement de votre projet.</p>
+</div>
+<div class="paragraph">
+<p>Note: la commande <code>git checkout -b &lt;nom_de_branche&gt;</code> permet de faire les deux actions précédentes en une commande.</p>
+</div>
+<div class="paragraph">
+<p>Une branche est tout simplement <strong>un pointeur sur un commit</strong>. Dans notre cas, nous venons de créer notre branche, et donc nos branches "master" et "my-feature" pointent sur notre seul et unique commit.</p>
+</div>
+<div class="paragraph">
+<p>Créons maintenant un nouveau fichier et puis commitons le dans notre branche:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ echo "hello" &gt; babar
+$ git add .
+$ git commit -m "nouveau commit sur ma branche"
+[my-feature 7cd6872] nouveau commit sur ma branche
+ 1 file changed, 1 insertion(+)
+ create mode 100644 babar</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si vous exécutez <code>git log</code>, vous verrez votre nouveau commit. Comme dit précédemment, la branche "master" n&#8217;a pas bougée, mais la branche "my-feature" pointe maintenant sur ce nouveau commit.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/git_intro/git2.png" alt="ma nouvelle branche my-feature et son commit"></span></p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez maintenant pousser sur votre dépôt distant votre nouveau commit et votre branche avec <code>git push -u origin my-feature</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_merges_de_branches">Merges de branches</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nous allons maintenant ajouter le travail que nous avons fait sur la branche "my-feature" sur la branche master. Si vous utilisez un outil comme Github, cela peut être fait via l&#8217;interface de Pull Request. Ici, nous le ferons en ligne de commande.</p>
+</div>
+<div class="paragraph">
+<p>Retournons sur la branche "master" avec <code>git checkout master</code>, et importons notre commit de la branche <code>my-feature</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">git merge my-feature
+Mise à jour f87ebd7..7cd6872
+Fast-forward
+ babar | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 babar</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vous pouvez voir avec <code>git log</code> que le commit de notre branche a été rajouté à master.</p>
+</div>
+<div class="paragraph">
+<p>La mention de <code>Fast-forward</code> indique que Git s&#8217;est contenté d&#8217;appliquer le commit de la branche "my-feature" au dessus de "master". Cela est possible car le travail était linéaire. Notre branche "master" n&#8217;avait pas bougée, et le commit de la branche "feature" (dont la source était master) a simplement été rajouté par Git sur "master":</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/git_intro/git3.png" alt="Exemple de fast forward"></span></p>
+</div>
+<div class="paragraph">
+<p>Cela serait différent dans ce cas là:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># Création et déplacement sur une nouvelle branche
+git checkout -b fix-bug
+
+# Création d'un fichier et commit sur cette branche
+echo "f1" &gt;&gt; f1 &amp;&amp; git add f1 &amp;&amp; git commit -m "f1"
+
+# Retour sur master
+git checkout master
+
+# Création d'un ouveau commit sur master
+echo "f2" &gt; f2 &amp;&amp; git add f2 &amp;&amp; git commit -m "f2"
+
+# Merge de notre branche "fix-bug" sur master
+git merge fix-bug</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A ce moment, Git va créer un nouveau commit, appelé commit de merge (et vous demander d&#8217;écrire son message).</p>
+</div>
+<div class="paragraph">
+<p>En effet, la branche "master" a changée depuis le moment de la création de "fix-bug", et dans ce cas Git crée un nouveau commit (qui est la combinaisons de plusieurs commits) pour pouvoir merger votre branche.<br></p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/git_intro/git4.png" alt="Exemple de commit de merge"></span></p>
+</div>
+<div class="paragraph">
+<p>Nous reparlerons de tout cela dans un prochain article qui sera dédié aux commandes git avancées (il existe des techniques pour éviter cela si vous le voulez).</p>
+</div>
+<div class="paragraph">
+<p>A noter que lorsqu&#8217;une branche est mergée, elle existe toujours et pointe toujours sur son dernier commit. Si vous voulez la supprimer, vous pouvez le faire avec <code>git branch -D &lt;nom&gt;</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pull">Pull</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Git a été conçu pour que plusieurs personnes puissent travailler sur le même projet.</p>
+</div>
+<div class="paragraph">
+<p>La commande <code>git pull &lt;remote&gt; &lt;branche&gt;</code> permet de récupérer l&#8217;état d&#8217;un dépôt distant sur votre machine local. La commande <code>git pull</code> est en fait la combinaison de  deux actions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Récupérer les modifications de votre remote (origin par exemple). Il est d&#8217;ailleurs possible d&#8217;exécuter seulement cette action avec la commande <code>git fetch &lt;remote&gt;</code>, donc <code>git fetch origin</code> dans notre cas.</p>
+</li>
+<li>
+<p>Lancer un <code>git merge</code> pour fusionner les modifications appliquées sur votre remote avec votre travail local. Il existe là aussi plusieurs stratégies pour fusionner votre remote et votre travail local, et nous en reparlerons dans <a href="https://mcorbin.fr/posts/2020-06-27-git-avancee/">l&#8217;article suivant</a>.</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_conflits">Conflits</h3>
+<div class="paragraph">
+<p>Lorsque vous récupérez des modifications d&#8217;un dépôt distant, vous pouvez avoir des conflits. Imaginons que vous modifiez un fichier, puis créez un commit. Si quelqu&#8217;un a modifié la même partie de ce fichier sur votre dépôt distant, <code>git pull</code> produira un conflit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ git pull
+Rembobinage préalable de head pour pouvoir rejouer votre travail par-dessus...
+Application de  foo
+Utilisation de l'information de l'index pour reconstruire un arbre de base...
+Retour à un patch de la base et fusion à 3 points...
+Fusion automatique de conflict
+CONFLIT (ajout/ajout) : Conflit de fusion dans conflict
+error: Échec d intégration des modifications.
+le patch a échoué à 0001 foo
+astuce: Utilisez 'git am --show-current-patch' pour visualiser le patch en échec
+
+Résolvez tous les conflits manuellement, marquez-les comme résolus avec
+"git add/rm &lt;fichier en conflit&gt;", puis lancez "git rebase --continue".
+Si vous préférez sauter ce commit, lancez "git rebase --skip". Pour arrêter
+et revenir à l état antérieur à la commande, lancez "git rebase --abort".</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Le contenu du fichier <code>conflict</code> est dans mon cas:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+hello
+=======
+conflict
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; foo</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On voit que quelqu&#8217;un a écrit "hello" dans ce fichier, alors que moi j&#8217;ai écrit "conflict". A moi de corriger le fichier (par exemple en ne laissant que "conflict" dedans) pour corriger le conflit.</p>
+</div>
+<div class="paragraph">
+<p>Je peux ensuite utiliser <code>git rebase --continue</code> pour indiquer que le conflit est résolu (j&#8217;explique la commande <code>rebase</code> dans l&#8217;article suivant).</p>
+</div>
+<div class="paragraph">
+<p>Il existe différentes façons de gérer les modifications apportées par <code>git pull</code> (merge ou rebase), ce qui influe sur la gestion des conflits. J&#8217;utilise personnellement la méthode du <code>rebase</code> en indiquant dans le fichier de configuration global de git (<code>~/.gitconfig</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>[pull]
+  rebase = true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lisez l&#8217;article suivant pour mieux comprendre rebase ;)</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tags">Tags</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Un tag est seulement une étiquette ajoutée à un commit pour qu&#8217;il puisse être référencé de façon plus simple par un humain.</p>
+</div>
+<div class="paragraph">
+<p>La commande <code>git tag &lt;nom&gt;</code> permet de créer un tag.</p>
+</div>
+<div class="paragraph">
+<p>Il est également possible d&#8217;utiliser <code>git tag -a &lt;nom&gt;</code> pour créer un tag avec plus d&#8217;informations, comme son auteur ou un message de commit.</p>
+</div>
+<div class="paragraph">
+<p>Il est possible, comme pour une branche ou pour un hash de commit, de se déplacer sur le commit référencé par un tag en utilisant <code>git checkout &lt;tag&gt;</code>. Cela est pratique si vous voulez vérifier l&#8217;état de votre travail sur un tag spécifique.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_fichier_gitignore">Fichier .gitignore</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Vous voudrez parfois que certains fichiers ou dossiers ne soient pas visibles par Git, c&#8217;est à dire qu&#8217;ils ne puissent jamais être ajoutés à l&#8217;index et donc commités.</p>
+</div>
+<div class="paragraph">
+<p>Cela est contrôlé par le fichier <code>.gitignore</code>, qu&#8217;il faut créer à la racine de votre projet. Si vous ajoutez par exemple la valeur <code>my-file</code> dans ce fichier, les fichiers nommés <code>my-file</code> présents dans votre projet seront invisibles pour Git.</p>
+</div>
+<div class="paragraph">
+<p>Il existe d&#8217;autres "patterns" pour ignorer des répertoire, ou bien faire de la négation. Vous pouvez retrouver plus de détails sur ces options dans la <a href="https://git-scm.com/docs/gitignore">documentation</a> de Git.</p>
+</div>
+<div class="paragraph">
+<p>Cette fonctionnalité est par exemple utile si vous avez besoin d&#8217;avoir des fichiers de configurations spécifiques, ou des mots de passes&#8230;&#8203; à configurer dans votre projet local.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion_et_suite">Conclusion et suite</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nous avons vu ici rapidement comment fonctionne Git. Dans <a href="https://mcorbin.fr/posts/2020-06-27-git-avancee/">l&#8217;article suivant</a>, j&#8217;expliquerai des notions avancées et comment se sortir de situations difficiles.</p>
+</div>
+<div class="paragraph">
+<p>je pense que la chose la plus importante à comprendre dans Git est le fait que l&#8217;on travaille avec des commits, et que nous avons des moyens de référencer ces commits (branches, tags&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Nous verrons dans l&#8217;article suivant qu&#8217;il est possible de jouer avec ces commits et ses références pour faire des choses intéressantes dessus.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/programming/">programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-06-27-git-avancee/">&laquo; Git: quelques commandes avancées.</a>
+        
+        
+        <a class="right" href="/posts/2020-06-24-cabourotte-release/">Cabourotte: un outil de monitoring pour tester l&#39;état de vos services &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

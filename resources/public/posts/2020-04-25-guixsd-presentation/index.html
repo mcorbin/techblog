@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): GuixSD, une distrib Linux originale: présentation et déploiement dans le cloud</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-04-25-guixsd-presentation/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">25 avril 2020</div>
+        
+    </div>
+    <h2>GuixSD, une distrib Linux originale: présentation et déploiement dans le cloud</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>GuixSD est une distribution Linux inspirée de <a href="https://nixos.org/">Nix</a> et unique en son genre: mises à jour atomiques, gestion des packages par utilisateur, rollbacks faciles, configuration des outils en <a href="https://www.gnu.org/software/guile/">Guile</a> (une version de Scheme)&#8230;&#8203; On ne voit pas ça tous les jours. Je présenterai dans cet article cette distribution, et montrerai comment la déployer dans le Cloud.</p>
+</div>
+<div class="sect1">
+<h2 id="_note_sur_scheme_h_s">Note sur Scheme/H.S</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Comme dit précédemment, la configuration de Guix se fait via le langage <a href="https://www.gnu.org/software/guile/">Guile</a>. Cela peut sembler surprenant aux premiers abords, mais personnellement je trouve cela très intéressant.</p>
+</div>
+<div class="paragraph">
+<p>Déjà, pourquoi un langage de type Scheme et non quelque chose de plus "classique" (comme Python par exemple) ? Les langages de la famille des Lisp sont généralement beaucoup plus flexibles que leurs homologues d&#8217;autres familles, et ont une syntaxe concise et cohérente.<br>
+Si vous n&#8217;avez pas l&#8217;habitude de Lisp/Scheme, insistez un peu, c&#8217;est juste une famille de langages différente de ce qu&#8217;on a l&#8217;habitude de voir. Et ces langages ont beaucoup d&#8217;avantages.</p>
+</div>
+<div class="paragraph">
+<p>De manière générale, je préfère configurer si possible mes outils avec un vrai langage de programmation et non avec des DSL limités inventés pour l&#8217;occasion (coucou Prometheus). C&#8217;est d&#8217;ailleurs pour moi la grande force d&#8217;outils comme <a href="http://riemann.io/">Riemann</a>, dont les idées n&#8217;ont malheureusement pas été reprises dans d&#8217;autres outils de monitoring.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_au_commencement_l_installation">Au commencement: l&#8217;installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Avant de pouvoir tester la distribution, il faut d&#8217;abord l&#8217;installer.<br>
+Une solution serait d&#8217;installer la distribution sur votre ordinateur. Cela peut marcher, mais GuixSD est une distribution founissant une quantité limitée de drivers (la distribution faisant partie du projet GNU, les drivers propriétaires en sont exclus), cela peut donc vous poser des problèmes.</p>
+</div>
+<div class="paragraph">
+<p>Il est également possible d&#8217;installer <code>Guix</code>, le package manager de GuixSD (qui est la distribution), sur une distribution comme Debian ou Ubuntu, ce qui permet de l&#8217;utiliser tout en conservant une autre distribution comme distribution principale.<br>
+J&#8217;avais testé celle solution (Guix + Debian) il y a quelques années, mais j&#8217;avais rencontré de nombreux problèmes de conflits entre les packages venant de Guix et ceux venant de Debian, je pense donc que ce n&#8217;est pas une bonne idée.</p>
+</div>
+<div class="paragraph">
+<p>La dernière solution est de déployer GuixSD sur un environnement contrôlé: le Cloud. Ici, pas besoin de drivers, et ça nous permettra de tester facilement la distribution. C&#8217;est la solution que nous allons explorer dans cet article.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_créer_une_image_guixsd">Créer une image GuixSD</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nous allons tout d&#8217;abord créer une image GuixSD qui sera ensuite envoyée sur le Cloud. Une solution pourrait être de démarrer avec par exemple <code>KVM</code> l&#8217;iso d&#8217;installation de GuixSD, et de suivre le manuel (que vous trouverez <a href="https://guix.gnu.org/manual/en/html_node/System-Installation.html">ici</a>).</p>
+</div>
+<div class="paragraph">
+<p>Mais comme d&#8217;habitude, on va essayer d&#8217;automatiser un peu la chose, et nous allons construire notre image avec <a href="https://www.packer.io/">Packer</a>. Cela nous permettra de reconstruire à tout moment notre image si besoin, en une commande.</p>
+</div>
+<div class="paragraph">
+<p>Si vous ne connaissez pas Packer, je vous recommande la lecture de <a href="http://mcorbin.fr/posts/2019-11-21-exemple-infra-vm-image/">mon article sur le sujet</a> qui donne un bon aperçu de l&#8217;outil.</p>
+</div>
+<div class="sect2">
+<h3 id="_guixsd_et_packer">GuixSD et Packer</h3>
+<div class="paragraph">
+<p>Pour construire notre image GuixSD avec Packer, nous allons tout simplement suivre <a href="https://guix.gnu.org/manual/en/html_node/Manual-Installation.html#Manual-Installation">la documentation officielle</a> pour une installation en mode shell de GuixSD, et l&#8217;implémenter dans Packer (avec quelques améliorations).</p>
+</div>
+<div class="paragraph">
+<p>On part donc de l&#8217;iso d&#8217;installation de GuixSD, simulons le clavier grâce à l&#8217;option <a href="https://www.packer.io/docs/builders/qemu.html#boot-configuration">boot_command</a> du builder QEMU, et lançons de cette façon l&#8217;installer en mode shell. Vous pouvez retrouver la <code>boot_command</code> utilisée ainsi que le fichier <code>packer.json</code> complet que j&#8217;ai utilisé pour cet article <a href="https://github.com/mcorbin/exemple-infra/blob/master/guix-packer/packer.json#L37">ici</a>.</p>
+</div>
+<div class="paragraph">
+<p>Nous continuons ensuite l&#8217;installation, toujours via l&#8217;option <code>boot_command</code>, en faisant exactement ce qui est décrit dans la documentation GuixSD, c&#8217;est à dire:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Configurer le partitionnement avec <code>cfdisk</code>.</p>
+</li>
+<li>
+<p>Créer un système de fichier <code>ext4</code>.</p>
+</li>
+<li>
+<p>Monter le système de fichier, lancer <code>herd start cow-store /mnt</code>, puis lancer l&#8217;installation de GuiXSD</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Une chose intéressante est que l&#8217;installation du système d&#8217;exploitation se fait de manière déclarative via un fichier <code>config.scm</code> (la section correspondante dans la documentation est trouvable <a href="https://guix.gnu.org/manual/en/html_node/Proceeding-with-the-Installation.html#Proceeding-with-the-Installation">ici</a>).</p>
+</div>
+<div class="paragraph">
+<p>Si on suit la documentation officielle, on doit écrire ce fichier à la main.<br>
+Mon premier réflexe a été d&#8217;essayer d&#8217;implémenter ce qui est possible de faire pour d&#8217;autres distributions Linux (Red Hat par exemple): faire exposer le fichier de configuration (Kickstart, Preseed&#8230;&#8203;) via HTTP par Packer, et d&#8217;une façon ou une autre le faire "manger" par l&#8217;installer.</p>
+</div>
+<div class="paragraph">
+<p>Pour les distributions Linux mainstream, c&#8217;est généralement supporté nativement par l&#8217;installer. Je n&#8217;ai pas trouvé comment réaliser cela avec GuixSD, il a donc fallu innover (surtout que les commandes comme curl, wget&#8230;&#8203; ne sont pas disponibles dans le shell d&#8217;installation).</p>
+</div>
+<div class="paragraph">
+<p>On expose donc avec Packer un dossier contenant notre fichier <code>.scm</code> grâce à l&#8217;option <a href="https://www.packer.io/docs/builders/qemu.html#http_directory">http_directory</a> de Packer. Ensuite, il fallait récupérer ce fichier.</p>
+</div>
+<div class="paragraph">
+<p>Heureusement, je me suis vite rendu compte que <code>guile</code> était disponible dans le shell de l&#8217;installer. J&#8217;ai donc passé cette commande (toujours via <code>boot_command</code> de Packer) à l&#8217;installer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-scheme" data-lang="scheme">guile -c '(use-modules (web client)) (define-values (a b) (http-request \"http://{{ .HTTPIP }}:{{ .HTTPPort }}/config.scm\")) (display b)' &gt; /mnt/etc/config.scm</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Les variables <code>{{ .HTTPIP }}</code> et <code>{{ .HTTPPort }}</code> seront remplacées automatiquement par des valeurs choisies par l&#8217;outil pour exposer le fichier HTTP. De cette façon, je récupère le fichier décrivant mon installation pour pouvoir ensuite la démarrer.</p>
+</div>
+<div class="paragraph">
+<p>Mon fichier <code>config.scm</code> est trouvable <a href="https://github.com/mcorbin/exemple-infra/blob/master/guix-packer/http/config.scm">ici</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_le_fichier_config_scm">Le fichier config.scm</h3>
+<div class="paragraph">
+<p>Ce fichier décrit comment votre système est installé, ce qui inclut notamment:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>L&#8217;hostname de la machine, sa timezone, la configuration de la locale.</p>
+</li>
+<li>
+<p>Les systèmes de fichiers et la configuration du boot.</p>
+</li>
+<li>
+<p>Les utilisateurs, les groupes, la configuration du fichier sudoer.</p>
+</li>
+<li>
+<p>Les packages et services à installer et à lancer.</p>
+</li>
+<li>
+<p>Et plein d&#8217;autres choses.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>l&#8217;idée de GuixSD est de ne jamais installer ou configurer un package manuellement (par exemple en posant un binaire dans /bin, ou en modifiant un fichier dans /etc manuellement) mais de tout faire de manière déclarative via ce fichier de configuration.</p>
+</div>
+<div class="paragraph">
+<p>Durant mon installation, je pars donc d&#8217;un fichier qui me crée un utilisateur appelé <code>guix</code>, qui a les droits sudo sur la machine, et qui a un mot de passe par défaut.
+Sinon, le reste de ce fichier est assez basique (j&#8217;installe juste le package <code>curl</code> en plus des packages par défaut).<br>
+Les packages configurés dans ce fichier seront installés globalement, et disponible pour tous les utilisateurs.</p>
+</div>
+<div class="paragraph">
+<p>Je reparlerai de ce fichier dans la suite de l&#8217;article.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_les_scripts_d_installation">Les scripts d&#8217;installation</h3>
+<div class="paragraph">
+<p>Une fois l&#8217;installation principale terminée, la machine va redémarrer et Packer va exécuter la section <code>provisioners</code> via SSH.<br>
+Concernant la connexion SSH, j&#8217;ai fait le choix (par simplicité on va dire) de configurer la machine virtuelle avec un mot de passe SSH "en dur" dans le fichier <code>packer.json</code> ainsi que dans le fichier <code>config.scm</code> (les valeurs doivent bien sûr être les mêmes).</p>
+</div>
+<div class="paragraph">
+<p>Je vous conseille fortement de changer ce mot de passe dans le script/désactiver l&#8217;authentification par mot de passe pour une configuration de production.</p>
+</div>
+<div class="paragraph">
+<p>Dans mon cas, je me contente de poser un fichier <code>.bash_profile</code> et d&#8217;exécuter un script qui mettra la distribution à jour.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_enregistrement_sur_exoscale">Enregistrement sur Exoscale</h3>
+<div class="paragraph">
+<p>Il n&#8217;y a plus maintenant qu&#8217;à envoyer le template sur le Cloud. Dans mon cas, je le déploierai sur Exoscale. Il est possible d&#8217;utiliser le <a href="https://www.packer.io/docs/post-processors/exoscale-import.html">post-processor</a> Exoscale pour Packer, ou bien de le faire avec un autre outil (comme la <a href="https://github.com/exoscale/cli/">cli</a>, ou bien l&#8217;interface web).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_premier_boot_et_configuration">Premier boot et configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On peut maintenant démarrer notre machine virtuelle, et commencer à jouer avec en se connectant dessus en SSH (en utilisant le mot de passe défini précédemment).</p>
+</div>
+<div class="sect2">
+<h3 id="_installer_des_packages">Installer des packages</h3>
+<div class="paragraph">
+<p><strong>Subtitutes</strong></p>
+</div>
+<div class="paragraph">
+<p>Les packages de GuixSD sont par défaut compilés sur la machine après récupération. Il est possible de configurer GuixSD pour (essayer de) récupérer des binaires précompilés depuis un serveur.<br>
+Un serveur officiel existe pour fournir ces binaires. Il est censé être activé par défaut sur GuixSD mais ça n&#8217;avait pas l&#8217;air d&#8217;être le cas pour moi (le fichier <code>/etc/guix/acl</code> était vide et me posait des problèmes). C&#8217;est pour cela que j&#8217;exécute dans le script passé à Packer les lignes suivantes.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo rm /etc/guix/acl
+sudo guix archive --authorize &lt; $(sudo find / -name "ci.guix.gnu.org.pub")</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ces deux lignes permettent de configurer GuixSD avec le subtitute officiel. C&#8217;est peut être pas la façon officielle pour configurer un subtitute, mais je n&#8217;ai pas trouvé dans la documentation comment faire autrement.</p>
+</div>
+<div class="paragraph">
+<p><strong>Mettre à jour le système</strong></p>
+</div>
+<div class="paragraph">
+<p>La commande <code>guix pull</code> permet de télécharger les nouvelles versions des packages ou de Guix disponibles. Ensuite, a commande <code>guix package -u</code> permet de mettre les packages à jour.</p>
+</div>
+<div class="paragraph">
+<p>Ces commandes sont à exécuter par utilisateur. Souvenez-vous, dans GuixSD, <strong>tout</strong> est cloisonné par utilisateur, packages inclus.</p>
+</div>
+<div class="paragraph">
+<p>Attention, cette opération peut être <strong>très</strong> longue, surtout si vous avez le malheur de devoir compiler un package un peu gros. C&#8217;est pour ça que j&#8217;exécute également ces cmmandes dans le script passé à Packer.<br>
+De manière générale, j&#8217;ai trouvé que GuixSD mettait beaucoup de temps à se mettre à jour ou à installer de nouveaux packages.</p>
+</div>
+<div class="paragraph">
+<p><strong>Installer un package</strong></p>
+</div>
+<div class="paragraph">
+<p>Installons par exemple le package <code>screen</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>guix package -i screen</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ce package sera installé seulement pour l&#8217;utilisateur courant. Si vous changez d&#8217;utilisateurs (si vous passez root par exemple), la commande <code>screen</code> ne sera pas disponible.</p>
+</div>
+<div class="paragraph">
+<p><strong>/etc/config.scm</strong></p>
+</div>
+<div class="paragraph">
+<p>Le fichier <code>/etc/config.scm</code> contient la définition de l&#8217;installation globale du système (la même qui a été utilisée par Packer). Si vous voulez définir un nouveau utilisateur, modifier une configuration&#8230;&#8203; Modifiez ce fichier, et lancez <code>guix system reconfigure /etc/config.scm</code>.</p>
+</div>
+<div class="paragraph">
+<p><strong>Rollbacks</strong></p>
+</div>
+<div class="paragraph">
+<p>Tout l&#8217;intérêt de GuixSD est de pouvoir rollback facilement (que ce soit au niveau système ou utilisateur) sur une "version" précédente. Donc si vous cassez votre système après une mise à jour, il devrait être en théorie très facile de rollback sur une version antérieure.</p>
+</div>
+<div class="paragraph">
+<p>Voici <a href="https://guix.gnu.org/blog/2018/multi-dimensional-transactions-and-rollbacks-oh-my/">un article</a> provenant du site de Guix sur le sujet si cela vous intéresse. Je n&#8217;ai pas testé cette fonctionnalité (cf la section <code>Pour aller plus loin</code> où j&#8217;explique pourquoi).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pour_aller_plus_loin">Pour aller plus loin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A la base, j&#8217;avais prévu un article beaucoup plus conséquent sur GuixSD (installation de packages, de services, intégration Ansible, rollbacks&#8230;&#8203;). Mais après avoir passé pas mal de soirées à jouer avec la distribution, j&#8217;arrive aux conclusions suivantes:</p>
+</div>
+<div class="paragraph">
+<p><strong>Documentation</strong></p>
+</div>
+<div class="paragraph">
+<p>Le manque de documentation fait qu&#8217;il est quasiment impossible de comprendre comment utiliser la distribution (configurer un service, ou comment construire un package par exemple).</p>
+</div>
+<div class="paragraph">
+<p>La documentation de GuixSD se limite généralement à une documentation des fonctions <code>Guile</code> pour intéragir avec les différents sous modules. Très bien, écrire du code je sais faire. Mais ensuite, j&#8217;en fais quoi ? Où est ce que je dois mettre mes fichiers de configurations, où est ce que je dois les référencer ? C&#8217;est quoi les bonnes pratiques ? Mystère.<br>
+Il manque selon moi toute la documentation "utilisateur". Donner une collection de fonctions Scheme et leurs paramètres n&#8217;est pas suffisant si on ne sait pas quoi en faire.</p>
+</div>
+<div class="paragraph">
+<p>Quand vous avez un problème, vous trouverez <strong>peut être</strong> quelqu&#8217;un ayant eu le même problème ou la même question sur les logs IRC de Guix, ou bien quelqu&#8217;un aura donné une solution sur un site web. Sinon, vous serez bloqué.</p>
+</div>
+<div class="paragraph">
+<p>Ne pouvant pas me permettre de repasser mes soirées pendant encore 2 semaines à lire des historiques de logs IRC et le code source GuixSD pour essayer de comprendre quoi faire, j&#8217;ai donc abandonné et livre donc un article incomplet. Cela ne m&#8217;était jamais arrivé, même mon article sur <a href="https://mcorbin.fr/posts/2019-03-03-ebpf-xdp-introduction/">eBPF</a> avait été plus facile à écrire.</p>
+</div>
+<div class="paragraph">
+<p>Quelques exemples de points de blocages.</p>
+</div>
+<div class="paragraph">
+<p><strong>Packages</strong></p>
+</div>
+<div class="paragraph">
+<p>Il y a peu de documentation sur comment packager une application. A force de chercher, j&#8217;ai réussi à packager un simple shell script que je place dans un dossier <code>bin</code>. A la base, je voulais coder une simple implémentation de <code>cloud-init</code> en shell et pouvoir configurer ma machine Guix de cette façon (clés SSH notamment) sur Exoscale. Je mets le code du package (qui a l&#8217;air de marcher) ici, ça servira peut être à quelqu&#8217;un:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>(define-module (gnu packages exo-init)
+  #:use-module (guix packages)
+  #:use-module (guix download)
+  #:use-module (guix build-system copy)
+  #:use-module (guix licenses))
+
+(define-public exo-init
+  (package
+   (name "exo-init")
+   (version "0.1.0")
+   (source (origin
+            (method url-fetch)
+            (uri "https://sos-ch-gva-2.exo.io/mcorbin.fr.iso/exo-init.tar.gz")
+            (sha256
+             (base32
+              "0igqkaz02fwr58fhzzrh51vfql6xz5ywhp9j0s2y5i2lxfvd9s4g"))))
+   (build-system copy-build-system)
+   (arguments
+    `(#:install-plan
+      `(("exo-init.sh" "bin/"))))
+   (synopsis "A simple Cloud-Init like for the Exoscale platform")
+   (description
+    "A simple Cloud-Init like for the Exoscale platform")
+   (home-page "https://www.gnu.org/software/hello/")
+   (license gpl3+)))
+
+exo-init</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Services</strong></p>
+</div>
+<div class="paragraph">
+<p>Prenons l&#8217;exemple des services. Vous trouverez dans la documentation de Guix ou de shepherd (le daemon gérant les services dans Guix) une liste de fonctions pour configurer un service, mais pas vraiment d&#8217;exemples. La section <a href="https://www.gnu.org/software/shepherd/manual/html_node/Service-Examples.html">example</a> contient <code>FIXME: This needs a lot of work.</code>, et l&#8217;exemple donné à base de <code>make &lt;service&gt;</code> ne fonctionne pas, j&#8217;ai jamais réussi à trouver quel module importer pour le faire marcher.<br>
+Ce problème d&#8217;import se rencontre d&#8217;ailleurs partout dans GuixSD, les exemples dans la documentation sont généralement mis sans la liste des modules à importer, donc le code est de fait inutilisable.</p>
+</div>
+<div class="paragraph">
+<p>Je voulais à la base définir un service pour le package <code>exo-init</code> définit précédemment, et pouvoir lancer ce script à chaque démarrage de la machine. Déjà, je n&#8217;ai jamais trouvé comment configurer un service lors de l&#8217;installation du package, j&#8217;ai juste réussi à écrire cela en m&#8217;inspirant de différentes sources trouvées à droite à gauche (dont le code source de Guix):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>(define-module (mcorbin services exoinit)
+  #:use-module (gnu)
+  #:use-module (gnu services)
+  #:use-module (gnu services base)
+  #:use-module (gnu services shepherd)
+  #:use-module (guix gexp)
+  #:export (exo-init-service))
+
+(define exo-init-service-type
+  (shepherd-service-type
+  'exo-init
+  (lambda (name)
+    (shepherd-service
+    (documentation "Exo init service")
+    (provision '(exo-init))
+    (start #~(lambda _
+               (make-forkexec-constructor
+               '("exo-init"))))
+    (one-shot? #t)))))
+
+(define (exo-init-service) (service exo-init-service-type "name"))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A noter: je voulais au début ne passer aucun paramètre à <code>exo-init-service-type</code> mais ça n&#8217;a pas l&#8217;air possible, je passe donc un paramètre non utilisé.</p>
+</div>
+<div class="paragraph">
+<p>Et même une fois le service écrit, j&#8217;en fais quoi ? Je dois l&#8217;installer manuellement pour chaque utilisateur ? Je dois le définir dans <code>/etc/config.scm</code> ? Je n&#8217;ai pas la réponse à ces questions.</p>
+</div>
+<div class="paragraph">
+<p><strong>Bugs</strong></p>
+</div>
+<div class="paragraph">
+<p>Le coup de grâce a été un bug que je rencontre actuellement sur un template GuixSD tout neuf. Toutes les commandes <code>guix package</code> finissent en:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>guix package: error: error parsing derivation `/gnu/store/b9vig6s9f3a9c6gr8889pn3dp6gaq89a-guile-gdbm-ffi-20120209.fa1d5b6.tar.xz.drv': expected string `Derive(['</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Un <code>guix gc --delete /gnu/store/b09qkb8r06l64p809nysp67ihmvrib2f-guile-gdbm-ffi-20120209.fa1d5b6.drv</code> permet de supprimer ce fichier, mais il revient lors d&#8217;une installation de package.</p>
+</div>
+<div class="paragraph">
+<p>Donc en gros je ne peux plus rien faire sur la machine. Je me dis donc <code>tiens, c&#8217;est le moment de tester les rollbacks !</code>. Je lance donc <code>guix package --list-generations</code> (commande trouvée dans l&#8217;article partagé précemment), j&#8217;obtiens maintenant:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$guix package --list-generations
+guix package: error: profile '/var/guix/profiles/per-user/guix/guix-profile' does not exist</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(╯°□°）╯︵ ┻━┻</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_en_conclusion">En conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Les idées de GuixSD sont très bonnes, le choix de Scheme pour la configuration est super. Mais pour faire marcher le machin, faut s&#8217;accrocher. Et encore, je faisais mes tests sur un cloud, donc aucun problème de drivers ou autre, et pas de risque de flinguer ma machine.</p>
+</div>
+<div class="paragraph">
+<p>Peut être que je referais une tentative dans quelques années ?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/cloud/">cloud</a>
+    
+    <a href="/tags/linux/">linux</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-05-02-meuse-0.5.0/">&laquo; Meuse 0.5.0 released !</a>
+        
+        
+        <a class="right" href="/posts/2020-04-06-meuse-0-4-1-release/">Meuse 0.4.1 released ! &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

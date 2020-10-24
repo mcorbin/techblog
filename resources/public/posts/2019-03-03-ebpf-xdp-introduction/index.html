@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Introduction to eBPF and XDP</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2019-03-03-ebpf-xdp-introduction/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">3 mars 2019</div>
+        
+    </div>
+    <h2>Introduction to eBPF and XDP</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p><strong>English version <a href="https://mcorbin.fr/pages/xdp-introduction/">here</a></strong><br>
+Cela fait un moment que j&#8217;entends parler de eBPF et de XDP (eXpress Data Path) mais je n&#8217;avais pas vraiment eu l&#8217;occasion de jouer avec. J&#8217;ai donc décidé comme projet de week-end d&#8217;écrire un programme XDP le plus simple possible permettant de filtrer les paquets pour une addresse IP donnée. Je présenterais comment ce programme fonctionne, comment le compiler et l&#8217;exécuter.</p>
+</div>
+<div class="sect1">
+<h2 id="_ebpf_et_xdp">eBPF et XDP</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Je ne connais pas encore dans le détail ces technologies, donc n&#8217;hésitez pas à me remonter mes eventuelles erreurs.</p>
+</div>
+<div class="paragraph">
+<p>eBPF est une technologie du kernel Linux permettant d&#8217;écrire des programmes qui seront compilés en bytecode BPF. Ce bytecode est ensuite vérifié (certaines erreurs comme une lecture sans vérifier si la valeur lue est <code>null</code> ne sont pas possibles empêchent la compilation) et exécuté dans une machine virtuelle présente dans le kernel.</p>
+</div>
+<div class="paragraph">
+<p>eBPF peut être utilisé pour écrire des outils de monitoring (en attachant le programme pour réagir à des événements comme des appels systèmes par exemple). Ici, l&#8217;intêret de eBPF est son faible impact sur les performances du système que l&#8217;on instrumente.</p>
+</div>
+<div class="paragraph">
+<p>Mais eBPF permet aussi d&#8217;intéragir avec le réseau avec XDP (comme par exemple pour écrire un load balancer ou un firewall). Ici aussi, l&#8217;intêret de XDP est qu&#8217;il s&#8217;exécute au plus prêt du hardware et permet donc d&#8217;atteindre de très bonnes performances.</p>
+</div>
+<div class="paragraph">
+<p>Voici une collection de liens avec plus d&#8217;informations sur ces sujets:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.brendangregg.com/ebpf.html" class="bare">http://www.brendangregg.com/ebpf.html</a></p>
+</li>
+<li>
+<p><a href="http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html" class="bare">http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html</a></p>
+</li>
+<li>
+<p><a href="https://www.iovisor.org/technology/xdp" class="bare">https://www.iovisor.org/technology/xdp</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Je ne sais pas pour vous, mais pour moi eBPF et XDP sont clairement le genre de technologies où même après lecture de 20 articles sur le sujet, je ne suis pas vraiment sûr de bien comprendre ce qu&#8217;il se passe vraiment. J&#8217;ai donc décidé de pratiquer un maximum pour mieux comprendre tout cela, et cet article sera (j&#8217;espère !) le premier d&#8217;une longue série.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation">Installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Pour compiler un programme BPF, le plus simple semble de compiler directement le programme dans l&#8217;arborescence du kernel Linux.</p>
+</div>
+<div class="paragraph">
+<p>On commence donc par cloner le kernel avec un <code>git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git</code>.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai également dû installer sur ma machine (Debian) un certain nombre de paquets. Peut être que vous en aurez d&#8217;autres à installer (vous le saurez à la compilation): <code>apt-get install bison clang flex libelf-dev llvm</code>.</p>
+</div>
+<div class="paragraph">
+<p>Allez maintenant à la racine du projet Linux, et exécutez <code>make headers_install</code> puis <code>make menuconfig</code> (pour cette phase, j&#8217;ai tout simplement laissé la configuration par défaut).</p>
+</div>
+<div class="paragraph">
+<p>Vous devriez maintenant pouvoir compiler les programmes BPF inclus dans le kernel avec <code>make samples/bpf/</code> (attention, le <code>/</code> est important à la fin) sans erreurs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_mise_en_place_du_projet">Mise en place du projet.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Comme dit précédemment, mon but est d&#8217;écrire un programme permettant de filtrer tous les paquets venant d&#8217;une addresse IP donnée sur l&#8217;interface localhost. Le nom de mon programme sera <code>xdp_ip_filter</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_makefile">&nbsp;&nbsp;&nbsp;&nbsp; Makefile</h3>
+<div class="paragraph">
+<p>Nous allons tout d&#8217;abord rajouter dans le fichier <code>samples/bpf/Makefile</code> les instructions pour compiler notre futur programme. Vous verrez dans ce fichier de multiples déclarations commençant par <code>hostprogs-y</code>, rajouter la ligne <code>hostprogs-y += xdp_ip_filter</code>.</p>
+</div>
+<div class="paragraph">
+<p>De la même façon, rajoutez la ligne <code>xdp_ip_filter-objs := bpf_load.o xdp_ip_filter_user.o</code> à l&#8217;endroit où se trouve les déclarations commençant par <code>xdp_</code>, puis <code>always += xdp_ip_filter_kern.o</code> un peu plus loin.</p>
+</div>
+<div class="paragraph">
+<p>Le Makefile est maintenant prêt.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_les_fichiers_du_projet">&nbsp;&nbsp;&nbsp;&nbsp; Les fichiers du projet</h3>
+<div class="paragraph">
+<p>Nous allons travailler dans deux fichiers <code>samples/bpf/xdp_ip_filter_kern.c</code> et <code>samples/bpf/xdp_ip_filter_user.c</code>. Le fichier <code>kern</code> contiendra le code qui sera compilé en bytecode BPF, le fichier <code>user</code> sera notre point d&#8217;entrée pour démarrer ce dernier. Je me référerais souvent à ces fichiers par les noms abrégés <code>user</code> ou <code>kern</code>.</p>
+</div>
+<div class="paragraph">
+<p>Le code de ces fichiers est disponible à ces deux emplacements:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Sur Github, avec la coloration syntaxique <a href="https://github.com/mcorbin/blog/tree/master/resources/templates/static/ebpf_xdp">ici</a>.</p>
+</li>
+<li>
+<p>Sur ce site aux url suivantes: <a href="../../static/ebpf_xdp/xdp_ip_filter_kern.c">xdp_ip_filter_kern.c</a> et <a href="../../static/ebpf_xdp/xdp_ip_filter_user.c">xdp_ip_filter_user.c</a>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Il faut savoir que je n&#8217;ai pas fait de C depuis <strong>très</strong> longtemps (et j&#8217;ai jamais pratiqué le C à haut niveau), donc mon code est assez moche (mais ce n&#8217;est pas très grave pour cet exemple <code>¯_(ツ)_/¯</code>).<br>
+Je vous conseille également de lire cet article en ayant ouvert dans votre éditeur favoris les deux fichiers.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_xdp_ip_filter_kern_c">xdp_ip_filter_kern.c</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Après la déclaration des headers (que vous pouvez retrouver dans les liens mis au dessus), nous avons une première macro:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>#define bpf_printk(fmt, ...)                    \
+({                              \
+           char ____fmt[] = fmt;                \
+           bpf_trace_printk(____fmt, sizeof(____fmt),   \
+                ##__VA_ARGS__);         \
+})</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette macro sera utilisée comme logger. Son fonctionnement n&#8217;est pas important.</p>
+</div>
+<div class="sect2">
+<h3 id="_les_maps">&nbsp;&nbsp;&nbsp;&nbsp; Les maps</h3>
+<div class="paragraph">
+<p>On a maintenant une partie plus intéressante:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">struct bpf_map_def SEC("maps") ip_map = {
+	.type        = BPF_MAP_TYPE_HASH,
+	.key_size    = sizeof(__u32),
+	.value_size  = sizeof(__u32),
+	.max_entries = 1,
+};
+
+struct bpf_map_def SEC("maps") counter_map = {
+	.type        = BPF_MAP_TYPE_PERCPU_ARRAY,
+	.key_size    = sizeof(__u32),
+	.value_size  = sizeof(__u64),
+	.max_entries = 1,
+};</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On définit ici deux <code>maps</code>. Ces maps sont donc des associations clé/valeurs, et c&#8217;est ces maps qui sont utilisées pour intéragir avec l&#8217;extérieur (notre fichier <code>user</code> que je présenterais tout à l&#8217;heure). Le programme <code>user</code> pourra lire et écrire dans ces maps, même chose pour le programme <code>kern</code>. Vous pouvez donc voir les maps comme de la mémoire partagée entre les deux programmes, et c&#8217;est d&#8217;ailleurs à ma connaissance la seule façon de faire communiquer ces programmes entre eux.</p>
+</div>
+<div class="paragraph">
+<p>La première map <code>ip_map</code> est une map de type <code>BPF_MAP_TYPE_HASH</code> (voyez ça comme une map classique), dont les clés et valeurs sont des <code>u32</code> (en effet, une addresse IP v4 peut être représentée sous forme d&#8217;un simple integer). Cette map ne peut contenir qu&#8217;une entrée (cf <code>max_entries</code>).<br>
+Cette map servira au programme <code>user</code> à transmettre au programme <code>kern</code> l&#8217;adresse IP à filtrer (et ici, on ne filtre qu&#8217;une IP donc la map n&#8217;aura qu&#8217;une entrée).</p>
+</div>
+<div class="paragraph">
+<p>La seconde map nommée <code>counter_map</code> est une map de type <code>BPF_MAP_TYPE_PERCPU_ARRAY</code>. Ce type indique que l&#8217;on aura en fait une map par core de notre CPU (si vous avez 8 cores, vous aurez 8 maps). Ces map serviront à compter par core combien de paquets ont été filtrés. Le type <code>ARRAY</code> indique également que la clé de notre map sera entre <code>0</code> et <code>max_entries -1</code> (donc dans notre cas nous n&#8217;aurons qu&#8217;une entrée pour la clé <code>0</code>). On aura donc pour chaque core une map dont la valeur pour la clé <code>0</code> contiendra le nombre de paquets filtrés par ce core.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ebpf_xdp/ebpf_maps_1.png" alt="maps xdm et abpf"></span></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_le_code">&nbsp;&nbsp;&nbsp;&nbsp; Le code</h3>
+<div class="paragraph">
+<p><strong>Récupération de l&#8217;IP à filtrer</strong></p>
+</div>
+<div class="paragraph">
+<p>Ici, nous avons une fonction prenant en paramètre une struct <code>xdp_md</code>. Cette struct contiendra le paquet réseau avec lequel nous allong intéragir.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">SEC("xdp_ip_filter")
+int _xdp_ip_filter(struct xdp_md *ctx) {
+  // key of the maps
+  u32 key = 0;
+  // the ip to filter
+  u32 *ip;
+
+  bpf_printk("starting xdp ip filter\n");
+
+  // get the ip to filter from the ip_filtered map
+  ip = bpf_map_lookup_elem(&amp;ip_map, &amp;key);
+  if (!ip){
+    return XDP_PASS;
+  }
+  bpf_printk("the ip address to filter is %u\n", ip);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>La première chose à faire est de récupérer dans la map <code>ip_map</code> l&#8217;ip addresse que nous voulons filtrer. Pour cela, nous utilisons <code>bpf_map_lookup_elem</code> sur <code>ip_map</code> avec comme clé <code>0</code> (rappelez vous, notre map n&#8217;a qu&#8217;un élément). Comme dit précédemment, l&#8217;IP retournée par <code>bpf_map_lookup_elem</code> est sous format <code>u32</code> en <code>little endian</code> (par exemple 192.168.1.78 &#8658; 0xC0A8014E en hexadécimal &#8658; on lit à l&#8217;envers &#8658; 0x4E0180C0 &#8658; 1308721344 en base 10).<br>
+Vous pouvez voir également que j&#8217;utilise <code>bpf_printk</code> comme un logger.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ebpf_xdp/ebpf_maps_2.png" alt="lookup map ebpf"></span></p>
+</div>
+<div class="paragraph">
+<p><strong>Récupération de l&#8217;IP source du paquet</strong></p>
+</div>
+<div class="paragraph">
+<p>Maintenant, nous voulons récupérer l&#8217;adresse IP source du paquet.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">  void *data_end = (void *)(long)ctx-&gt;data_end;
+  void *data     = (void *)(long)ctx-&gt;data;
+  struct ethhdr *eth = data;
+
+  // check packet size
+  if (eth + 1 &gt; data_end) {
+    return XDP_PASS;
+  }
+
+  // check if the packet is an IP packet
+  if(ntohs(eth-&gt;h_proto) != ETH_P_IP) {
+    return XDP_PASS;
+  }
+
+  // get the source address of the packet
+  struct iphdr *iph = data + sizeof(struct ethhdr);
+  if (iph + 1 &gt; data_end) {
+    return XDP_PASS;
+  }
+  u32 ip_src = iph-&gt;saddr;
+  bpf_printk("source ip address is %u\n", ip_src);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nous commençons par récupérer la donnée contenue dans <code>ctx</code> grâce à <code>ctx&#8594;data</code>, et un pointer sur la fin du paquet via <code>(void *)(long)ctx&#8594;data_end</code>. Ensuite, on assigne <code>data</code> à une struct de type <code>ethhdr</code> (représentant une trame Ethernet).</p>
+</div>
+<div class="paragraph">
+<p>On doit ensuite vérifier que <code>eth + 1</code> ne dépasse pas <code>data_end</code> en mémoire. Ce check est obligatoire (sans cela, le programme refuse de compiler). Si la taille est supérieuse, on ne fait rien (on laisse passer le paquet en retournant <code>XDP_PASS</code>).</p>
+</div>
+<div class="paragraph">
+<p>On vérifie ensuite que le paquet est un paquet IP via <code>if(ntohs(eth&#8594;h_proto) != ETH_P_IP)</code>. Si le paquet n&#8217;est pas un paquet IP, il ne nous intéresse pas, donc là aussi on retourne <code>XDP_PASS</code>.</p>
+</div>
+<div class="paragraph">
+<p>Nous créons maintenant une nouvelle struct de type <code>iphdr</code> à partir de la struct ethernet, nous refaisons également une vérification (obligatoire) sur <code>data_end</code>, puis nous récupérons enfin l&#8217;IP source du paquet via <code>iph&#8594;saddr</code>.</p>
+</div>
+<div class="paragraph">
+<p><strong>Filtrer le paquet</strong></p>
+</div>
+<div class="paragraph">
+<p>On a maintenant l&#8217;IP source, nous allons la comparer avec l&#8217;IP que nous avons récupérée dans la map en début de programme:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">  // drop the packet if the ip source address is equal to ip
+  if (ip_src == *ip) {
+    u64 *filtered_count;
+    u64 *counter;
+    counter = bpf_map_lookup_elem(&amp;counter_map, &amp;key);
+    if (counter) {
+      *counter += 1;
+    }
+    return XDP_DROP;
+  }
+  return XDP_PASS;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, on compare <code>ip_src</code> avec <code>ip</code>. Si le paquet source doit être filtré, on incrémente dans la map <code>counter_map</code> le compteur de paquet filtré (en utilisant encore la clé <code>0</code>) via <code>bpf_map_lookup_elem</code> (qui retourne un pointeur dont on peut donc incrémenter la valeur), et on filtre le paquet en retournant <code>XDP_DROP</code>. Sinon, on retourne <code>XDP_PASS</code>.</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est tout pour le programme <code>kern</code> !</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_xdp_ip_filter_user_c">xdp_ip_filter_user.c</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_le_code_2">&nbsp;&nbsp;&nbsp;&nbsp; Le code</h3>
+<div class="paragraph">
+<p>Ce fichier commence comme l&#8217;autre par l&#8217;inclusion de nombreux fichiers headers, puis de:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">static int ifindex = 1; // localhost interface ifindex
+static __u32 xdp_flags = 0;
+
+// unlink the xdp program and exit
+static void int_exit(int sig) {
+  printf("stopping\n");
+  bpf_set_link_xdp_fd(ifindex, -1, xdp_flags);
+  exit(0);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On définit ici une variable <code>ifindex</code> qui est l&#8217;index de l&#8217;interface <code>localhost</code> (je parlerais plus en détail de cela plus loin), puis <code>xdp_flags</code> qui vaut zéro.</p>
+</div>
+<div class="paragraph">
+<p>La fonction <code>int_exit</code> est une fonction servant à stopper le programme <code>kern</code> en cas de signal, via <code>bpf_set_link_xdp_fd</code>.</p>
+</div>
+<div class="paragraph">
+<p><strong>La fonction main, récupération de l&#8217;IP</strong></p>
+</div>
+<div class="paragraph">
+<p>Voici maintenant la fonction <code>main</code> qui sera exécutée pour démarrer notre programme BPF:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>int main(int argc, char **argv) {
+  const char *optstr = "i:";
+  char *filename="xdp_ip_filter_kern.o";
+  char *ip_param = "127.0.0.1";
+  int opt;
+  // maps key
+  __u32 key = 0;
+
+  while ((opt = getopt(argc, argv, optstr)) != -1) {
+    switch(opt)
+      {
+      case 'i':
+        ip_param=optarg;
+      break;
+    }
+  }
+
+  // convert the ip string to __u32
+  struct sockaddr_in sa_param;
+  inet_pton(AF_INET, ip_param, &amp;(sa_param.sin_addr));
+  __u32 ip = sa_param.sin_addr.s_addr;
+  printf("the ip to filter is %s/%u\n", ip_param, ip);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, on définit quelques variables comme les paramètres attendues à <code>main</code>, le nom du fichier <code>.o</code> (xdp_ip_filter_kern.o) qui devra être lancé, et une valeur par défaut pour l&#8217;IP à filtrer (<code>127.0.0.1</code>).</p>
+</div>
+<div class="paragraph">
+<p>On récupère l&#8217;IP à filtrer (qui sera passé via l&#8217;option <code>-i</code> au programme), et on la convertit en un u32 (par exemple "192.168.1.78" &#8658; 0xC0A8014E &#8658; on lit à l&#8217;envers &#8658; 0x4E0180C0 &#8658; 1308721344 en base 10).</p>
+</div>
+<div class="paragraph">
+<p><strong>Changements de limits</strong></p>
+</div>
+<div class="paragraph">
+<p>On voit dans beaucoup de programmes eBPF que les limites du système sont augmentées, j&#8217;ai laissé ce comportement:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>// change limits
+  struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
+  if (setrlimit(RLIMIT_MEMLOCK, &amp;r)) {
+    perror("setrlimit(RLIMIT_MEMLOCK, RLIM_INFINITY)");
+    return 1;
+  }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Chargement du programme eBPF</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">// load the bpf kern file
+  if (load_bpf_file(filename)) {
+    printf("error %s", bpf_log_buf);
+    return 1;
+  }
+
+  if (!prog_fd[0]) {
+    printf("load_bpf_file: %s\n", strerror(errno));
+    return 1;
+  }
+
+  // add sig handlers
+  signal(SIGINT, int_exit);
+  signal(SIGTERM, int_exit);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, on charge le fichier  <code>xdp_ip_filter_kern.o</code> (qui contient notre fichier précédent compilé), et on ajoute le handler <code>int_exit</code> sur les signaux <code>SIGINT</code> et <code>SIGTERM</code>.</p>
+</div>
+<div class="paragraph">
+<p><strong>Ajout de l&#8217;IP à filtrer dans la map</strong></p>
+</div>
+<div class="paragraph">
+<p>Il faut maintenant ajouter l&#8217;IP que nous voulons filtrer dans la map nommée <code>ip_map</code> que nous avons utilisée dans le fichier <code>xdp_ip_filter_kern.c</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">  // set the first element of the first map to the ip passed as a parameter
+  int result = bpf_map_update_elem(map_fd[0], &amp;key, &amp;ip, BPF_ANY);
+  if (result != 0) {
+    fprintf(stderr, "bpf_map_update_elem error %d %s \n", errno, strerror(errno));
+    return 1;
+  }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, on met à jour la map avec la fonction <code>bpf_map_update_elem</code>. <code>map_fd[0]</code> retourne la première map définie dans le fichier <code>kern</code>, qui est bien notre map <code>ip_map</code> (l&#8217;ordre de déclaration des maps a donc de l&#8217;importance !). La map contiendra donc maintenant pour la clé <code>0</code> l&#8217;IP à filtrer (et donc le programme <code>kern</code> pourra la récupérer comme vu précédemment).</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ebpf_xdp/ebpf_maps_3.png" alt="ebpf update map"></span></p>
+</div>
+<div class="paragraph">
+<p><strong>Ajout du programme XDP sur une interface</strong></p>
+</div>
+<div class="paragraph">
+<p>Dans la fonction <code>int_exit</code> vue précédemment, nous appelions <code>bpf_set_link_xdp_fd</code> pour stopper le programme XDP, en utilisant notamment la variable <code>ifindex</code>. En fait, un programme XDP est lié à une interface (et dans <code>int_exit</code>, nous le détachions donc de l&#8217;interface).</p>
+</div>
+<div class="paragraph">
+<p>Il faut donc dans notre <code>main</code> l&#8217;attacher à l&#8217;interface dont nous voulons filtrer les paquets:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">// link the xdp program to the interface
+  if (bpf_set_link_xdp_fd(ifindex, prog_fd[0], xdp_flags) &lt; 0) {
+    printf("link set xdp fd failed\n");
+    return 1;
+  }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, on attachons à l&#8217;interface <code>localhost</code> notre programme XDP.</p>
+</div>
+<div class="paragraph">
+<p><strong>Collecte des statistiques</strong></p>
+</div>
+<div class="paragraph">
+<p>A partir de ce moment, notre programme XDP est démarré, et commence à filtrer des paquets. Nous voulons savoir combien de paquets ont été filtrés, en récupérant pour chaque core de notre CPU la valeur dans la map <code>counter_map</code> vue précédemment.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">  int i, j;
+
+  // get the number of cpus
+  unsigned int nr_cpus = bpf_num_possible_cpus();
+  __u64 values[nr_cpus];
+
+  // "infinite" loop
+  for (i=0; i&lt; 1000; i++) {
+    // get the values of the second map into values.
+    assert(bpf_map_lookup_elem(map_fd[1], &amp;key, values) == 0);
+    printf("%d\n", i);
+    for (j=0; j &lt; nr_cpus; j++) {
+      printf("cpu %d, value = %llu\n", j, values[j]);
+    }
+    printf("\n\n");
+    sleep(2);
+  }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Rappelez vous, la map <code>counter_map</code> est par core (type <code>BPF_MAP_TYPE_PERCPU_ARRAY</code>). Nous récupérons notre nombre de core via <code>bpf_num_possible_cpus</code>, puis nous créons deux boucles:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Une pour périodiquement récupérer les valeurs de la map, toutes les 2 secondes. <code>bpf_map_lookup_elem</code> est appelé sur la map numéro 2 (<code>map_fd[1]</code>, donc <code>counter_map</code>), pour la clé <code>0</code> pour réaliser cela. Les valeurs sont stockées dans le tableau <code>values</code> (car il y a une valeur par core).</p>
+</li>
+<li>
+<p>Une qui va intérer sur le tableau <code>values</code> pour afficher à l&#8217;écran les statistiques pour chaque core.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/ebpf_xdp/ebpf_maps_4.png" alt="ebpf update map"></span></p>
+</div>
+<div class="paragraph text-center">
+<p><em>Ici, on voit que bpf_map_lookup_elem récupère pour chaque map "counter_map" de chaque core la valeur à l&#8217;index 0 et la stocke dans un tableau nommé values, où l&#8217;index du tableau est le numéro du core.</em></p>
+</div>
+<div class="paragraph">
+<p><strong>Fin du programme</strong></p>
+</div>
+<div class="paragraph">
+<p>A la fin du programme, on détache le programme de l&#8217;interface localhost.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-c" data-lang="c">  printf("end\n");
+  // unlink the xdp program
+  bpf_set_link_xdp_fd(ifindex, -1, xdp_flags);
+  return 0;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>C&#8217;est maintenant terminé, place à la compilation et aux tests !</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tester_le_programme">Tester le programme</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Lancer <code>make samples/bpf/</code>, cela devrait compiler sans erreurs votre programme. Vous pouvez maintenant le tester. Par exemple, filtrons tous les paquets venant de l&#8217;IP <code>192.168.1.78</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">cd samples/bpf/
+sudo ./xdp_ip_filter -i "192.168.1.78"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>L&#8217;output devrait être le suivant:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>the ip to filter is 192.168.1.78/1308731584
+0
+cpu 0, value = 0
+cpu 1, value = 0
+cpu 2, value = 0
+cpu 3, value = 0
+cpu 4, value = 0
+cpu 5, value = 0
+cpu 6, value = 0
+cpu 7, value = 0
+cpu 8, value = 0
+cpu 9, value = 0
+cpu 10, value = 0
+cpu 11, value = 0
+cpu 12, value = 0
+cpu 13, value = 0
+cpu 14, value = 0
+cpu 15, value = 0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vous pouvez vérifier que votre programme <code>kern</code> est bien attaché à l&#8217;interface localhost en appelant <code>ip link list</code>. une ligne <code>prog/xdp</code> devrait être rajoutée sur l&#8217;interface:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">ip link list
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 xdpgeneric qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    prog/xdp id 69 tag 1ddc7360e5987edf</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vous pouvez d&#8217;ailleurs à tout moment détacher les programmes XDP de votre interface via la commande <code>ip link set dev lo xdp off</code>.</p>
+</div>
+<div class="paragraph">
+<p>Testons maintenant si notre programme marche. Pour cela, j&#8217;utilise <a href="https://scapy.net/">scapy</a> pour crafter des paquets réseaux. Installez le (via <code>pip</code> ou via le gestionnaire de paquet de votre distribution). Puis en root, ouvrez un interpréteur python avec <code>python</code> et envoyez un paquet ICMP ayant comme source <code>192.168.1.78</code> vers <code>localhost</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">from scapy.all import  *
+conf.L3socket=L3RawSocket
+sr1(IP(src="192.168.1.78", dst="127.0.0.1")/ICMP())</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>La réponse n&#8217;arrivera jamais, car le paquet a été filtré par notre programme ! D&#8217;ailleurs, l&#8217;output de votre programme devrait être:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>cpu 0, value = 0
+cpu 1, value = 0
+cpu 2, value = 0
+cpu 3, value = 0
+cpu 4, value = 0
+cpu 5, value = 0
+cpu 6, value = 0
+cpu 7, value = 0
+cpu 8, value = 0
+cpu 9, value = 1
+cpu 10, value = 0
+cpu 11, value = 0
+cpu 12, value = 0
+cpu 13, value = 0
+cpu 14, value = 0
+cpu 15, value = 0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, mon core numéro 9 a filtré le paquet. Réessayez, et vous verrez les compteurs s&#8217;incrémenter !</p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez également consulter les logs du program <code>kern</code> (l&#8217;output de <code>bpf_printk</code>) en allant lire le fichier <code>/sys/kernel/debug/tracing/trace</code>, n&#8217;hésitez pas à rajouter plus de logs si besoin.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>J&#8217;ai appris beaucoup de choses sur eBPF et XDP en écrivant ce programme. C&#8217;est définitivement une technologie puissante, très intéressante, mais pas forcément évidente à utiliser (surtout pour quelqu&#8217;un n&#8217;ayant pas d&#8217;expérience en développement kernel).
+Certains projets comme <a href="https://github.com/iovisor/bcc">bcc</a> ou <a href="https://github.com/iovisor/bpftrace">bpftrace</a> ont l&#8217;air plus accessibles, mais écrire un peu de C permet de rentrer rapidement dans le vif du sujet.</p>
+</div>
+<div class="paragraph">
+<p>Ce ne sera sûrement pas mon seul article sur le sujet, mon prochain projet sera peut être d&#8217;écrire un petit outil pour collecter une métrique quelconque de mon système par exemple.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/ebpf/">ebpf</a>
+    
+    <a href="/tags/linux/">linux</a>
+    
+    <a href="/tags/english/">english</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2019-05-01-meuse-rust-registry/">&laquo; Meuse, a free Rust private Registry</a>
+        
+        
+        <a class="right" href="/posts/2019-02-15-kubernetes-overdose/">Kubernetes overdose &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

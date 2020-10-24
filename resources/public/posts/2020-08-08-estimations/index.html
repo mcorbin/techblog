@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Développement et estimation de temps</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-08-08-estimations/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">8 août 2020</div>
+        
+    </div>
+    <h2>Développement et estimation de temps</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Vous devez déjà vous dire "encore un article disant que les estimations de temps ça sert à rien" ? C&#8217;est en effet la grande mode depuis quelques années. Mais comme toujours, le diable se cache dans les détails et donnerai mon avis personnel sur cette question.</p>
+</div>
+<div class="sect1">
+<h2 id="_les_estimations_vraiment_utile">Les estimations, vraiment utile ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Quand les gens parlent d&#8217;estimations, ils décrivent généralement deux situations.</p>
+</div>
+<div class="sect2">
+<h3 id="_les_estimations_en_début_de_projet">Les estimations en début de projet</h3>
+<div class="paragraph">
+<p>Le projet n&#8217;est pas encore lancé qu&#8217;il faut déjà faire des estimations, par exemple dans des réponses à appel d&#8217;offre.<br>
+Comme vous vous en doutez, ces estimations sont souvent fausses. De plus, ce n&#8217;est pas forcément l&#8217;aspect technique qui est pris en compte lors de ces estimations.<br></p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est encore plus vrai sur des gros projets où trop de variables rentrent en compte.<br>
+De plus, dans le cas de prestations externes, ne pas forcément connaître le domaine métier du client ou l&#8217;équipe du futur projet (qui n&#8217;est parfois même pas encore recrutée à ce moment là) n&#8217;aide pas.</p>
+</div>
+<div class="paragraph">
+<p>Si demain vous me dites "Bon, il faut que tu développes un site de e-commerce faisant ça, ça et ça avec une équipe que tu ne connais pas", en effet je ne saurai pas faire une estimation de temps.</p>
+</div>
+<div class="sect3">
+<h4 id="_une_estimation_approximative_est_possible">Une estimation approximative est possible</h4>
+<div class="paragraph">
+<p>Néanmoins, une estimation approximative est possible selon moi si le projet respecte plusieurs critères:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>L&#8217;équipe développant le projet est connue, les gens ont déjà travaillés ensemble, des méthodes de travail et automatismes sont déjà en place&#8230;&#8203; Bref, on ne part pas en terrain inconnu avec 20 prestas arrivant d&#8217;on ne sait trop où.</p>
+</li>
+<li>
+<p>Le domaine du projet est connu par l&#8217;équipe.</p>
+</li>
+<li>
+<p>Le scope du projet est connu. On sait d&#8217;où on part, où l&#8217;on veut arriver, et dans les grandes lignes ce qui doit être fait pour y arriver.</p>
+</li>
+<li>
+<p>On a pris un peu de temps pour valider certains besoins techniques, voir on a quelques maquettes du projet&#8230;&#8203; Bref, on ne part pas d&#8217;une feuille blanche.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Dans ce cas, et si le projet n&#8217;est pas un truc gigantesque sur 10 ans, je pense qu&#8217;une estimation approximative peit être donnée. Bien sûr, il y aura des surprises. Le projet estimé à 4 mois mettra peut être 3 mois, ou bien 6 mois, mais cela donne au moins un ordre de grandeur et permet de voir si le projet est réalisable dans un temps acceptable.</p>
+</div>
+<div class="paragraph">
+<p>Avoir un ordre de grandeur est important. Si vous prévoyez de sortir dans les 6 mois un produit pour vos clients mais qu&#8217;en fait vous mettez 3 ans, cela peut être problématique pour l&#8217;entreprise.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_les_estimations_de_tâches">Les estimations de tâches</h3>
+<div class="paragraph">
+<p>J&#8217;ai travaillé il y a quelques années sur un gros projet où à chaque sprint des products owners et un lead dev estimaient toutes les tâches présentes dans le backlog (JIRA pour ne rien arranger).</p>
+</div>
+<div class="paragraph">
+<p>Evidemment, cela ne fonctionnait pas du tout, notamment parce que les personnes faisant les estimations n&#8217;étaient pas les personnes développant les fonctionnalités. Il fallait d&#8217;ailleurs aussi mettre sur les tickets JIRA le temps réellement passé dessus. Bien sûr le grand jeu était en fin de semaine de mettre des temps random sur les tickets pour que ça fasse 8 heures/jour. Mais cela est une autre histoire.</p>
+</div>
+<div class="paragraph">
+<p>Estimer les tâches de cette façon est complètement inutile et même néfaste. Cela prend du temps, met la pression aux équipes (car les devs se disent "OMG je vais dépasser l&#8217;estimation") et ne sert strictement à <strong>rien</strong>.<br>
+On sait que l&#8217;on va avoir des imprévus, que certaines tâches seront en fait plus difficiles que prévu&#8230;&#8203; Bref, estimer n&#8217;apporte rien dans ce cas.</p>
+</div>
+<div class="paragraph">
+<p>Mais faut-il quand même se passer totalement d&#8217;estimation sur les tâches ? Je ne pense pas. A entendre certains devs, estimer serait complètement impossible quelle que soit la tâche.<br>
+Pour être honnête, je me poserai beaucoup de questions si un dev travaillant depuis plusieurs mois sur un projet, connaissant la stack technique&#8230;&#8203; affirmait ce genre de choses.</p>
+</div>
+<div class="sect3">
+<h4 id="_quand_estimer">Quand estimer ?</h4>
+<div class="paragraph">
+<p>L&#8217;estimation doit être avant tout un exercice personnel.</p>
+</div>
+<div class="paragraph">
+<p>Quand je me lance sur une tâche, j&#8217;estime toujours mentalement le temps que cela va me prendre. Si vous ne le faites pas, essayez, c&#8217;est un très bon exercice.<br>
+En connaissant bien le projet, ses technos, et le domaine métier, il est selon moi possible de taper assez juste (bien sûr, avec une marge d&#8217;erreur) pour un certain nombre de tâches.</p>
+</div>
+<div class="paragraph">
+<p>Si vous n&#8217;arrivez pas à donner une estimation mentale "à la louche" pour une tâche, demandez vous pourquoi. Par exemple, peut être que:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>La tâche n&#8217;est pas assez détaillée ?</p>
+</li>
+<li>
+<p>Vous ne connaissez pas bien le projet ou n&#8217;êtes pas à l&#8217;aise avec la stack technique utilisée ?</p>
+</li>
+<li>
+<p>La tâche est trop grosse, peut être mériterait t-elle d&#8217;être découpée en plusieurs sous tâches ?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Bien sûr, parfois on tombera sur une tâche où on se prendra un mur car un truc important n&#8217;avait pas été identifié (surtout vrai en début de projet je trouve), ou bien certains types de tâches (investiguer des bugs complexes par exemple) ne sont pas vraiment estimables, mais globalement estimer un certain nombre de <strong>ses</strong> tâches est je pense possible.</p>
+</div>
+<div class="paragraph">
+<p>Cela me permet également de savoir si je suis en train de bloquer ou non, et de savoir si c&#8217;est le moment de re-réfléchir au problème voir de demander de l&#8217;aide.</p>
+</div>
+<div class="paragraph">
+<p>Enfin, estimer les tâches mentalement permet de savoir à peu près ce qui devrait être fait (et donc arriver en prod) dans un futur proche. C&#8217;est toujours cool de pouvoir se dire que telle fonctionnalité devrait arriver en prod en fin de semaine (et de finir la semaine en ayant effectivement terminé la tâche).<br>
+Cela me permet également de donner une estimation si la tâche est attendue par une autre personne ou équipe (mais tout le monde doit être au courant que c&#8217;est une estimation et non un engagement).</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, estimer est un très bon exercice à réaliser de son côté.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/programming/">programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-08-10-clojure-libraries/">&laquo; My go-to Clojure libraries</a>
+        
+        
+        <a class="right" href="/posts/2020-06-27-git-avancee/">Git: quelques commandes avancées. &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

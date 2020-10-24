@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Meuse 0.4.0 released !</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-03-24-meuse-0-4-0-release/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">24 mars 2020</div>
+        
+    </div>
+    <h2>Meuse 0.4.0 released !</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>I&#8217;m happy to announce the release of <a href="https://github.com/mcorbin/meuse">Meuse</a> 0.4.0. Meuse is an alternative registry for the Rust programming language. This release will probably be the last one before a <code>1.0.0</code> release. What&#8217;s new ?</p>
+</div>
+<div class="sect2">
+<h3 id="_frontend_improvement_and_authentication">Frontend improvement and authentication</h3>
+<div class="paragraph">
+<p>The Meuse frontend has been improved, and now supports authentication. The frontend offers a simple way to browse crates and gather some information about them.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_read_only_roles">Read-only roles</h3>
+<div class="paragraph">
+<p>Originally, Meuse had 2 roles for users:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Admin, which can do anything (manage users, crates, categories&#8230;&#8203;).</p>
+</li>
+<li>
+<p>Tech, which can manage crates (create new crates, publish new versions of a crate if it owns the crate, yank/unyank crates&#8230;&#8203;).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>But I felt something was missing. The <code>Tech</code> role was nice for a CI user for example (if you want to publish new crates from your CI platform), but not so much for developers (you may want to allow only your CI to publish packages).</p>
+</div>
+<div class="paragraph">
+<p>This release adds a new <code>read-only</code> roles, which should be perfect for developers. Read-only users can still access Meuse, browse and search crates, categories, manage their accounts&#8230;&#8203; But they cannot do actions on crates.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_improvements_on_logs_and_metrics">Improvements on logs and metrics</h3>
+<div class="paragraph">
+<p>Logs and metrics has been improved. Logs contain more informations, and new metrics are now provided.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_internal_refactoring">Internal Refactoring</h3>
+<div class="paragraph">
+<p>A lot of refactoring has been done to simplify the request lifecycle. For example, the <a href="https://github.com/exoscale/interceptor">Interceptor</a> Clojure library is now used by Meuse (I highly recommand this lib if you are a Clojure developer).<br>
+Some refactoring has also be done on the unit tests.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_try_it">Try it !</h3>
+<div class="paragraph">
+<p>If you want to try Meuse, please take a look at the <a href="https://meuse.mcorbin.fr/">documentation</a>. Feedbacks are always appreciated ;)</p>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+    <a href="/tags/rust/">rust</a>
+    
+    <a href="/tags/meuse/">meuse</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-04-06-meuse-0-4-1-release/">&laquo; Meuse 0.4.1 released !</a>
+        
+        
+        <a class="right" href="/posts/2020-02-22-jvm-ecosysteme/">La JVM, Java, ses haters, son écosystème &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

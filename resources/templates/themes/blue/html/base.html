@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>{{title}}{% block subtitle %}{% endblock %}</title>
+    <link rel="canonical" href="{{site-url}}{{uri}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% style "css/bootstrap.min.css" %}
+    {% style "css/font-awesome.min.css" %}
+    {% style "css/styles/tomorrow-night.css" %}
+    {% style "css/screen.css" %}
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{{index-uri}}">{{title}}</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li {% if home %} class="active" {% endif %}><a href="{{index-uri}}">Home</a></li>
+            <li
+               {% if archives %} class="active" {% endif %}><a href="{{archives-uri}}">Archives</a></li>
+            {% for nav-page in navbar-pages %}
+            <li
+               {%ifequal page.uri nav-page.uri %} class="active" {% endifequal %}>
+              <a href="{{nav-page.uri}}">{{nav-page.title}}</a>
+            </li>
+            {% endfor %}
+            <li><a href="{{rss-uri}}">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            {% block content %}
+            {% endblock %}
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; {{today|date:yyyy}} {{author}}</footer>
+    </div>
+    {% script "js/jquery-1.11.0.min.js" %}
+    {% script "js/bootstrap.min.js" %}
+    {% script "js/highlight.pack.js" %}
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

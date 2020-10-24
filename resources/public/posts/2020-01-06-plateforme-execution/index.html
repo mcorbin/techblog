@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Développement d&#39;applications, conteneurs et plateforme d&#39;exécution</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-01-06-plateforme-execution/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">6 janvier 2020</div>
+        
+    </div>
+    <h2>Développement d&#39;applications, conteneurs et plateforme d&#39;exécution</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>De plus en plus d&#8217;applications tournent dans des conteneurs, et de plus en plus de conteneurs tournent sur des plateformes types Kubernetes. Devons nous changer nos habitudes lorsque nous développons des applications conteneurisées ?</p>
+</div>
+<div class="sect1">
+<h2 id="_la_plateforme_d_exécution_n_est_pas_importante">La plateforme d&#8217;exécution n&#8217;est pas importante</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>je pense qu&#8217;il faut dissocier l&#8217;application en elle même (et donc son développement) de la plateforme d&#8217;exécution (où l&#8217;application tournera). En effet, une application aura toujours besoin:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>D&#8217;exposer un endpoint de <code>health</code> indiquant si l&#8217;application fonctionne correctement et est prête à fonctionner (et donc prête à recevoir du trafic pour une application web par exemple).</p>
+</li>
+<li>
+<p>D&#8217;exposer des métriques (au format Prometheus par exemple), ou alors de les générer dans votre format préféré (Graphite, InfluxDB&#8230;&#8203;).</p>
+</li>
+<li>
+<p>De générer des logs corrects, avec une manière de contrôler la verbosité des logs etc&#8230;&#8203;</p>
+</li>
+<li>
+<p>&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Cela n&#8217;a <strong>aucun</strong> rapport avec la plateforme d&#8217;exécution de l&#8217;application. Par exemple, mon endpoint de <code>health</code> peut aussi bien être utilisé par un load balancer comme HAProxy, par un agent comme Consul, ou bien par Kubernetes.</p>
+</div>
+<div class="paragraph">
+<p>Une application devrait pouvoir passer très facilement d&#8217;une plateforme d&#8217;exécution à une autre, comme par exemple d&#8217;un déploiement sur machines virtuelles classiques, sans conteneurs, à un déploiement dans Kubernetes. Si cela n&#8217;est pas possible, cela veut dire qu&#8217;on a lié l&#8217;application à sa plateforme, et ce couplage fort rend la possibilité de changement beaucoup plus difficile.</p>
+</div>
+<div class="paragraph">
+<p>En effet, on parle beaucoup aujourd&#8217;hui de Kubernetes, mais comme je le dis toujours, ce n&#8217;est pas la plateforme miracle. Même si vous déployez vos applications sur Kubernetes aujourd&#8217;hui, rien ne dit que vous ne voudrez pas les "sortir" de Kubernetes l&#8217;année prochaine pour une raison ou une autre.<br>
+De la même façon, il devrait être facile de passer d&#8217;une application hébergée sur une machine virtuelle à une application tournant sur Kubernetes. L&#8217;outillage autour de l&#8217;application va changer, mais pas l&#8217;application en elle même.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_l_impact_des_conteneurs_lors_du_dev">L&#8217;impact des conteneurs lors du dev</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A part <code>docker-compose</code> qui est je trouve intéressant pour démarrer facilement des dépendances comme des bases de données, je ne vois pas pourquoi on devrait parler de conteneurs lors de la phase de développement. Comme dit dans le paragraphe précédemment, c&#8217;est beaucoup trop tôt.</p>
+</div>
+<div class="paragraph">
+<p>Le développeur doit pouvoir développer sans se soucier de la plateforme d&#8217;exécution. Ce sera dans la plateforme d&#8217;intégration continue que la plateforme d&#8217;exécution aura un impact (pour construire un conteneur, un package&#8230;&#8203; à partir du projet).<br>
+Bien sûr, il y aura toujours dans le dépôt Git du projet quelques fichiers en lien avec cela (Dockerfile par exemple), mais cela n&#8217;a aucun impact sur le développement de l&#8217;application elle même.</p>
+</div>
+<div class="paragraph">
+<p>Et surtout, quand je développe, je ne veux surtout pas à avoir à construire des conteneurs, installer un minikube ou avoir à déployer sur des clusters Kubernetes depuis mon poste de dev.<br>
+Pour moi, cela doit être le job de la plateforme d&#8217;intégration continue. Je pousse mon travail, et je peux d&#8217;une façon ou une autre déployer mon application sur ma plateforme. Cela permet également une certaine tracabilité.</p>
+</div>
+<div class="paragraph">
+<p>En local, je veux travailler en isolation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Je pense sincèrement qu&#8217;il faut pouvoir s&#8217;abstraire de la plateforme d&#8217;exécution lors du développement.<br>
+Les développeurs perdront un temps fou à configurer leurs postes, seront frustrés, à chaque montée de version plus rien ne fonctionnera etc&#8230;&#8203; si développer demande trop de dépendances.</p>
+</div>
+<div class="paragraph">
+<p>En conclusion: Evitez de faire fuiter votre infrastructure sur vos postes de développement.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/programming/">programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        <a href="/posts/2020-02-13-informatique-coeur-metier/">&laquo; L&#39;informatique, c&#39;est pas notre coeur de métier !</a>
+        
+        
+        <a class="right" href="/posts/2020-01-01-exemple-infra-terraform/">Un exemple d&#39;infrastructure: création avec Terraform &raquo;</a>
+        
+    </div>
+
+    
+
+
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
