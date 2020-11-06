@@ -12,11 +12,534 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Wed, 04 Nov 2020 18:32:26 +0100
+Fri, 06 Nov 2020 00:38:46 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2020-11-05-certificate-subject-asn1/
+</guid>
+<link>
+https://mcorbin.fr/posts/2020-11-05-certificate-subject-asn1/
+</link>
+<title>
+TLS: sujets de certificats, ASN.1 et pétage de plomb
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je suis récemment tombé sur un problème au travail qui je pense mérite son article de blog. Cela concerne le TLS et plus particulièrement la validation des certificats clients en mutual TLS.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_problème&quot;&gt;Le problème&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce que je voulais faire était assez simple sur le papier.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je fournissais à un programme une autorité de certification (certificat, clé publique et privée) et ce programme générait des certificats clients qui allaient être ensuite utilisés pour se connecter à un logiciel écrit en Golang (ce dernier acceptant les certificats clients générés par cette autorité).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;autorité de certification était générée par &lt;a href=&quot;https://github.com/cloudflare/cfssl&quot;&gt;cfssl&lt;/a&gt;, un outil bien connu aujourd&amp;#8217;hui pour ce genre de tâche.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le programme générant les certificats clients était lui écrit en Clojure, et utilisait la librairie &lt;a href=&quot;https://github.com/puppetlabs/jvm-ssl-utils&quot;&gt;jvm-ssl-utils&lt;/a&gt;, cette dernière étant un wrapper autour de la librairie Java &lt;a href=&quot;https://www.bouncycastle.org/&quot;&gt;bouncycastle&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Récapitulons: j&amp;#8217;ai donc un outil en Golang (cfssl) qui me génère une autorité de certification. Cette autorité est utilisée depuis un programme Clojure pour générer des certificats clients pour autoriser des clients à se connecter en mutual TLS à une application Golang.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Sur le papier, cela fonctionne. Mettons ça en pratique.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_en_pratique&quot;&gt;En pratique&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_autorité_de_certification&quot;&gt;Autorité de certification&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Générons d&amp;#8217;abord une autorité de certification en utilisant &lt;a href=&quot;https://github.com/cloudflare/cfssl&quot;&gt;cfssl&lt;/a&gt;. Cela se fait rapidement, vous pouvez utiliser la documentation de &lt;a href=&quot;https://coreos.com/os/docs/latest/generate-self-signed-certificates.html&quot;&gt;CoreOS&lt;/a&gt; qui explique cela par exemple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La façon de faire n&amp;#8217;est pas importante, vous pouvez sauter cette partie (et aller directement à la section &lt;code&gt;J’ai quoi maintenant ?&lt;/code&gt;) si vous ne voulez pas essayer de reproduire le problème, mais voici la procédure tirée du site de CoreOS:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;créez un fichier nommé &lt;code&gt;ca-csr.json&lt;/code&gt; ayant pour contenu:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;{
+    &quot;CN&quot;: &quot;mcorbin.fr&quot;,
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;rsa&quot;,
+        &quot;size&quot;: 2048
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;FR&quot;,
+            &quot;L&quot;: &quot;Meuse&quot;,
+            &quot;O&quot;: &quot;mcorbin.fr&quot;,
+            &quot;OU&quot;: &quot;blog&quot;
+        }
+    ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On remarque qu&amp;#8217;on configure le subject (country, location&amp;#8230;&amp;#8203;) de notre CA. Générez votre ca avec:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cfssl gencert -initca ca-csr.json | cfssljson -bare ca -&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Créez un fichier nommé &lt;code&gt;ca-config.json&lt;/code&gt; ayant pour contenu:&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;{
+    &quot;signing&quot;: {
+        &quot;default&quot;: {
+            &quot;expiry&quot;: &quot;43800h&quot;
+        },
+        &quot;profiles&quot;: {
+            &quot;server&quot;: {
+                &quot;expiry&quot;: &quot;43800h&quot;,
+                &quot;usages&quot;: [
+                    &quot;signing&quot;,
+                    &quot;key encipherment&quot;,
+                    &quot;server auth&quot;,
+                    &quot;client auth&quot;
+                ]
+            }
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ici, on configure la façon dont nos certificats seront générés.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_certificat_serveur&quot;&gt;Certificat serveur&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous allons maintenant générer des certificats pour notre partie serveur (qui seront utilisés par notre application finale écrite en Golang):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cfssl print-defaults csr &amp;gt; server.json&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous pouvez modifier server.json pour configurer votre futur certificat comme vous le voulez (notamment la partie &lt;code&gt;hosts&lt;/code&gt; ou &lt;code&gt;CN&lt;/code&gt;), par exemple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;{
+    &quot;CN&quot;: &quot;example.net&quot;,
+    &quot;hosts&quot;: [
+        &quot;localhost&quot;,
+        &quot;www.example.net&quot;
+    ],
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;rsa&quot;,
+        &quot;size&quot;: 2048
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;US&quot;,
+            &quot;ST&quot;: &quot;CA&quot;,
+            &quot;L&quot;: &quot;San Francisco&quot;
+        }
+    ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Générez maintenant vos certificats serveur:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=server server.json | cfssljson -bare server&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et voilà, vos certificats serveur sont générés.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_certificats_clients&quot;&gt;Certificats Clients&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;utilise maintenant mon autorité de certification pour générer des certificats clients comme expliqué précédemment (depuis du code Clojure en utilisant la lib &lt;a href=&quot;https://github.com/puppetlabs/jvm-ssl-utils&quot;&gt;jvm-ssl-utils&lt;/a&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le code est assez complexe, donc je ne le détaillerai pas ici. Faites moi confiance, ça marche ;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_j_ai_quoi_maintenant&quot;&gt;J&amp;#8217;ai quoi maintenant ?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai donc maintenant:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Une autorité de certification&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Des certificats serveur, pouvant être utilisés par un serveur voulant faire du TLS.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Des certificats clients, signés par l&amp;#8217;autorité de certification, me permettant donc &lt;strong&gt;en théorie&lt;/strong&gt; de me connecter sur le serveur.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_tester_la_théorie&quot;&gt;Tester la théorie&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_depuis_un_serveur_clojure&quot;&gt;Depuis un serveur Clojure&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour tester ma théorie, j&amp;#8217;ai démarré un serveur &lt;a href=&quot;https://github.com/aleph-io/aleph&quot;&gt;Aleph&lt;/a&gt; en utilisant les certificats serveur générés précédemment. Le code pour configurer le TLS pour Aleph (et donc générer un SSLContext pour Netty) n&amp;#8217;est pas très intéressant, je ne le présenterai donc pas ici.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;utilise ensuite les certificats clients (générés depuis la lib Clojure) avec &lt;code&gt;curl&lt;/code&gt; pour envoyer des requêtes au server. Ca marche !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl --cacert ca.pem --cert clj-client.pem --key clj-client.key https://localhost:9999
+hello&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_depuis_un_serveur_golang&quot;&gt;Depuis un serveur Golang&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Essayons la même chose depuis un serveur golang. Par exemple, démarrons etcd en utilisant &lt;strong&gt;les mêmes&lt;/strong&gt; certificats serveur que notre serveur Clojure:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./etcd \
+--cert-file=server.pem \
+--key-file=server-key.pem \
+--trusted-ca-file=ca.pem \
+--client-cert-auth \
+--listen-client-urls https://localhost:2379 \
+--advertise-client-urls https://localhost:2379&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Réessayons notre commande curl:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;curl --cacert ca.pem --cert clj-client.pem --key clj-client.key https://localhost:2379
+
+curl: (35) error:14094412:SSL routines:ssl3_read_bytes:sslv3 alert bad certificate&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et on remarque dans les logs du serveur etcd:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;2020-11-05 22:02:35.562419 I | embed: rejected connection from &quot;127.0.0.1:40436&quot; (error &quot;tls: failed to verify client's certificate: x509: issuer name does not match subject from issuing certificate&quot;, ServerName &quot;localhost&quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_issuer_name_does_not_match_subject_from_issuing_certificate&quot;&gt;Issuer name does not match subject from issuing certificate&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Donc nos certificats fonctionnent depuis un serveur Java mais pas depuis un serveur Golang. Surprenant non ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;erreur dans les logs etcd est assez claire: le champ Issuer (l&amp;#8217;autorité ayant généré le certificat client) ne correspond pas au Subject de cette même autorité !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Premier réflexe: vérifier cela:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;openssl x509 -in ca.pem -noout -text
+
+        Issuer: C = FR, L = Meuse, O = mcorbin.fr, OU = blog, CN = mcorbin.fr
+        Validity
+            Not Before: Nov  4 18:30:00 2020 GMT
+            Not After : Nov  3 18:30:00 2025 GMT
+        Subject: C = FR, L = Meuse, O = mcorbin.fr, OU = blog, CN = mcorbin.fr
+
+openssl x509 -in clj-client.pem -noout -text
+
+        Issuer: C = FR, L = Meuse, O = mcorbin.fr, OU = blog, CN = mcorbin.fr
+        Validity
+            Not Before: Nov  3 23:14:51 2020 GMT
+            Not After : Sep 17 09:30:42 2070 GMT
+        Subject: C = FR, L = Meuse, O = blog, OU = mcorbin.fr, CN = client&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pourtant, on voit ici que le champ Issuer du certificat client (&lt;code&gt;clj-client.pem&lt;/code&gt;) correspond bien au Subject de notre autorité de certification (&lt;code&gt;ca.pem&lt;/code&gt;): la valeur est bien &lt;code&gt;C = FR, L = Meuse, O = mcorbin.fr, OU = blog, CN = mcorbin.fr&lt;/code&gt; partout.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et surtout, je rappelle, nos certificats marchent depuis un programme Java ! Là, c&amp;#8217;est le moment où je commençais à devenir fou.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/asn1/angry.gif&quot; alt=&quot;gif énervé&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Jusqu&amp;#8217;à ce qu&amp;#8217;une collègue trouve la solution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_asn_1&quot;&gt;ASN.1&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les certificats sont encodés en &lt;a href=&quot;https://fr.wikipedia.org/wiki/ASN.1&quot;&gt;ASN.1&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ne rentrerai pas dans le détail d&amp;#8217;ASN.1 dans cet article (j&amp;#8217;ai un petit parser ASN.1 écrit en Clojure qui fonctionne pas trop mal, ce serait une bonne base pour un article dédié sur ce format), mais en gros ASN.1 permet de représenter des données en indiquant pour chaque donnée son type et sa taille en byte (et donc cela permet de récupérer sa valeur).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On pourrait par exemple avoir une représentation textuelle (après parsing) qui ressemblerait à&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[TYPE: SEQUENCE,
+ taille: 892,
+ valeur:
+   [
+     [TYPE: Integer, taille 1, valeur 2]]
+     [TYPE: Integer, taille 1, valeur 3]]
+     ...
+   ]
+]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais revenons à nos certificats.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On a donc dans ASN.1 des données qui ont chacune un type. OpenSSL permet récupérer cette information pour les champs Issuer/Subject d&amp;#8217;un certificat. Regardons cela pour le certificat de notre autorité de certification:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;openssl x509 -in ca.pem -subject -issuer -nameopt multiline,show_type -noout -subject_hash -issuer_hash
+subject=
+    countryName               = PRINTABLESTRING:FR
+    localityName              = PRINTABLESTRING:Meuse
+    organizationName          = PRINTABLESTRING:mcorbin.fr
+    organizationalUnitName    = PRINTABLESTRING:blog
+    commonName                = PRINTABLESTRING:mcorbin.fr
+issuer=
+    countryName               = PRINTABLESTRING:FR
+    localityName              = PRINTABLESTRING:Meuse
+    organizationName          = PRINTABLESTRING:mcorbin.fr
+    organizationalUnitName    = PRINTABLESTRING:blog
+    commonName                = PRINTABLESTRING:mcorbin.fr&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Faisons la même chose pour notre certificat client, généré depuis Clojure:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt; openssl x509 -in clj-client.pem -subject -issuer -nameopt multiline,show_type -noout -subject_hash -issuer_hash
+subject=
+    countryName               = PRINTABLESTRING:FR
+    localityName              = UTF8STRING:Meuse
+    organizationName          = UTF8STRING:blog
+    organizationalUnitName    = UTF8STRING:mcorbin.fr
+    commonName                = UTF8STRING:client
+issuer=
+    countryName               = PRINTABLESTRING:FR
+    localityName              = UTF8STRING:Meuse
+    organizationName          = UTF8STRING:mcorbin.fr
+    organizationalUnitName    = UTF8STRING:blog
+    commonName                = UTF8STRING:mcorbin.fr&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et voici le problème: les &lt;strong&gt;valeurs&lt;/strong&gt; sont les mêmes, mais l'&lt;strong&gt;encodage&lt;/strong&gt; est différent. Et selon les implémentations de TLS, cela peut poser ou non des problèmes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le type PrintableString permet de représenter un sous ensemble de ASCII, alors qu&amp;#8217;UTF8String permet de représenter comme son nom l&amp;#8217;indique de l&amp;#8217;UTF8.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On a donc l&amp;#8217;outillage Golang (cfssl) qui nous a généré une autorité de certification avec le champ Subject en PrintableString (à part le champ countryName), et l&amp;#8217;outillage Clojure qui a généré un certificat client en UTF8String à partir de cette même autorité !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_l_implémentation_tls_de_golang&quot;&gt;L&amp;#8217;implémentation TLS de Golang&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le code source Golang nous montre en effet que le langage fait une comparaison stricte sur les champs Subject et Issuer des certificats. Regardez &lt;a href=&quot;https://github.com/golang/go/blob/master/src/crypto/x509/verify.go#L584&quot;&gt;ici&lt;/a&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-golang&quot; data-lang=&quot;golang&quot;&gt;if !bytes.Equal(child.RawIssuer, c.RawSubject) {
+    return CertificateInvalidError{c, NameMismatch, &quot;&quot;}
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On compare donc ici RawIssuer et RawSubject entre eux, les deux variables étant des tableaux de bytes. Ecrivons un petit programme Golang qui nous permet d&amp;#8217;afficher ces valeurs pour nos certificats (autorité et client):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;package main
+
+import (
+	&quot;crypto/tls&quot;
+	&quot;crypto/x509&quot;
+	&quot;fmt&quot;
+	&quot;io/ioutil&quot;
+)
+
+func main() {
+	caCert, _ := ioutil.ReadFile(&quot;ca.pem&quot;)
+	caKey, _ := ioutil.ReadFile(&quot;ca-key.pem&quot;)
+	caCertificate, _ := tls.X509KeyPair(caCert, caKey)
+	caX509cert, _ := x509.ParseCertificate(caCertificate.Certificate[0])
+	fmt.Println(caX509cert.RawIssuer)
+
+	clientCert, _ := ioutil.ReadFile(&quot;clj-client.pem&quot;)
+	clientKey, _ := ioutil.ReadFile(&quot;clj-client.key&quot;)
+	clientCertificate, _ := tls.X509KeyPair(clientCert, clientKey)
+	clientX509cert, _ := x509.ParseCertificate(clientCertificate.Certificate[0])
+	fmt.Println(clientX509cert.RawIssuer)
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On le lance, et on obtient:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-plaintext&quot; data-lang=&quot;plaintext&quot;&gt;[48 86 49 11 48 9 6 3 85 4 6 19 2 70 82 49 14 48 12 6 3 85 4 7 **19** 5 77 101 117 115 101 49 19 48 17 6 3 85 4 10 **19** 10 109 99 111 114 98 105 110 46 102 114 49 13 48 11 6 3 85 4 11 **19** 4 98 108 111 103 49 19 48 17 6 3 85 4 3 **19** 10 109 99 111 114 98 105 110 46 102 114]
+
+[48 86 49 11 48 9 6 3 85 4 6 19 2 70 82 49 14 48 12 6 3 85 4 7 **12** 5 77 101 117 115 101 49 19 48 17 6 3 85 4 10 **12** 10 109 99 111 114 98 105 110 46 102 114 49 13 48 11 6 3 85 4 11 **12** 4 98 108 111 103 49 19 48 17 6 3 85 4 3 **12** 10 109 99 111 114 98 105 110 46 102 114]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme vous pouvez le voir, certaines valeurs (entre **) sont différentes.&lt;br&gt;
+Parfois des 12, parfois des 19. C&amp;#8217;est en effet ces valeurs qui donnent le type de donnée utilisé en ASN.1: 12 pour UTF8String, 19 pour PrintableString.&lt;br&gt;
+A part ça, le reste est identique mais cela suffit à faire échouer la comparaison, et générer l&amp;#8217;erreur montrée précédemment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_corriger_le_problème&quot;&gt;Corriger le problème&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il y a plusieurs moyens de corriger ce problème.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_utiliser_le_même_encodage_partout&quot;&gt;Utiliser le même encodage partout&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La solution la plus simple est de générer tous les certificats avec le même encodage pour le subject et l&amp;#8217;issuer. Facile à dire, mais pas facile à réaliser.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bizarrement, il semble impossible de choisir l&amp;#8217;encodage voulu avec l&amp;#8217;ensemble de l&amp;#8217;écosystème Golang (cfssl, Hashicorp Vault&amp;#8230;&amp;#8203;). L&amp;#8217;écosystème Go réalise les choses de cette façon:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Tout générer en PrintableString si possible.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Si un caractère n&amp;#8217;est pas valide en PrintableString, générer le champ en UTF8String.
+Par exemple, si je reprends mon autorité de certification générée par cfssl et remplace la location par &lt;code&gt;&quot;L&quot;: &quot;éééé&quot;,&lt;/code&gt; mon certificat aura &lt;code&gt;localityName = UTF8STRING:\E9\E9\E9\E9&lt;/code&gt;, mais les autres champs seront en PrintableString.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ne comprends pas comment ce genre d&amp;#8217;outils avancés et utilisés partout ne permettent pas de faire les choses de façon plus intelligente. Ou alors j&amp;#8217;ai raté quelque chose dans les documentations, dans ce cas contactez moi (car j&amp;#8217;ai quand même du mal à y croire donc je me dis que j&amp;#8217;ai dû manquer un truc).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En Java, BouncyCastle semble rendre paramétrable l&amp;#8217;encodage des champs via la classe abstraite &lt;a href=&quot;https://github.com/bcgit/bc-java/blob/07604208a773d2334fb09276796288404804e557/core/src/main/java/org/bouncycastle/asn1/x509/X509NameEntryConverter.java&quot;&gt;X509NameEntryConverter&lt;/a&gt;. La Javadoc résume tout:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
+ * It turns out that the number of standard ways the fields in a DN should be
+ * encoded into their ASN.1 counterparts is rapidly approaching the
+ * number of machines on the internet. By default the X509Name class
+ * will produce UTF8Strings in line with the current recommendations (RFC 3280).
+ * &amp;lt;p&amp;gt;
+**/&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais cela n&amp;#8217;était pas évident à intégrer dans le wrapper Clojure.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Sinon, il faut utiliser de l&amp;#8217;outillage compatible. Par exemple, remplacer cfssl par OpenSSL (qui lui génère tout par défaut en UTF8String) nous a permis de résoudre le soucis dans mon cas.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_les_rfcs_disent_quoi&quot;&gt;Les RFCs disent quoi ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://tools.ietf.org/html/rfc3280&quot;&gt;RFC 3280&lt;/a&gt; (2002):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-plaintext&quot; data-lang=&quot;plaintext&quot;&gt;   The DirectoryString type is defined as a choice of PrintableString,
+   TeletexString, BMPString, UTF8String, and UniversalString.  The
+   UTF8String encoding [RFC 2279] is the preferred encoding, and all
+   certificates issued after December 31, 2003 MUST use the UTF8String
+   encoding of DirectoryString (except as noted below).&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est clair au moins, il faut utiliser UTF8String.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Problème, la &lt;a href=&quot;https://tools.ietf.org/html/rfc5280&quot;&gt;RFC 5280&lt;/a&gt; de 2008 ne mentionne plus cette partie. Pas si clair que ça en fait. En tout cas, à part l&amp;#8217;outillage Golang, le reste du monde (Java, OpenSSL) a l&amp;#8217;air de faire de l&amp;#8217;UTF8String par défaut.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une &lt;a href=&quot;https://github.com/golang/go/issues/31440&quot;&gt;issue&lt;/a&gt; parlant du problème sur le projet Github de Golang contient également une discussion intéressante.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mon plus gros problème comme dit précédemment est le fait que ce réglage ne puisse pas être choisi dans l&amp;#8217;écosystème Golang.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Donc si vous générez des certificats en utilisant plusieurs outils, méfiance !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Thu, 05 Nov 2020 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2020-11-04-environnement-travail/
