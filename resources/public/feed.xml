@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Wed, 11 Nov 2020 10:45:18 +0100
+Wed, 11 Nov 2020 10:53:19 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -66,7 +66,7 @@ Commentator: commentaires de blogs basé sur S3
 &lt;p&gt;Il reste pas mal de choses que je souhaiterai améliorer, mais les principales fonctionnalités sont là, et j&amp;#8217;ai mis le projet &quot;en prod&quot; pour ce blog.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Le code est comme d&amp;#8217;habitude trouvable sur &lt;a href=&quot;https://github.com/mcorbin/commentator&quot;&gt;Github&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Le code est comme d&amp;#8217;habitude trouvable sur &lt;a href=&quot;https://github.com/mcorbin/commentator&quot;&gt;Github&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
