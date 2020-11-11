@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Commentator: commentaires de blogs basé sur S3</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-11-12-commentator/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery-3.5.1.min.js" type="text/javascript"></script>
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">12 novembre 2020</div>
+        
+    </div>
+    <h2>Commentator: commentaires de blogs basé sur S3</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Je souhaite depuis longtemps intéger un système de commentaire à ce blog. Après avoir regardé un peu ce qui était disponible côté Open Source pour réaliser cela, j&#8217;ai décidé d&#8217;écrire mon propre outil: Commentator.</p>
+</div>
+<div class="sect1">
+<h2 id="_pourquoi_écrire_un_nouveau_outil">Pourquoi écrire un nouveau outil ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Je voulais un outil répondant à plusieurs critères:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Facile à déployer (pas de bases de données compliquées à déployer) et à administrer (en ligne de commande si possible).</p>
+</li>
+<li>
+<p>Avec un système de "challenges" pour éviter au maximum le spam.</p>
+</li>
+<li>
+<p>Avec un système de rate-limit basique, là aussi pour éviter le spam.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><a href="https://posativ.org/isso/">Isso</a> avait l&#8217;air intéressant, mais finalement j&#8217;ai décidé d&#8217;écrire mon propre outil.</p>
+</div>
+<div class="paragraph">
+<p>Les raisons ? Déjà, le fun. J&#8217;aime écrire mes propres outils pour mes propres besoins. Ensuite, car il est plus facile pour moi d&#8217;implémenter ce que je veux exactement de cette façon, en travaillant sur la stack technique de mon choix.</p>
+</div>
+<div class="paragraph">
+<p>Et c&#8217;est comme cela que Commentator est né.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai commencé à travailler dessus Samedi dernier, donc on est ici sur une version alpha, avec certaines parties du code à revoir (j&#8217;ai écris le projet d&#8217;une traite).</p>
+</div>
+<div class="paragraph">
+<p>Il reste pas mal de choses que je souhaiterai améliorer, mais les principales fonctionnalités sont là, et j&#8217;ai mis le projet "en prod" pour ce blog.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ca_marche_comment">Ca marche comment ?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Commentator stocke les commentaires de vos article sur n&#8217;importe quel stockage compatible S3. Vous pouvez donc l&#8217;utiliser chez à peu près tous les Cloud Providers.<br>
+A part ça, Commentator est stateless, il est donc possible de l&#8217;héberger sur un provider ne supportant pas S3 tout en ayant un bucket S3 configuré chez un autre provider.</p>
+</div>
+<div class="paragraph">
+<p>Commentator sauvegarde donc dans un bucket les commentaires pour chaque article. Chaque article dispose d&#8217;un fichier <code>json</code> contenant ses commentaires dans le bucket:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>mon-bucket/article1.json
+mon-bucket/article2.json
+mon-bucket/article3.json</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Les commentaires sont tout simplement stockés au format JSON. Voici par exemple le contenu (indenté correctement) possible d&#8217;un fichier de commentaire:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-javascript" data-lang="javascript">[
+  {
+    "content": "line1\nline2\nline3",
+    "author": "mcorbin",
+    "id": "06246983-acc9-4aaf-8ae3-9788bd708451",
+    "approved": false,
+    "timestamp": 1604940397620
+  },
+  {
+    "content": "line1\nline2\nline3\naaaaaa",
+    "author": "mcorbin",
+    "id": "9157ce3b-945f-4e35-ad9a-472f22b54c05",
+    "approved": true,
+    "timestamp": 1604940432062
+  }
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai ici deux commentaires. Chaque commentaire possède un champ "content" contenant le contenu du commentaire, un champ "author" contenant l&#8217;auteur du commentaire, un ID, un champ "approved" indiquant si le commentaire a été approuvé ou non par l&#8217;administrateur et un timestamp (seuls les commentaires approuvés sont affichés).</p>
+</div>
+<div class="paragraph">
+<p>Commentator cache également en mémoire les commentaires des articles.<br>
+Quand un article est consulté, tous ses commentaires sont mis dans un cache pour une durée arbitraire (6 heures actuellement, mais je pense mettre plus), et ce cache n&#8217;est invalidé que si un commentaire de cet article est supprimé, mis à jour, ou un nouveau commentaire créé.</p>
+</div>
+<div class="paragraph">
+<p>Cela permet d&#8217;éviter les allers-retours entre l&#8217;application et le store S3 à chaque consultation (les lectures étant bien plus fréquentes que l&#8217;ajout de commentaires), et donc d&#8217;améliorer grandement les performances tout en vous faisant économiser de l&#8217;argent (très peu de trafic sortant du store S3 vu que tout est en mémoire).</p>
+</div>
+<div class="paragraph">
+<p>Quand un nouveau commentaire est ajouté, vous voulez être notifié pour pouvoir l&#8217;approuver.<br>
+Un fichier nommé <code>events.json</code> est gêré par Commentator dans le bucket. Lorsqu&#8217;un commentaire est créé, un nouveau événement est publié dans ce bucket. Voici à quoi ressemble un événement:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-javascript" data-lang="javascript">{
+  "timestamp": 1604943888444,
+  "id": "f5af61f2-2675-45f6-827b-4ea9f8470cca",
+  "article": "foo",
+  "message": "New comment 4e21a377-00a1-47f0-b5a1-b57b1262921a on article foo",
+  "comment-id": "4e21a377-00a1-47f0-b5a1-b57b1262921a",
+  "type": "new-comment"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/commentator/archi.jpg" alt="architecture du projet"></span></p>
+</div>
+<div class="paragraph">
+<p>Commentator dispose d&#8217;une API pour créer, récupérer et gérer les commentaires, les événements et les challenges. Mais parlons avant de présenter l&#8217;API du choix de S3, d&#8217;antispam et de challenges.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_le_choix_de_s3">Le choix de S3</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>S3 est devenu de facto un standard. Disponible partout, avec des librairies disponibles dans tousles langages pour intéragir avec, son utilisation est je pense un atout pour le projet.</p>
+</div>
+<div class="paragraph">
+<p>Rappelez vous: les commentaires et événements sont juste des fichiers JSON stockés sur S3. Enrichir le projet, écrire du tooling (pour consommer les événements et envoyer des emails par exemple) peut se faire super facilement.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;aime cette approche où n&#8217;importe qui, depuis n&#8217;importe quel langage, peut écrire ses scripts pour intéragir avec les fichiers présents sur S3.</p>
+</div>
+<div class="paragraph">
+<p>Cela permet également de n&#8217;avoir aucun état local (comme une base SQLite) dans le projet.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;utilise <a href="https://community.exoscale.com/documentation/storage/quick-start/">l&#8217;object store compatible S3</a> d&#8217;Exoscale (mon employeur).<br>
+Il est de plus possible de créer chez Exoscale des clés API restreintes à un seul bucket, et autorisant seulement quelques appels (comme ajouter ou supprimer un objet). Cela me permet de ne pas avoir des clés API pouvant faire n&#8217;importe quoi qui trainent sur les serveurs.</p>
+</div>
+<div class="paragraph">
+<p>A 0.01800 €/mois le GB de données stockées (chez Exoscale), c&#8217;est aussi très économique. Si on considère qu&#8217;un commentaire fait 4KB (ce qui est déjà pas mal), on se rend compte que notre facture sera à peine quelques centimes pour un très grand nombre de commentaires.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_antispam">Antispam</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Commentator intègre du rate limiting basique par IP (ou en vérifiant le header <code>x-forwarded-for</code>). Un utilisateur ne peut poster un commentaire qu&#8217;une fois toutes les 10 minutes.</p>
+</div>
+<div class="paragraph">
+<p>Pour créer un commentaire, un utilisateur doit également résoudre un <code>challenge</code> (répondre à une question). Les challenges se définissent dans le fichier de configuration du projet. Par exemple (au format <a href="https://github.com/edn-format/edn">EDN</a>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>:challenges {:c1 {:question "1 + 4 = ?"
+                  :answer "5"}
+             :c2 {:question "Les ? de l'archiduchesse sont-elles sèches? Archi-sèches ?"
+                  :answer "chaussettes"}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On a ici deux challenges. Chaque challenge a un nom (qui est le nom de sa clé, comme <code>c1</code> ou <code>c2</code> ici), une question et une réponse.<br>
+Le format des questions et des réponses est libre, donc n&#8217;importe qui peut écrire ses propres challenges (à notez que la vérification des réponses n&#8217;est pas sensible à la casse).</p>
+</div>
+<div class="paragraph">
+<p>Il est également facile comme cela d&#8217;écrire des scripts pour générer des milliers de challenges, et de faire de la rotation de challenges très rapidement.</p>
+</div>
+<div class="paragraph">
+<p>Quand un utilisateur crée un commentaire, un nom de challenge et la réponse donnée par l&#8217;utilisateur sont également envoyés au serveur. Le commentaire n&#8217;est accepté par le système que si la réponse correspond à celle configurée pour ce challenge.</p>
+</div>
+<div class="paragraph">
+<p>Actuellement, il est toujours facile pour un utilisateur connaissant un nom de challenge et la réponse associée d&#8217;écrire un script pour envoyer un commentaire toutes les 10 minutes (pour éviter le rate limiter), mais je prévois de régler ce soucis en faisant des rotations de challenges dans le futur (un challenge déjà utilisé serait inutilisable pour une longue période).</p>
+</div>
+<div class="paragraph">
+<p>Une autre solution serait de générer dynamiquement des challenges côté backend, et donc de pouvoir avoir des challenges à usage unique.</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est pas comme si on avait 10000 commentaires/secondes sur nos blogs, donc avec un peu de travail une solution pour éviter que quelqu&#8217;un maintienne une liste des challenges et de leurs réponses doit pouvoir se faire assez facilement (si vous avez des idées, j&#8217;attends vos suggestions).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_api">API</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>L&#8217;API se décompose en deux parties: une API publique et une API admin. L&#8217;API consomme et renvoie du JSON.</p>
+</div>
+<div class="paragraph">
+<p>Je ferai prochainement une documentation complète pour l&#8217;API, mais voici un résumé rapide.</p>
+</div>
+<div class="sect2">
+<h3 id="_publique">Publique</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>POST /api/v1/comment/&lt;article&gt;</code>: Ajoute un commentaire pour un article. Les champs attendus sont <code>author</code>, <code>content</code>, <code>challenge</code> et <code>answer</code>.</p>
+</li>
+<li>
+<p><code>GET /api/v1/comment/&lt;article&gt;</code>: Retourne les commentaires pour un article.</p>
+</li>
+<li>
+<p><code>GET /api/v1/challenge</code>: Retourne un challenge choisi aléatoirement.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_admin">Admin</h3>
+<div class="paragraph">
+<p>L&#8217;API admin est utilisable en passant un token (défini dans la configuration du projet) dans le header <code>Authorization</code>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GET /api/admin/event/</code>: Retourne les événements.</p>
+</li>
+<li>
+<p><code>GET /api/admin/event/&lt;event-id&gt;</code>: Supprime un événement par ID.</p>
+</li>
+<li>
+<p><code>GET /api/admin/comment/&lt;article&gt;</code>: Liste tous les commentaires pour un article, approuvés ou non.</p>
+</li>
+<li>
+<p><code>POST /api/admin/comment/&lt;article&gt;/&lt;comment-id&gt;</code>: Approuve un commentaire pour un article.</p>
+</li>
+<li>
+<p><code>GET /api/admin/comment/&lt;article&gt;/&lt;comment-id&gt;</code>: Récupère un commentaire pour un article.</p>
+</li>
+<li>
+<p><code>DELETE /api/admin/comment/&lt;article&gt;/&lt;comment-id&gt;</code>: Supprime un commentaire pour un article.</p>
+</li>
+<li>
+<p><code>DELETE /api/admin/comment/&lt;article&gt;</code>: Supprime tous les commentaires pour un article</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration">Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Le projet se configure via un fichier de configuration <a href="https://github.com/edn-format/edn">EDN</a> (qui est en gros ce qu&#8217;aurait dû être json). Par exemple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>{:http {:host "127.0.0.1"
+        :port 8787}
+ :admin {:token #secret "my-super-token"}
+ :store {:access-key #secret #env ACCESS_KEY
+         :secret-key #secret #env SECRET_KEY
+         :endpoint "https://sos-ch-gva-2.exo.io"
+         :bucket "mcorbin.fr.test.comment"}
+ :comment {:auto-approve false
+           :allowed-articles ["foo"
+                              "bar"]}
+ :logging {:level "info"
+           :console true
+           :overrides {:org.eclipse.jetty "info"
+                       :org.apache.http "error"}}
+ :challenges {:c1 {:question "1 + 4 = ?"
+                   :answer "5"}
+              :c2 {:question "1 + 9 = ?"
+                   :answer "10"}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On retrouve une section <code>:http</code> pour la configuration du serveur, <code>:admin</code> pour le token admin, <code>:store</code> pour la configuration du store S3.</p>
+</div>
+<div class="paragraph">
+<p>On remarque l&#8217;utilisation de readers EDN. J&#8217;utilise ici <code>#env</code> pour lire la valeur depuis une variable d&#8217;environnement. J&#8217;ai rendu le reader <code>#secret</code> obligatoire pour les valeurs sensibles, cela me permet (en utilisant la librarie <a href="https://github.com/exoscale/cloak">exoscale/cloak</a>) de manipuler dans le programme des secrets sans les log/print/sérialiser par erreur.</p>
+</div>
+<div class="paragraph">
+<p>La section <code>:comment</code> contient une clé <code>:auto-approve</code> pouvant être passée à <code>true</code> pour ne pas avoir à approuver les commentaires. La liste <code>allowed-articles</code> définit une liste d&#8217;articles autorisés à recevoir des commentaires. Je génère cette ligne via un script pour un blog, et cela permet de désactiver les commentaires si besoin.</p>
+</div>
+<div class="paragraph">
+<p>La partie <code>:logging</code> contient la configuration du logger (basé sur <a href="https://github.com/pyr/unilog">unilog</a>).</p>
+</div>
+<div class="paragraph">
+<p>Et enfin, <code>:challenges</code> contient mes challenges (j&#8217;ai généré pour mon blog 250 challenges via un script).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_la_suite">La suite</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Comme dit précédemment, le projet n&#8217;est qu&#8217;à ses débuts. La première chose que je ferai au cours du prochain mois est de nettoyer la codebase, ajouter plus de tests, écrire la documentation&#8230;&#8203; Bref, rendre le projet présentable.</p>
+</div>
+<div class="paragraph">
+<p>Ensuite, un peu d&#8217;outillage pour la gestion des événements, la relecture et la validation des commentaires ne ferait pas de mal (rien qu&#8217;un script shell basé sur curl et jq serait intéressant au début).</p>
+</div>
+<div class="paragraph">
+<p>Je suis également un <strong>horrible</strong> développeur frontend. Si un dev frontend a un peu de temps, je serai preneur d&#8217;une Pull Request pour ajouter un block HTML et les scripts/css associés (si possible sans aucune dépendance externe) pour intégrer proprement Commentator dans un site web.<br>
+J&#8217;ai bien fait un truc aujourd&#8217;hui mais c&#8217;est du code bien dégueulasse, donc si ça vous dit j&#8217;attends vos contributions dans le dossier <code>integration</code> de <a href="https://github.com/mcorbin/commentator">dépôt Git</a>.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;attends vos commentaires en bas de page !</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/clojure/">clojure</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+        <a class="right" href="/posts/2020-11-05-certificate-subject-asn1/">TLS: sujets de certificats, ASN.1 et pétage de plomb &raquo;</a>
+        
+    </div>
+    <!--Crappy code starts here-->
+    
+    <script>
+      $( document ).ready(function() {
+          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+              $('#challenge_question').text(data.question);
+              $('#challenge_name span').text(data.name);
+          });
+          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-11-12-commentator", function(data) {
+              for (i=0; i<data.length; i++) {
+
+                  response = data[i];
+                  author = document.createElement('div');
+                  author.className="comment_author";
+                  author.textContent=response.author;
+
+                  d = new Date(response.timestamp);
+                  datestring = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + "h" + d.getMinutes();
+
+                  date = document.createElement('span');
+                  date.className="comment_date";
+                  date.textContent=datestring;
+
+                  content = document.createElement('div');
+                  content.className="comment_content";
+                  content.textContent=response.content;
+                  content.style="white-space: pre-wrap;";
+
+
+                  comment = document.createElement('div');
+                  comment.className="comment";
+
+                  comment.appendChild(author);
+                  comment.appendChild(date);
+                  comment.appendChild(content);
+
+                  document.getElementById('comments_list').appendChild(comment);
+              }
+          });
+      });
+      $(function(){
+          $('#comment_create').on('click', function(){
+              $.ajax
+              ({
+                  type: "POST",
+                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-11-12-commentator",
+                  dataType: 'json',
+                  contentType: 'application/json',
+                  data: JSON.stringify({"author": $("#new_comment_author").val(),
+                                        "content" : $("#new_comment_content").val(),
+                                        "challenge" : $("#challenge_name span").text(),
+                                        "answer" : $("#challenge_answer").val()}),
+                  success: function () {
+                      $('#comment_result span').text("The comment will be approved soon.");
+                  },
+                  error: function () {
+                      $('#comment_result span').text("Fail to add the comment. Please contact the website owner.");
+                  }
+              })
+          });
+      });
+    </script>
+
+    <div id="comment_block">
+      <div id="comments_list">
+      </div>
+
+      <div id="new_comment">
+
+        <div id="challenge_name" style="visibility: hidden">
+          <span  style="visibility: hidden"></span>
+        </div>
+        <b><p>Add a comment</p></b>
+        <input type="text" id="new_comment_author" name="author" placeholder="author"><br><br>
+
+        <textarea id="new_comment_content", name="comment_content" rows="5" placeholder="content"></textarea>
+        <br><br>
+
+        <b><span id="challenge_question"></span></b><br/>
+        <input type="text" id="challenge_answer" name="challenge_answer" placeholder="Answer" size="40"><br><br>
+        <input id="comment_create" type="button" value="Add comment" class="btn btn-primary btn-lg"/>
+        <div id="comment_result">
+          <span></span>
+        </div>
+      </div>
+
+    </div>
+    
+    <!--Ends here-->
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

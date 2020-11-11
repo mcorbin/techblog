@@ -12,11 +12,323 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Fri, 06 Nov 2020 00:38:46 +0100
+Wed, 11 Nov 2020 10:21:07 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2020-11-12-commentator/
+</guid>
+<link>
+https://mcorbin.fr/posts/2020-11-12-commentator/
+</link>
+<title>
+Commentator: commentaires de blogs basé sur S3
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je souhaite depuis longtemps intéger un système de commentaire à ce blog. Après avoir regardé un peu ce qui était disponible côté Open Source pour réaliser cela, j&amp;#8217;ai décidé d&amp;#8217;écrire mon propre outil: Commentator.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_pourquoi_écrire_un_nouveau_outil&quot;&gt;Pourquoi écrire un nouveau outil ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je voulais un outil répondant à plusieurs critères:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Facile à déployer (pas de bases de données compliquées à déployer) et à administrer (en ligne de commande si possible).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Avec un système de &quot;challenges&quot; pour éviter au maximum le spam.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Avec un système de rate-limit basique, là aussi pour éviter le spam.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://posativ.org/isso/&quot;&gt;Isso&lt;/a&gt; avait l&amp;#8217;air intéressant, mais finalement j&amp;#8217;ai décidé d&amp;#8217;écrire mon propre outil.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les raisons ? Déjà, le fun. J&amp;#8217;aime écrire mes propres outils pour mes propres besoins. Ensuite, car il est plus facile pour moi d&amp;#8217;implémenter ce que je veux exactement de cette façon, en travaillant sur la stack technique de mon choix.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et c&amp;#8217;est comme cela que Commentator est né.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai commencé à travailler dessus Samedi dernier, donc on est ici sur une version alpha, avec certaines parties du code à revoir (j&amp;#8217;ai écris le projet d&amp;#8217;une traite).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il reste pas mal de choses que je souhaiterai améliorer, mais les principales fonctionnalités sont là, et j&amp;#8217;ai mis le projet &quot;en prod&quot; pour ce blog.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_ca_marche_comment&quot;&gt;Ca marche comment ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Commentator stocke les commentaires de vos article sur n&amp;#8217;importe quel stockage compatible S3. Vous pouvez donc l&amp;#8217;utiliser chez à peu près tous les Cloud Providers.&lt;br&gt;
+A part ça, Commentator est stateless, il est donc possible de l&amp;#8217;héberger sur un provider ne supportant pas S3 tout en ayant un bucket S3 configuré chez un autre provider.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Commentator sauvegarde donc dans un bucket les commentaires pour chaque article. Chaque article dispose d&amp;#8217;un fichier &lt;code&gt;json&lt;/code&gt; contenant ses commentaires dans le bucket:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mon-bucket/article1.json
+mon-bucket/article2.json
+mon-bucket/article3.json&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les commentaires sont tout simplement stockés au format JSON. Voici par exemple le contenu (indenté correctement) possible d&amp;#8217;un fichier de commentaire:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;[
+  {
+    &quot;content&quot;: &quot;line1\nline2\nline3&quot;,
+    &quot;author&quot;: &quot;mcorbin&quot;,
+    &quot;id&quot;: &quot;06246983-acc9-4aaf-8ae3-9788bd708451&quot;,
+    &quot;approved&quot;: false,
+    &quot;timestamp&quot;: 1604940397620
+  },
+  {
+    &quot;content&quot;: &quot;line1\nline2\nline3\naaaaaa&quot;,
+    &quot;author&quot;: &quot;mcorbin&quot;,
+    &quot;id&quot;: &quot;9157ce3b-945f-4e35-ad9a-472f22b54c05&quot;,
+    &quot;approved&quot;: true,
+    &quot;timestamp&quot;: 1604940432062
+  }
+]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai ici deux commentaires. Chaque commentaire possède un champ &quot;content&quot; contenant le contenu du commentaire, un champ &quot;author&quot; contenant l&amp;#8217;auteur du commentaire, un ID, un champ &quot;approved&quot; indiquant si le commentaire a été approuvé ou non par l&amp;#8217;administrateur et un timestamp (seuls les commentaires approuvés sont affichés).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Commentator cache également en mémoire les commentaires des articles.&lt;br&gt;
+Quand un article est consulté, tous ses commentaires sont mis dans un cache pour une durée arbitraire (6 heures actuellement, mais je pense mettre plus), et ce cache n&amp;#8217;est invalidé que si un commentaire de cet article est supprimé, mis à jour, ou un nouveau commentaire créé.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cela permet d&amp;#8217;éviter les allers-retours entre l&amp;#8217;application et le store S3 à chaque consultation (les lectures étant bien plus fréquentes que l&amp;#8217;ajout de commentaires), et donc d&amp;#8217;améliorer grandement les performances tout en vous faisant économiser de l&amp;#8217;argent (très peu de trafic sortant du store S3 vu que tout est en mémoire).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Quand un nouveau commentaire est ajouté, vous voulez être notifié pour pouvoir l&amp;#8217;approuver.&lt;br&gt;
+Un fichier nommé &lt;code&gt;events.json&lt;/code&gt; est gêré par Commentator dans le bucket. Lorsqu&amp;#8217;un commentaire est créé, un nouveau événement est publié dans ce bucket. Voici à quoi ressemble un événement:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;{
+  &quot;timestamp&quot;: 1604943888444,
+  &quot;id&quot;: &quot;f5af61f2-2675-45f6-827b-4ea9f8470cca&quot;,
+  &quot;article&quot;: &quot;foo&quot;,
+  &quot;message&quot;: &quot;New comment 4e21a377-00a1-47f0-b5a1-b57b1262921a on article foo&quot;,
+  &quot;comment-id&quot;: &quot;4e21a377-00a1-47f0-b5a1-b57b1262921a&quot;,
+  &quot;type&quot;: &quot;new-comment&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/commentator/archi.jpg&quot; alt=&quot;architecture du projet&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Commentator dispose d&amp;#8217;une API pour créer, récupérer et gérer les commentaires, les événements et les challenges. Mais parlons avant de présenter l&amp;#8217;API du choix de S3, d&amp;#8217;antispam et de challenges.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_choix_de_s3&quot;&gt;Le choix de S3&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;S3 est devenu de facto un standard. Disponible partout, avec des librairies disponibles dans tousles langages pour intéragir avec, son utilisation est je pense un atout pour le projet.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Rappelez vous: les commentaires et événements sont juste des fichiers JSON stockés sur S3. Enrichir le projet, écrire du tooling (pour consommer les événements et envoyer des emails par exemple) peut se faire super facilement.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;aime cette approche où n&amp;#8217;importe qui, depuis n&amp;#8217;importe quel langage, peut écrire ses scripts pour intéragir avec les fichiers présents sur S3.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cela permet également de n&amp;#8217;avoir aucun état local (comme une base SQLite) dans le projet.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;utilise &lt;a href=&quot;https://community.exoscale.com/documentation/storage/quick-start/&quot;&gt;l&amp;#8217;object store compatible S3&lt;/a&gt; d&amp;#8217;Exoscale (mon employeur).&lt;br&gt;
+Il est de plus possible de créer chez Exoscale des clés API restreintes à un seul bucket, et autorisant seulement quelques appels (comme ajouter ou supprimer un objet). Cela me permet de ne pas avoir des clés API pouvant faire n&amp;#8217;importe quoi qui trainent sur les serveurs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A 0.01800 €/mois le GB de données stockées (chez Exoscale), c&amp;#8217;est aussi très économique. Si on considère qu&amp;#8217;un commentaire fait 4KB (ce qui est déjà pas mal), on se rend compte que notre facture sera à peine quelques centimes pour un très grand nombre de commentaires.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_antispam&quot;&gt;Antispam&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Commentator intègre du rate limiting basique par IP (ou en vérifiant le header &lt;code&gt;x-forwarded-for&lt;/code&gt;). Un utilisateur ne peut poster un commentaire qu&amp;#8217;une fois toutes les 10 minutes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour créer un commentaire, un utilisateur doit également résoudre un &lt;code&gt;challenge&lt;/code&gt; (répondre à une question). Les challenges se définissent dans le fichier de configuration du projet. Par exemple (au format &lt;a href=&quot;https://github.com/edn-format/edn&quot;&gt;EDN&lt;/a&gt;):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;:challenges {:c1 {:question &quot;1 + 4 = ?&quot;
+                  :answer &quot;5&quot;}
+             :c2 {:question &quot;Les ? de l'archiduchesse sont-elles sèches? Archi-sèches ?&quot;
+                  :answer &quot;chaussettes&quot;}}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On a ici deux challenges. Chaque challenge a un nom (qui est le nom de sa clé, comme &lt;code&gt;c1&lt;/code&gt; ou &lt;code&gt;c2&lt;/code&gt; ici), une question et une réponse.&lt;br&gt;
+Le format des questions et des réponses est libre, donc n&amp;#8217;importe qui peut écrire ses propres challenges (à notez que la vérification des réponses n&amp;#8217;est pas sensible à la casse).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il est également facile comme cela d&amp;#8217;écrire des scripts pour générer des milliers de challenges, et de faire de la rotation de challenges très rapidement.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Quand un utilisateur crée un commentaire, un nom de challenge et la réponse donnée par l&amp;#8217;utilisateur sont également envoyés au serveur. Le commentaire n&amp;#8217;est accepté par le système que si la réponse correspond à celle configurée pour ce challenge.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Actuellement, il est toujours facile pour un utilisateur connaissant un nom de challenge et la réponse associée d&amp;#8217;écrire un script pour envoyer un commentaire toutes les 10 minutes (pour éviter le rate limiter), mais je prévois de régler ce soucis en faisant des rotations de challenges dans le futur (un challenge déjà utilisé serait inutilisable pour une longue période).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une autre solution serait de générer dynamiquement des challenges côté backend, et donc de pouvoir avoir des challenges à usage unique.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est pas comme si on avait 10000 commentaires/secondes sur nos blogs, donc avec un peu de travail une solution pour éviter que quelqu&amp;#8217;un maintienne une liste des challenges et de leurs réponses doit pouvoir se faire assez facilement (si vous avez des idées, j&amp;#8217;attends vos suggestions).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_api&quot;&gt;API&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;API se décompose en deux parties: une API publique et une API admin. L&amp;#8217;API consomme et renvoie du JSON.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ferai prochainement une documentation complète pour l&amp;#8217;API, mais voici un résumé rapide.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_publique&quot;&gt;Publique&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;POST /api/v1/comment/&amp;lt;article&amp;gt;&lt;/code&gt;: Ajoute un commentaire pour un article. Les champs attendus sont &lt;code&gt;author&lt;/code&gt;, &lt;code&gt;content&lt;/code&gt;, &lt;code&gt;challenge&lt;/code&gt; et &lt;code&gt;answer&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;GET /api/v1/comment/&amp;lt;article&amp;gt;&lt;/code&gt;: Retourne les commentaires pour un article.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;GET /api/v1/challenge&lt;/code&gt;: Retourne un challenge choisi aléatoirement.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_admin&quot;&gt;Admin&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;API admin est utilisable en passant un token (défini dans la configuration du projet) dans le header &lt;code&gt;Authorization&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;GET /api/admin/event/&lt;/code&gt;: Retourne les événements.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;GET /api/admin/event/&amp;lt;event-id&amp;gt;&lt;/code&gt;: Supprime un événement par ID.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;GET /api/admin/comment/&amp;lt;article&amp;gt;&lt;/code&gt;: Liste tous les commentaires pour un article, approuvés ou non.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;POST /api/admin/comment/&amp;lt;article&amp;gt;/&amp;lt;comment-id&amp;gt;&lt;/code&gt;: Approuve un commentaire pour un article.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;GET /api/admin/comment/&amp;lt;article&amp;gt;/&amp;lt;comment-id&amp;gt;&lt;/code&gt;: Récupère un commentaire pour un article.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;DELETE /api/admin/comment/&amp;lt;article&amp;gt;/&amp;lt;comment-id&amp;gt;&lt;/code&gt;: Supprime un commentaire pour un article.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;DELETE /api/admin/comment/&amp;lt;article&amp;gt;&lt;/code&gt;: Supprime tous les commentaires pour un article&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_configuration&quot;&gt;Configuration&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le projet se configure via un fichier de configuration &lt;a href=&quot;https://github.com/edn-format/edn&quot;&gt;EDN&lt;/a&gt; (qui est en gros ce qu&amp;#8217;aurait dû être json). Par exemple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{:http {:host &quot;127.0.0.1&quot;
+        :port 8787}
+ :admin {:token #secret &quot;my-super-token&quot;}
+ :store {:access-key #secret #env ACCESS_KEY
+         :secret-key #secret #env SECRET_KEY
+         :endpoint &quot;https://sos-ch-gva-2.exo.io&quot;
+         :bucket &quot;mcorbin.fr.test.comment&quot;}
+ :comment {:auto-approve false
+           :allowed-articles [&quot;foo&quot;
+                              &quot;bar&quot;]}
+ :logging {:level &quot;info&quot;
+           :console true
+           :overrides {:org.eclipse.jetty &quot;info&quot;
+                       :org.apache.http &quot;error&quot;}}
+ :challenges {:c1 {:question &quot;1 + 4 = ?&quot;
+                   :answer &quot;5&quot;}
+              :c2 {:question &quot;1 + 9 = ?&quot;
+                   :answer &quot;10&quot;}}}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On retrouve une section &lt;code&gt;:http&lt;/code&gt; pour la configuration du serveur, &lt;code&gt;:admin&lt;/code&gt; pour le token admin, &lt;code&gt;:store&lt;/code&gt; pour la configuration du store S3.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On remarque l&amp;#8217;utilisation de readers EDN. J&amp;#8217;utilise ici &lt;code&gt;#env&lt;/code&gt; pour lire la valeur depuis une variable d&amp;#8217;environnement. J&amp;#8217;ai rendu le reader &lt;code&gt;#secret&lt;/code&gt; obligatoire pour les valeurs sensibles, cela me permet (en utilisant la librarie &lt;a href=&quot;https://github.com/exoscale/cloak&quot;&gt;exoscale/cloak&lt;/a&gt;) de manipuler dans le programme des secrets sans les log/print/sérialiser par erreur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La section &lt;code&gt;:comment&lt;/code&gt; contient une clé &lt;code&gt;:auto-approve&lt;/code&gt; pouvant être passée à &lt;code&gt;true&lt;/code&gt; pour ne pas avoir à approuver les commentaires. La liste &lt;code&gt;allowed-articles&lt;/code&gt; définit une liste d&amp;#8217;articles autorisés à recevoir des commentaires. Je génère cette ligne via un script pour un blog, et cela permet de désactiver les commentaires si besoin.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La partie &lt;code&gt;:logging&lt;/code&gt; contient la configuration du logger (basé sur &lt;a href=&quot;https://github.com/pyr/unilog&quot;&gt;unilog&lt;/a&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et enfin, &lt;code&gt;:challenges&lt;/code&gt; contient mes challenges (j&amp;#8217;ai généré pour mon blog 250 challenges via un script).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_la_suite&quot;&gt;La suite&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme dit précédemment, le projet n&amp;#8217;est qu&amp;#8217;à ses débuts. La première chose que je ferai au cours du prochain mois est de nettoyer la codebase, ajouter plus de tests, écrire la documentation&amp;#8230;&amp;#8203; Bref, rendre le projet présentable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ensuite, un peu d&amp;#8217;outillage pour la gestion des événements, la relecture et la validation des commentaires ne ferait pas de mal (rien qu&amp;#8217;un script shell basé sur curl et jq serait intéressant au début).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je suis également un &lt;strong&gt;horrible&lt;/strong&gt; développeur frontend. Si un dev frontend a un peu de temps, je serai preneur d&amp;#8217;une Pull Request pour ajouter un block HTML et les scripts/css associés (si possible sans aucune dépendance externe) pour intégrer proprement Commentator dans un site web.&lt;br&gt;
+J&amp;#8217;ai bien fait un truc aujourd&amp;#8217;hui mais c&amp;#8217;est du code bien dégueulasse, donc si ça vous dit j&amp;#8217;attends vos contributions dans le dossier &lt;code&gt;integration&lt;/code&gt; de &lt;a href=&quot;https://github.com/mcorbin/commentator&quot;&gt;dépôt Git&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;attends vos commentaires en bas de page !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Thu, 12 Nov 2020 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2020-11-05-certificate-subject-asn1/

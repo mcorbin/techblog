@@ -286,3 +286,41 @@ tr:nth-child(odd) {
 }
 
 .line-through{text-decoration:line-through}
+
+
+.comment_author {
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.comment_date {
+    font-weight: bold;
+    color: #14436c;
+}
+
+.comment_content {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.comment {
+    border-top: 1px solid #dbdbdb;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+#new_comment_content {
+    width:100%;
+}
+
+#new_comment_author {
+    width:100%;
+}
+
+#challenge_answer {
+    width:100%;
+}
+
+#comment_block {
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
