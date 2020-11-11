@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Wed, 11 Nov 2020 10:37:55 +0100
+Wed, 11 Nov 2020 10:39:07 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -310,7 +310,10 @@ Le format des questions et des réponses est libre, donc n&amp;#8217;importe qui
 &lt;h2 id=&quot;_la_suite&quot;&gt;La suite&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Comme dit précédemment, le projet n&amp;#8217;est qu&amp;#8217;à ses débuts. La première chose que je ferai au cours du prochain mois est de nettoyer la codebase, ajouter plus de tests, écrire la documentation&amp;#8230;&amp;#8203; Bref, rendre le projet présentable.&lt;/p&gt;
+&lt;p&gt;Comme dit précédemment, le projet n&amp;#8217;est qu&amp;#8217;à ses débuts. Il peut y avoir des bugs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La première chose que je ferai au cours du prochain mois est de nettoyer la codebase, ajouter plus de tests, écrire la documentation&amp;#8230;&amp;#8203; Bref, rendre le projet présentable.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Ensuite, un peu d&amp;#8217;outillage pour la gestion des événements, la relecture et la validation des commentaires ne ferait pas de mal (rien qu&amp;#8217;un script shell basé sur curl et jq serait intéressant au début).&lt;/p&gt;
