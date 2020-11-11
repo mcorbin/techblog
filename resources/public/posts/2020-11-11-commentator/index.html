@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>(mcorbin.fr): Commentator: commentaires de blogs basé sur S3</title>
-    <link rel="canonical" href="https://mcorbin.fr/posts/2020-11-12-commentator/">
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-11-11-commentator/">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -55,7 +55,7 @@
 <div id="post">
     <div class="post-header">
     <div id="post-meta" class="row">
-        <div class="col-lg-6">12 novembre 2020</div>
+        <div class="col-lg-6">11 novembre 2020</div>
         
     </div>
     <h2>Commentator: commentaires de blogs basé sur S3</h2>
@@ -382,7 +382,7 @@ J&#8217;ai bien fait un truc aujourd&#8217;hui mais c&#8217;est du code bien dé
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-11-12-commentator", function(data) {
+          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-11-11-commentator", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -419,7 +419,7 @@ J&#8217;ai bien fait un truc aujourd&#8217;hui mais c&#8217;est du code bien dé
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-11-12-commentator",
+                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-11-11-commentator",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

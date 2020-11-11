@@ -12,17 +12,17 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Wed, 11 Nov 2020 10:21:07 +0100
+Wed, 11 Nov 2020 10:37:55 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
 <item>
 <guid>
-https://mcorbin.fr/posts/2020-11-12-commentator/
+https://mcorbin.fr/posts/2020-11-11-commentator/
 </guid>
 <link>
-https://mcorbin.fr/posts/2020-11-12-commentator/
+https://mcorbin.fr/posts/2020-11-11-commentator/
 </link>
 <title>
 Commentator: commentaires de blogs basé sur S3
@@ -326,7 +326,7 @@ J&amp;#8217;ai bien fait un truc aujourd&amp;#8217;hui mais c&amp;#8217;est du c
 &lt;/div&gt;
 </description>
 <pubDate>
-Thu, 12 Nov 2020 00:00:00 +0100
+Wed, 11 Nov 2020 00:00:00 +0100
 </pubDate>
 </item>
 <item>
