@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 29 Nov 2020 12:07:03 +0100
+Sun, 29 Nov 2020 12:12:43 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -57,7 +57,7 @@ Au cours de discussions où je parlais du Cloud avec des gens, j&amp;#8217;ai so
 Vous faites un appel API (utilisant une CLI par exemple), de nouvelles machines se déploient, le load balancer est automatiquement mis à jour. Un autre appel, et c&amp;#8217;est un cluster Kubernetes qui se déploie&amp;#8230;&amp;#8203;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Derrière tous ces services, il y a (entre autre) des programmes. Ces programmes, il faut les développer. C&amp;#8217;est le travail d&amp;#8217;un développeur Cloud.&lt;/p&gt;
+&lt;p&gt;Derrière tous ces services, il y a (entre autre) des programmes. Ces programmes, il faut les développer. C&amp;#8217;est le travail d&amp;#8217;un développeur ou d&amp;#8217;une développeuse Cloud.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
