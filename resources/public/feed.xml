@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 29 Nov 2020 12:12:43 +0100
+Sun, 29 Nov 2020 12:13:59 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -257,7 +257,7 @@ Mes années d&amp;#8217;expérience d&amp;#8217;administrateur système me sont 
 Il est difficile par exemple d&amp;#8217;écrire des agents intéragissant avec le réseau si vous ne connaissez rien en réseau. Nous (les dev) sommes également d&amp;#8217;astreintes, donc savoir aller voir ce qu&amp;#8217;il se passe niveau réseau pour des produits comme le load balancer est utile ;)&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Mais je le redis, je ne suis pas par exemple expert réseau, et les collègues experts sur ces sujets (ops, système, réseau, virtualisation&amp;#8230;&amp;#8203;) sont indispensables, notamment lors du design des produits et en cas de problème critique. Nous (développeurs) sommes accompagnés par ces experts pour implémenter les solutions.&lt;/p&gt;
+&lt;p&gt;Mais je le redis, je ne suis pas par exemple expert réseau, et les collègues experts sur ces sujets (ops, système, réseau, virtualisation&amp;#8230;&amp;#8203;) sont indispensables, notamment lors du design des produits et en cas de problème critique. Nous (développeurs et développeuses) sommes accompagnés par ces experts pour implémenter les solutions.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Une autre compétence dont on ne parle très peu et qui est je pense très utile (qu&amp;#8217;on soit dev, ops, quel que soit le domaine métier d&amp;#8217;ailleurs), est d&amp;#8217;arriver à garder en tête la vue d&amp;#8217;ensemble du fonctionnement des produits que l&amp;#8217;on développe.&lt;/p&gt;
