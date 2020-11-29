@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 29 Nov 2020 11:57:56 +0100
+Sun, 29 Nov 2020 12:01:04 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -35,7 +35,7 @@ Le métier de développeur Cloud
 &lt;h2 id=&quot;_pourquoi_cet_article&quot;&gt;Pourquoi cet article&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Je me suis rendu compte qu&amp;#8217;on parle beaucoup du Cloud mais très peu de comment le Cloud est implémenté, et du travail de développeur chez un Cloud Provider.&lt;br&gt;
+&lt;p&gt;Je me suis rendu compte que l&amp;#8217;on parle beaucoup du Cloud mais très peu de comment le Cloud est implémenté, et du travail de développeur chez un Cloud Provider.&lt;br&gt;
 Au cours de discussions où je parlais du Cloud avec des gens, j&amp;#8217;ai souvent eu des retours me disant des choses comme &quot;je me suis jamais demandé comment cela fonctionnait&quot; ou bien &quot;je ne pensais pas du tout à tous ses aspects en tant qu&amp;#8217;utilisateur&quot;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
