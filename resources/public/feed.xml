@@ -12,11 +12,282 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Wed, 11 Nov 2020 10:57:01 +0100
+Sun, 29 Nov 2020 11:57:56 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2020-11-29-developpeur-cloud/
+</guid>
+<link>
+https://mcorbin.fr/posts/2020-11-29-developpeur-cloud/
+</link>
+<title>
+Le métier de développeur Cloud
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai récemment eu l&amp;#8217;occasion de parler (rapidement) lors d&amp;#8217;une table ronde de mon métier. J&amp;#8217;avais préparé pour cette occasion des réponses à un certain nombre de questions, et je me dis qu&amp;#8217;en faire un article peut être intéressant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_pourquoi_cet_article&quot;&gt;Pourquoi cet article&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je me suis rendu compte qu&amp;#8217;on parle beaucoup du Cloud mais très peu de comment le Cloud est implémenté, et du travail de développeur chez un Cloud Provider.&lt;br&gt;
+Au cours de discussions où je parlais du Cloud avec des gens, j&amp;#8217;ai souvent eu des retours me disant des choses comme &quot;je me suis jamais demandé comment cela fonctionnait&quot; ou bien &quot;je ne pensais pas du tout à tous ses aspects en tant qu&amp;#8217;utilisateur&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pourtant, c&amp;#8217;est un domaine très intéressant (bien qu&amp;#8217;assez spécifique) où l&amp;#8217;on ne s&amp;#8217;ennuie jamais. J&amp;#8217;entends souvent dire &quot;Le Cloud c&amp;#8217;est de la magie&quot;, vraiment ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bref, c&amp;#8217;est quoi mon job ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_cloud&quot;&gt;Le Cloud&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous êtes peut être utilisateur de services Cloud pour déployer vos applications.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous cliquez sur un bouton, un groupe de machines se déploie, vous cliquez sur un autre bouton et un load balancer est installé devant ces machines, répartissant le trafic sur vos applications et exécutant des healthchecks.&lt;br&gt;
+Vous faire un appel API (utilisant une CLI par exemple), de nouvelles machines se déploient, le load balancer est automatiquement mis à jour. Un autre appel, et c&amp;#8217;est un cluster Kubernetes qui se déploie&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Derrière tous ces services, il y a (entre autre) des programmes. Ces programmes, il faut les développer. C&amp;#8217;est le travail d&amp;#8217;un développeur Cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_développer_sa_stack_cloud&quot;&gt;Développer sa stack Cloud&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A Exoscale, nous développons notre propre solution Cloud. On ne se contente pas d&amp;#8217;utiliser des solutions toutes faites, mais développons nos propres solutions, nos propres orchestrateurs, et c&amp;#8217;est je pense un point très important.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On m&amp;#8217;a parfois demandé &quot;mais ça apporte quoi d&amp;#8217;avoir sa propre solution et pas une solution toute faite&quot; ? Cela a selon moi plusieurs avantages.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Déjà, pouvoir faire ses propres choix technologiques. A Exoscale, la majorité des programmes sont écrits en &lt;a href=&quot;https://clojure.org/&quot;&gt;Clojure&lt;/a&gt; (même si l&amp;#8217;on a quand même un peu de Java, Go, C, Python&amp;#8230;&amp;#8203; car finalement chaque langage a son utilisation) et je pense que le choix de Clojure est en partie responsable de notre capacité actuelle à sortir rapidement (et maintenir et faire évoluer) des services fiables, le tout par de petite équipes (vous seriez je pense surpris de combien de personnes maintiennent les différents projets).&lt;br&gt;
+Mais cela sera sûrement le sujet d&amp;#8217;un article dédié.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ensuite, même quand vous utilisez des solutions Cloud toutes faites, vous allez devoir les maîtriser sur le bout des doigts, les forker, contribuer, parfois dériver de l&amp;#8217;implémentation originale car cette dernière ne correspond pas ou plus à vos besoins (peut être que les mainteneurs originaux ne sont pas intéressés par vos changements car trop spécifiques ?)&amp;#8230;&amp;#8203;&lt;br&gt;
+Bref, au final vous vous retrouvez également avec votre propre solution Cloud qui est un fork de l&amp;#8217;originale (bonne chance pour les rebase), avec des centaines de milliers ou millions de lignes de codes à maintenir.&lt;br&gt;
+De plus, les solutions toutes faites sont conçues pour tourner de plein de façons différentes, sur plein de hardware différents, alors que vous, vous savez généralement ce que vous voulez. Bref, vous avez un paquet de code mort que vous devez quand même maintenir.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Parlons égalemement du tooling. Si vous utilisez une solution Cloud générique, et que vous proposez ensuite un produit seulement disponible chez vous, est ce que les mainteneurs de la solution générique approuveront l&amp;#8217;ajout de votre solution spécifique dans leurs outils (Terraform, CLI&amp;#8230;&amp;#8203;) ? Probablement que non.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Avoir sa propre solution permet de travailler rapidement, d&amp;#8217;innover, et de sortir des produits Cloud fonctionnant avec des programmes simples et performants, sur une stack qu&amp;#8217;on maitrise de A à Z.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais revenons au métier de développeur Cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_la_difficulté_du_cloud&quot;&gt;La difficulté du Cloud&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Un Cloud peut être vu qu&amp;#8217;une certaine façon comme un système distribué. Prenons un exemple d&amp;#8217;infrastructure toute simple: un groupe de machines virtuelles dans un réseau privé et avec un load balancer en front.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On a déjà ici différents composants; des machines, un réseaux privé, un load balancer. Chacun de ces composants est &quot;déployé&quot; quelque part:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Les machines tournent sur des hyperviseurs. Le disque de la machine (en cas de stockage local) est également présent sur l&amp;#8217;hyperviseur.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Des règles réseaux (que ce soit pour les interfaces publiques ou privées) doivent être installées sur les hyperviseurs (comme vous vous en doutez il faut router les paquets là où il faut).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Des machines hébergent le composant faisant le load balancing (à Exoscale, quand vous créez un load balancer vous avez d&amp;#8217;ailleurs deux instances en &lt;strong&gt;actif/actif&lt;/strong&gt; de déployée). Ce composant est configuré en fonction des machines du groupe de machine.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Des règles réseaux doivent être ajoutées sur l&amp;#8217;hyperviseur pour chaque machine derrière le load balancer (dans notre cas, pour faire de la décapsulation IPIP et du Direct Server Return notamment, si le sujet vous intéresse j&amp;#8217;ai un talk de prêt sur le fonctionnement interne de notre load balancer, peut être que je le ferai au format vidéo à l&amp;#8217;occasion).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;oublie sûrement des trucs mais vous avez je pense saisi le problème: plusieurs composants distribués à différents endroits.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une vue utilisateur ultra simplifiée serait:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/dev-cloud/lb_exemple.jpg&quot; alt=&quot;un exemple d&amp;#8217;infrastructure avec 2 load balancers et deux machines virtuelles&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;De plus, par sa nature l&amp;#8217;état d&amp;#8217;une plateforme Cloud change constamment, par exemple lors d&amp;#8217;actions utilisateurs:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Un utilisateur ajoute une machine au groupe de machines, elle doit être automatiquement ajoutée au réseau privé et au load balancer. Et l&amp;#8217;inverse pour sa suppression.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Vous changez les règles de load balancing (par exemple, vous modifiez le healthcheck, le port de destination&amp;#8230;&amp;#8203;) la configuration du load balancer doit être mis à jour.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&amp;lt;Insérez ici tout ce que vous pouvez faire sur un Cloud: snapshot/restore, bidouilles réseaux, firewalling, déployer des clusters kube&amp;#8230;&amp;#8203;&amp;gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais aussi parce que nous, gestionnaires du Cloud, devons réaliser des actions sur la plateforme:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Mises à jour.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Migration (live) de machines virtuelles entre hyperviseurs. Bien sûr la machine doit migrer avec tout son état, règles réseaux incluses par exemple, et les règles doivent être nettoyées sur l&amp;#8217;hyperviseur source.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Plein d&amp;#8217;autre choses ;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et bien sûr, les pannes et incidents:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;On gère de l&amp;#8217;infrastructure physique, l&amp;#8217;infrastructure physique ça pète, tout simplement.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Il peut se passer plein de choses marrantes niveau réseau.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Et bien sûr, aucun programme n&amp;#8217;est parfait, malgré tous les efforts un bug peut arriver.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On a donc une sorte de système distribué où il peut se passer plein de trucs, et bien sûr en tant que client vous voulez juste que ça marche, et si possible 24H/24 et 7H/7 :D&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On a donc besoin de programmes capables de piloter des machines virtuelles, des load balancers, configurer du réseau, des clusters Kubernetes&amp;#8230;&amp;#8203; Et surtout de faire &lt;strong&gt;converger&lt;/strong&gt; l&amp;#8217;état global de la plateforme dans l&amp;#8217;état voulu en cas de changement (volontaire ou non).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et finalement, voilà ce que je fais: développer ces programmes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_agents_et_orchestrateurs&quot;&gt;Agents et Orchestrateurs&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On peut sûrement faire la distinction entre deux types de programmes chez un Cloud Provider. Les agents et les orchestrateurs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;les agents sont des daemons simples qui reçoivent des ordres. Par exemple, un agent tourne sur les hyperviseurs, expose une API qui lui permet par exemple de configurer le réseau d&amp;#8217;une machine virtuelle. L&amp;#8217;agent ne prend pas de décision, il reçoit un ordre (&quot;configure moi cette machine virtuelle&quot;, &quot;démarre cette machine&quot;, &quot;configure ce load balancer&quot;, &quot;configure ce réseau&quot;&amp;#8230;&amp;#8203;) et l&amp;#8217;applique.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les orchestrateurs sont les donneurs d&amp;#8217;ordres, et sont l&amp;#8217;intelligence de la plateforme. C&amp;#8217;est eux qui vont coordonner les agents (voir parler avec d&amp;#8217;autres orchestrateurs) pour faire converger la plateforme dans l&amp;#8217;état voulu.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est un domaine passionnant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Là aussi, voici une vue &lt;strong&gt;simplifiée&lt;/strong&gt; de ce qu&amp;#8217;il se passe en réalité:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/dev-cloud/orchestration.jpg&quot; alt=&quot;une infrastructure gérée par des orchestrateurs&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il y a plein de problèmes &quot;marrants&quot; à régler lors de l&amp;#8217;écriture d&amp;#8217;orchestrateurs ou d&amp;#8217;agents, comme par exemple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Eviter les race conditions (actions sur la même entité en parallèle)
+, Ne pas perdre d&amp;#8217;actions&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;pouvoir déclencher des exécutions de jobs depuis de multiples sources (actions utilisateurs, actions d&amp;#8217;administration, événements&amp;#8230;&amp;#8203;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Savoir récupérer &quot;l&amp;#8217;état du monde&quot; pour une entité et construire et exécuter le job qui fera converger l&amp;#8217;entité vers l&amp;#8217;état voulu (les orchestrateurs sont très déclaratifs).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Gestion des retry et de l&amp;#8217;alerting.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous avons résolu ces problèmes au fil du temps pour arriver à notre solution actuelle qui continue d&amp;#8217;ailleurs d&amp;#8217;évoluer (et certaines librairies utilisées sont open source et disponibles sur &lt;a href=&quot;https://github.com/exoscale/&quot;&gt;Github&lt;/a&gt;).&lt;br&gt;
+Cette solution est derrière tout nos nouveaux projets depuis un petit moment déjà, et c&amp;#8217;est &lt;strong&gt;très&lt;/strong&gt; efficace.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous êtes intéressé par le sujet ? Nous devrions publier une série d&amp;#8217;articles sur les orchestrateurs et notamment sur notre implémentation de notre offre de Kubernetes managé en début d&amp;#8217;année prochaine sur le blog d&amp;#8217;Exoscale.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_reste_de_la_plateforme&quot;&gt;Le reste de la plateforme&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Facturation, API Gateway, outils de stream processing, gestion des utilisateurs et organisations&amp;#8230;&amp;#8203; sont également des choses importantes sur lesquelles on doit intervenir.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bien sûr, il y a également chez un Cloud Provider des équipes frontend, des ingénieurs réseaux (gérer le routage interne dans les datacenters mais aussi externe), systèmes, hardware, des personnes travaillant sur le tooling (vous fournissant de supers intégrations Terraform, CLI&amp;#8230;&amp;#8203; dès la sortie d&amp;#8217;un nouveau produit), des équipes orientées avant vente&amp;#8230;&amp;#8203;&lt;br&gt;
+On retrouve des compétences très vastes, de l&amp;#8217;infrastructure physique (design de rack, choix et gestion du hardware&amp;#8230;&amp;#8203;) jusqu&amp;#8217;au frontend, et être en contact permanent avec des personnes travaillant dans tous ces domaines est super intéressant et enrichissant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_les_compétences_nécessaires_pour_un_développeur_cloud&quot;&gt;Les compétences nécessaires pour un développeur Cloud&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On m&amp;#8217;avait demandé quelles sont les compétences nécessaires pour développer des produits Cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En plus des compétences traditionnelles de développement (et tous les à côtés: CI/CD, monitoring, logging&amp;#8230;&amp;#8203;), avoir une affinité avec le monde du système et du réseau est je pense important.&lt;br&gt;
+Mes années d&amp;#8217;expérience d&amp;#8217;administrateur système me sont grandement utiles, et bien qu&amp;#8217;épaulé par des experts systèmes et réseaux (car certains produits demandent des connaissances pointues dans ces domaines) il faut comprendre les technologies et protocoles avec lesquels on travaille.&lt;br&gt;
+Il est difficile par exemple d&amp;#8217;écrire des agents intéragissant avec le réseau si vous ne connaissez rien en réseau. Nous (les dev) sommes également d&amp;#8217;astreintes, donc savoir aller voir ce qu&amp;#8217;il se passe niveau réseau pour des produits comme le load balancer est utile ;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais je le redis, je ne suis pas par exemple expert réseau, et les collègues experts sur ces sujets (ops, système, réseau, virtualisation&amp;#8230;&amp;#8203;) sont indispensables, notamment lors du design des produits et en cas de problème critique. Nous (développeurs) sommes accompagnés par ces experts pour implémenter les solutions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une autre compétence dont on ne parle très peu et qui est je pense très utile (qu&amp;#8217;on soit dev, ops, quel que soit le domaine métier d&amp;#8217;ailleurs), est d&amp;#8217;arriver à garder en tête la vue d&amp;#8217;ensemble du fonctionnement des produits que l&amp;#8217;on développe.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bien sûr, il y a de la documentation etc&amp;#8230;&amp;#8203; Mais je pense que pouvoir réfléchir sur le produit dans son ensemble (dès sa conception, pendant son implémentation, pendant sa vie) est très important.&lt;br&gt;
+C&amp;#8217;est comme cela que l&amp;#8217;on peut détecter des erreurs de design, réfléchir aux différents scénarios de pannes possibles, réfléchir à comment faire communiquer les différents composants, réagir rapidement en cas de problèmes&amp;#8230;&amp;#8203; Bref, je pense qu&amp;#8217;avoir cette vue d&amp;#8217;ensemble sur les produits et sur la façon dont ils interagissent entre eux (et savoir ensuite documenter et implémenter cette vue d&amp;#8217;ensemble) est indispensable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, la simplicité. Je pense que concevoir des solutions simples et efficaces, reconnaître les avantages &lt;strong&gt;et inconvénients&lt;/strong&gt; des technologies et outils est la clé de la réussite dans l&amp;#8217;informatique.&lt;br&gt;
+On parle d&amp;#8217;ailleurs souvent de pénuries dans nos métiers. Si les gens arretaient de monter des usines à gaz (ou suivre la hype aveuglément) il faudrait selon moi déjà beaucoup moins de monde dans les projets ;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Travailler sur un produit tech, dont nous sommes nous même utilisateur, le tout entouré de super collègues, c&amp;#8217;est cool.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les challenges techniques sont là, et c&amp;#8217;est très satisfaisant de mettre ce genre de produits en prod et ensuite de voir les gens commencer à les utiliser (même ce blog est derrière le load balancer dont je parle dans cet article par exemple !).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Sun, 29 Nov 2020 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2020-11-11-commentator/
