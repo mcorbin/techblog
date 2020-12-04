@@ -12,11 +12,282 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 29 Nov 2020 12:13:59 +0100
+Fri, 04 Dec 2020 10:42:32 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2020-12-04-pull-push/
+</guid>
+<link>
+https://mcorbin.fr/posts/2020-12-04-pull-push/
+</link>
+<title>
+Métriques, monitoring, push vs pull, Riemann, Vector
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai été et je suis toujours convaincu qu&amp;#8217;il est plus simple et efficace de faire du push par rapport à du pull pour le monitoring d&amp;#8217;une infrastructure. Dans cet article, j&amp;#8217;expliquerai pourquoi et parlerai de différents outils comme Riemann, Prometheus ou Vector.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_riemann&quot;&gt;Riemann&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai à une époque beaucoup contribué à &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt;. Cet outil de monitoring écrit par Kyle Kingsbury (Aphyr) n&amp;#8217;a selon moi toujours aucun équivalent sur le marché du monitoring aujourd&amp;#8217;hui. C&amp;#8217;est plein de bonnes idées, c&amp;#8217;est vraiment un outil où en tant qu&amp;#8217;utilisateur (et puis en tant que contributeur) j&amp;#8217;ai eu un effet &quot;Wahou&quot; en voyant comme ça marche.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous ne connaissez pas Riemann ? La &lt;a href=&quot;http://riemann.io/howto.html&quot;&gt;documentation&lt;/a&gt; est un bon point d&amp;#8217;entrée, mais voici un petit résumé.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Riemann est un outil de stream processing pour le monitoring. Vous pouvez y pousser toutes sortes d&amp;#8217;événéments (métriques applicatives, systèmes, événements divers et variés&amp;#8230;&amp;#8203;) et Riemann va pouvoir les transférer à des systèmes externes (comme Graphite, InfluxDB&amp;#8230;&amp;#8203;), réaliser des calculs complexes (notamment sur des fenêtres de temps) et générer des alertes (et les envoyer à Pagerduty par exemple). Voici un event Riemann:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;{:host &quot;mcorbin.fr&quot; ;; la source de la métrique
+ :service &quot;ram-usage&quot; ;; le service concerné
+ :ttl 60 ;; un TTL associé à la métrique pour certains usages interles
+ :tags {:environment &quot;prod&quot;} ;; des tags qui peut être ajoutés à la métrique
+ :time 1606854392183 ;; un timestamp
+ :metric 75 ;; la valeur de la métrique}
+ ;; d'autres champs arbitraires peuvent être attachés à la métrique.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La configuration de Riemann est du code (Clojure), et sa configuration est 100 % testable unitairement. Voici un exemple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;(where (service &quot;ram-usage&quot;)
+  (by [:host]
+    (fixed-time-window 60
+      (smap mean
+        influxdb))))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ici, je filtre tous les événements ayant pour service &lt;code&gt;ram-usage&lt;/code&gt;, je bufferise pour chaque &lt;code&gt;:host&lt;/code&gt; (grâce à &lt;code&gt;by&lt;/code&gt;) ces événements pendant 60 secondes, et je calcule ensuite la moyenne de ces événements (toujours par host). Cette moyenne est envoyée ensuite à InfluxDB.&lt;br&gt;
+Calculer la moyenne de la RAM n&amp;#8217;est pas utile mais cela me permettait de donner un exemple simple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Riemann est vraiment très (très) expressif, et surtout c&amp;#8217;est du code donc extensible à l&amp;#8217;infini (on peut écrire ses propres fonctions). Par exemple, je l&amp;#8217;avais utilisé avec succès pour détecter des déséquilibres dans des partitions Kafka (en comparant les métriques de chaque partitions entre elles en temps réel).&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;De plus, tout est immuable dans Riemann. Un événement peut passer dans plusieurs &quot;streams&quot; sans problème, donc vous pouvez transférer l&amp;#8217;événements original à un autre système tout en faisant des calculs complexes dessus dans des streams indépendants.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;avais d&amp;#8217;ailleurs réalisé une &lt;a href=&quot;https://mcorbin.fr/pdf/slides/riemann.pdf&quot;&gt;présentation&lt;/a&gt; sur cet outil (car il y a beaucoup d&amp;#8217;autres trucs cools dans Riemann).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Riemann est toujours utilisé dans l&amp;#8217;entreprise où je travaille aujourd&amp;#8217;hui (bien que l&amp;#8217;on transitionne sur Prometheus, j&amp;#8217;en parlerai plus loin), mais l&amp;#8217;outil a quand même quelques problèmes, notamment:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Difficile de faire de la HA avec (il faut faire du sharding manuel). Mais bon, est ce que c&amp;#8217;est mieux chez la concurrence ?&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Perte de l&amp;#8217;état interne des streams en cas d&amp;#8217;un reload (changement de configuration)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Gestion des fenêtres de temps parfois un peu étrange (j&amp;#8217;en parlerai plus loin)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Quelques petits défauts notamment sur le steam &lt;code&gt;(by)&lt;/code&gt; (qui permet de créer plusieurs sous streams en fonction de clés d&amp;#8217;un événement) qui n&amp;#8217;était jamais GC (donc si vous avez beaucoup de cardinalité ça posait des problèmes).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais de manière générale, Riemann fonctionne, et c&amp;#8217;est fou qu&amp;#8217;un outil maintenu par la communauté soit allé aussi loin.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais pour aller plus loin et corriger ses défauts structurels il aurait besoin d&amp;#8217;une réécriture &quot;from scratch&quot;. C&amp;#8217;est un projet qui mettrait au minimum plusieurs mois pour quelqu&amp;#8217;un de motivé travaillant un peu tous les jours (et on sait que les estimations en informatique c&amp;#8217;est pas fiable, donc ce serait beaucoup plus en réalité :D).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais reparlons du push et du pull.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_prometheus&quot;&gt;Prometheus&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Prometheus s&amp;#8217;impose aujourd&amp;#8217;hui comme un standard, qu&amp;#8217;on le veuille ou non. L&amp;#8217;outil a été pensé et conçu pour ne fonctionner qu&amp;#8217;en mode &quot;pull&quot;: les services à monitorer exposent les métriques via HTTP, et Prometheus va les chercher périodiquement. Selon la doc Prometheus, cela a plusieurs avantages:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-plaintext&quot; data-lang=&quot;plaintext&quot;&gt;Pulling over HTTP offers a number of advantages:
+
+    You can run your monitoring on your laptop when developing changes.
+    You can more easily tell if a target is down.
+    You can manually go to a target and inspect its health with a web browser.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ne suis d&amp;#8217;accord avec aucun de ces affirmations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Déjà, qu&amp;#8217;une métrique soit exposée en HTTP ou poussée sur le réseau est un détail d&amp;#8217;implémentation. Je pourrai très bien exposer mes métriques je sais pas trop où en dev et autre part en prod par exemple.&lt;br&gt;
+Ensuite, c&amp;#8217;est vrai que Prometheus permet de détecter si une cible ne répond plus. C&amp;#8217;est également possible de le faire avec du push en détectant une source n&amp;#8217;ayant pas émis de données pendant X temps. Cela demande un peu de travail, mais ça se fait (et je l&amp;#8217;ai fait dans certains projets).&lt;br&gt;
+Pour le troisième point, pareil, détail d&amp;#8217;implémentation. Je pourrai avoir mes métriques exposées d&amp;#8217;une façon ou une autre pour le debugging et les pousser quand même sur le réseau.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Par contre, voici selon moi les désavantages du pull:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Complexité réseau. En push, vous avez &lt;strong&gt;1 règle&lt;/strong&gt; de firewalling: de vos applications à votre truc qui stocke vos métrique (si c&amp;#8217;est Kafka c&amp;#8217;est encore mieux). En pull, si j&amp;#8217;ai 10 applications qui exposent du Prometheus sur un serveur, j&amp;#8217;ai 10 ports ouverts entre mon Prometheus et mon serveur. Et ça sur chaque serveur.&lt;br&gt;
+Vous allez me dire &quot;c&amp;#8217;est pas grave, moi j&amp;#8217;automatise mon infra, ouvrir des ports c&amp;#8217;est facile !&quot;. Si on veut, ça reste sujet à erreur. Notre job est déjà assez complexe pour ne pas avoir à se compliquer la vie.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Si Prometheus ne pull plus pour une raison X ou Y, vos métriques sont perdues. En push, je peux avoir mon Kafka (par exemple) qui fait buffer et permet de &quot;récupérer&quot; mes métriques une fois un incident résolu.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Je pense que le push est plus simple à scale, et plus flexible. Dans une ancienne expérience on envoyait toutes nos métriques dans Kafka. N&amp;#8217;importe qui pouvait brancher son consumer dessus et envoyer les métriques où il voulait, c&amp;#8217;était super.&lt;br&gt;
+Quelqu&amp;#8217;un veut tester InfluxDB ? Pas de problème. Vous décidez de partir sur Datadog finalement ? Allez, un nouveau consumer, et vous envoyez tout ça à l&amp;#8217;extérieur. Bref, zéro couplage, le top.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et enfin, je n&amp;#8217;aime pas les DSL à la Prometheus. Avoir un DSL, OK, mais je veux pouvoir facilement l&amp;#8217;étendre avec du code et avoir accès à un vrai langage de programmation. Sinon les queries deviennent des usines à gaz.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_je_recommande_prometheus&quot;&gt;Je recommande Prometheus&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pourtant, j&amp;#8217;ai encouragé le passage à Prometheus dans mon équipe. Pourquoi ? Pragmatisme.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme dit précédemment, Prometheus est partout. Si vous faites du Kubernetes par exemple, ne pas utiliser Prometheus c&amp;#8217;est se tirer une balle dans le pied. Les intégrations sont là, et soyons honnête la solution fonctionne quand même.&lt;br&gt;
+Je ne l&amp;#8217;aurai pas implémenté de cette façon si j&amp;#8217;avais eu le choix, mais Prometheus est là, facile à installer, facile à brancher sur votre service de discovery préféré, et ça marche.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais les outils ne vivent pas pour toujours. Dans 2, 3, 5 ans ou plus de nouveaux outils apparaîtrons, et j&amp;#8217;espère qu&amp;#8217;on aura quelque chose de différent.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_mon_outil_idéal&quot;&gt;Mon outil idéal&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je reste convaincu que beaucoup d&amp;#8217;idées de Riemann mériteraient d&amp;#8217;être implémentées dans d&amp;#8217;autres outils, avec quelques variations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il reste un soucis avec le stream processing. On ne peut souvent que calculer des approximations lors d&amp;#8217;aggregations d&amp;#8217;événements car on n&amp;#8217;a pas toujours de garantie d&amp;#8217;ordre.&lt;br&gt;
+Reprenons notre exemple de moyenne sur 10 secondes que nous avons vu précédemment. Vous recevez des événements entre T et T+10, vous calculez une moyenne sur ces événements. Que devez vous faire si vous recevez des événements du passé ? Dans le mauvais ordre ? Devons nous les ignorer ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/pull-push/events-bad-order.jpg&quot; alt=&quot;Si des événements arrivent en retard, ils sont perdus&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais cela n&amp;#8217;est finalement pas grave. Vous pouvez calculer très rapidement une approximation qui sera suffisante pour la plupart des cas. Si je veux faire de l&amp;#8217;aggregations sur des métriques venant de 100 machines, tant pis si je n&amp;#8217;ai au final que 99 événements si cela me permet d&amp;#8217;avoir très rapidement (en quelques secondes) une idée de la santé de la plateforme. Et si mes métriques arrivent en continu dans mon système, l&amp;#8217;événement manquant pourra être pris en compte plus tard.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On pourrait imaginer également la mise en place d&amp;#8217;un petit buffer de quelques secondes pour limiter ce problème.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais parfois, on a besoin d&amp;#8217;avoir la garantie que notre calcul est correct. Je pense que le même outil de stream processing pourrait réaliser cela si implémenté correctement.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Imaginez si vous pouviez réinjecter dans un outil de stream processing des données venant de votre base de données timeseries.&lt;br&gt;
+On peut ici parler de continuous query. Si vous avez la capacité de ré-emettre les événements (ordonnés par timestamp) dans votre outil de stream processing, l&amp;#8217;outil pourrait recalculer la valeur exacte de votre aggregation à partir de ces événements.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cela demande à l&amp;#8217;outil de gérer correctement les fenêtre de temps. Si l&amp;#8217;on sait que les événements arrivent dans l&amp;#8217;ordre, l&amp;#8217;outil peut se contenter de se baser sur le temps de chaque événement pour faire avancer les différentes fenêtre de temps (et non exécuter un &quot;tick&quot; bêtement toutes les 10 secondes). Le temps n&amp;#8217;a pas à avancer à la même vitesse dans la vraie vie et dans votre système de streaming, c&amp;#8217;est ce stream d&amp;#8217;événement qui doit être la source de vérité concernant le temps.&lt;br&gt;
+Cela a l&amp;#8217;avantage de rendre l&amp;#8217;outil prédictif: pour un même jeu de données en entrée, la sortie sera toujours la même. Reprendre un calcul est également facile vu qu&amp;#8217;on sait où on s&amp;#8217;est arrêté.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et là: on a le meilleur des deux mondes:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Mon outil de stream processing pour alerter rapidement (car par expérience, je veux souvent générer une alerte dès que je reçois un événement spécifique, je n&amp;#8217;ai pas toujours besoin de faire des calculs pour générer mon alerte), déplacer mes métriques d&amp;#8217;un système à un autre, faire des calculs approximatifs (parfois complexes) en temps réel sur mes métriques.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Le même outil, pour faire du continuous query (à partir d&amp;#8217;une ou plusieurs sources de données), tout en m&amp;#8217;appuyant pourquoi pas sur les capacités de calculs de ma base de données timeserie pour pré-calculer certains trucs (et éviter de déplacer trop de données). Dans ce mode de fonctionnement, chaque query (et ses calculs associés) pourrait avancer &quot;à son rythme&quot; et elles n&amp;#8217;auraient aucun effet de bords entre elles.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et le tout avec un langage commun entre les deux modes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/pull-push/event-in-order.jpg&quot; alt=&quot;Si des événements arrivent dans l&amp;#8217;ordre, le calcul est correct&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il m&amp;#8217;arrive tous les 3 à 6 mois de commencer à écrire une version de l&amp;#8217;outil décrit. Mais je ne suis jamais totalement satisfait donc je laisse tomber (et cela prend beaucoup de temps, que je n&amp;#8217;ai pas forcément, j&amp;#8217;ai déjà un certain nombre de projets à maintenir).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ma dernière tentative date d&amp;#8217;il y a 3 semaines où j&amp;#8217;ai écrit un POC où des unités de calculs peuvent se représenter en structures de données Clojure (au format &lt;a href=&quot;https://github.com/edn-format/edn&quot;&gt;edn&lt;/a&gt;), avec un DSL simple pour écrire la configuration:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;(-&amp;gt; (init {:name :foo
+           :stream? true
+           :by [:host]})
+     a/increment
+    (where :&amp;gt; 10)
+    (fixed-event-window 2)
+    mean
+    (debug!))
+
+#:pipeline{:name &quot;foo&quot;
+           :stream? true
+           :by [:host]
+           :actions
+           [#:action{:name :increment}
+            #:action{:name :where
+                     :params [:&amp;gt; 10]}
+            #:action{:name :fixed-event-window
+                     :params [2]}
+            #:action{:name :mean}
+            #:action{:name :debug!}]}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette structure de données peut ensuite être transformée en stream exécutable. Cette structure de données peut également me servir de constructeur pour construire à la demande des unités de calculs, connectées à un serveur recevant des événements en mode streaming ou instanciées à la volée pour des continuous query.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais je n&amp;#8217;ai malheureusement pas de temps à consacrer à ce projet actuellement.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_vector&quot;&gt;Vector&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Connaissez vous &lt;a href=&quot;https://vector.dev/&quot;&gt;Vector&lt;/a&gt; ? Cet outil écrit en Rust permet notamment d&amp;#8217;interconnecter différents systèmes entre eux. Vous le laissez scrap du Prometheus, consommer des logs, du Kafka&amp;#8230;&amp;#8203; Et il se charge de transférer tout ça à des systèmes extérieurs (voir à d&amp;#8217;autres instances de Vector).&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous pouvez même réaliser certains calculs ou modifications à vos métriques et logs, et étendre le projet en lua (et donc théoriquement en &lt;a href=&quot;https://fennel-lang.org/&quot;&gt;fennel&lt;/a&gt; si vous aimez Clojure).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On peut aussi d&amp;#8217;une certaine façon tester sa configuration (qui est écrite en toml, yaml ou json).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Interconnecter différents systèmes est, comme dit précédemment, une des forces de Riemann. D&amp;#8217;ailleurs &lt;a href=&quot;https://twitter.com/kartar&quot;&gt;James Turnbull&lt;/a&gt;, un des mainteneurs de Riemann (qui avait aussi écrit un livre sur le sujet), travaille sans surprise sur Vector.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme indiqué dans sa documentation, Vector n&amp;#8217;est pas fait pour faire du stream processing complexe. Mais je trouve le concept génial, et surtout on a enfin un outil bien conçu (du moins il semblerait après quelques tests rapides) pour scrape du Prometheus et renvoyer tout ça à d&amp;#8217;autres systèmes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cela faisait longtemps que je n&amp;#8217;avais pas été aussi enthousiaste sur un outil de monitoring. C&amp;#8217;est peut être également une bonne excuse pour faire du Rust et contribuer un peu au projet. Et clairement si je pouvais avoir un Riemann-like compatible Vector pour les transformations complexes ce serait super cool.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je prévois de tester Vector en détail sur mon infrastructure personnelle dans les mois à venir (et pourquoi pas faire un article dédié sur l&amp;#8217;outil), et je pense que Vector peut devenir une des briques pour de nouveaux outils basés sur le push, et apporter la flexibilité que j&amp;#8217;évoquais précédemment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Fri, 04 Dec 2020 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2020-11-29-developpeur-cloud/

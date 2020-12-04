@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Métriques, monitoring, push vs pull, Riemann, Vector</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2020-12-04-pull-push/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery-3.5.1.min.js" type="text/javascript"></script>
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">4 décembre 2020</div>
+        
+    </div>
+    <h2>Métriques, monitoring, push vs pull, Riemann, Vector</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>J&#8217;ai été et je suis toujours convaincu qu&#8217;il est plus simple et efficace de faire du push par rapport à du pull pour le monitoring d&#8217;une infrastructure. Dans cet article, j&#8217;expliquerai pourquoi et parlerai de différents outils comme Riemann, Prometheus ou Vector.</p>
+</div>
+<div class="sect1">
+<h2 id="_riemann">Riemann</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>J&#8217;ai à une époque beaucoup contribué à <a href="https://riemann.io">Riemann</a>. Cet outil de monitoring écrit par Kyle Kingsbury (Aphyr) n&#8217;a selon moi toujours aucun équivalent sur le marché du monitoring aujourd&#8217;hui. C&#8217;est plein de bonnes idées, c&#8217;est vraiment un outil où en tant qu&#8217;utilisateur (et puis en tant que contributeur) j&#8217;ai eu un effet "Wahou" en voyant comme ça marche.</p>
+</div>
+<div class="paragraph">
+<p>Vous ne connaissez pas Riemann ? La <a href="http://riemann.io/howto.html">documentation</a> est un bon point d&#8217;entrée, mais voici un petit résumé.</p>
+</div>
+<div class="paragraph">
+<p>Riemann est un outil de stream processing pour le monitoring. Vous pouvez y pousser toutes sortes d&#8217;événéments (métriques applicatives, systèmes, événements divers et variés&#8230;&#8203;) et Riemann va pouvoir les transférer à des systèmes externes (comme Graphite, InfluxDB&#8230;&#8203;), réaliser des calculs complexes (notamment sur des fenêtres de temps) et générer des alertes (et les envoyer à Pagerduty par exemple). Voici un event Riemann:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">{:host "mcorbin.fr" ;; la source de la métrique
+ :service "ram-usage" ;; le service concerné
+ :ttl 60 ;; un TTL associé à la métrique pour certains usages interles
+ :tags {:environment "prod"} ;; des tags qui peut être ajoutés à la métrique
+ :time 1606854392183 ;; un timestamp
+ :metric 75 ;; la valeur de la métrique}
+ ;; d'autres champs arbitraires peuvent être attachés à la métrique.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>La configuration de Riemann est du code (Clojure), et sa configuration est 100 % testable unitairement. Voici un exemple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(where (service "ram-usage")
+  (by [:host]
+    (fixed-time-window 60
+      (smap mean
+        influxdb))))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici, je filtre tous les événements ayant pour service <code>ram-usage</code>, je bufferise pour chaque <code>:host</code> (grâce à <code>by</code>) ces événements pendant 60 secondes, et je calcule ensuite la moyenne de ces événements (toujours par host). Cette moyenne est envoyée ensuite à InfluxDB.<br>
+Calculer la moyenne de la RAM n&#8217;est pas utile mais cela me permettait de donner un exemple simple.</p>
+</div>
+<div class="paragraph">
+<p>Riemann est vraiment très (très) expressif, et surtout c&#8217;est du code donc extensible à l&#8217;infini (on peut écrire ses propres fonctions). Par exemple, je l&#8217;avais utilisé avec succès pour détecter des déséquilibres dans des partitions Kafka (en comparant les métriques de chaque partitions entre elles en temps réel).<br></p>
+</div>
+<div class="paragraph">
+<p>De plus, tout est immuable dans Riemann. Un événement peut passer dans plusieurs "streams" sans problème, donc vous pouvez transférer l&#8217;événements original à un autre système tout en faisant des calculs complexes dessus dans des streams indépendants.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;avais d&#8217;ailleurs réalisé une <a href="https://mcorbin.fr/pdf/slides/riemann.pdf">présentation</a> sur cet outil (car il y a beaucoup d&#8217;autres trucs cools dans Riemann).</p>
+</div>
+<div class="paragraph">
+<p>Riemann est toujours utilisé dans l&#8217;entreprise où je travaille aujourd&#8217;hui (bien que l&#8217;on transitionne sur Prometheus, j&#8217;en parlerai plus loin), mais l&#8217;outil a quand même quelques problèmes, notamment:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Difficile de faire de la HA avec (il faut faire du sharding manuel). Mais bon, est ce que c&#8217;est mieux chez la concurrence ?</p>
+</li>
+<li>
+<p>Perte de l&#8217;état interne des streams en cas d&#8217;un reload (changement de configuration)</p>
+</li>
+<li>
+<p>Gestion des fenêtres de temps parfois un peu étrange (j&#8217;en parlerai plus loin)</p>
+</li>
+<li>
+<p>Quelques petits défauts notamment sur le steam <code>(by)</code> (qui permet de créer plusieurs sous streams en fonction de clés d&#8217;un événement) qui n&#8217;était jamais GC (donc si vous avez beaucoup de cardinalité ça posait des problèmes).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Mais de manière générale, Riemann fonctionne, et c&#8217;est fou qu&#8217;un outil maintenu par la communauté soit allé aussi loin.</p>
+</div>
+<div class="paragraph">
+<p>Mais pour aller plus loin et corriger ses défauts structurels il aurait besoin d&#8217;une réécriture "from scratch". C&#8217;est un projet qui mettrait au minimum plusieurs mois pour quelqu&#8217;un de motivé travaillant un peu tous les jours (et on sait que les estimations en informatique c&#8217;est pas fiable, donc ce serait beaucoup plus en réalité :D).</p>
+</div>
+<div class="paragraph">
+<p>Mais reparlons du push et du pull.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prometheus">Prometheus</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Prometheus s&#8217;impose aujourd&#8217;hui comme un standard, qu&#8217;on le veuille ou non. L&#8217;outil a été pensé et conçu pour ne fonctionner qu&#8217;en mode "pull": les services à monitorer exposent les métriques via HTTP, et Prometheus va les chercher périodiquement. Selon la doc Prometheus, cela a plusieurs avantages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-plaintext" data-lang="plaintext">Pulling over HTTP offers a number of advantages:
+
+    You can run your monitoring on your laptop when developing changes.
+    You can more easily tell if a target is down.
+    You can manually go to a target and inspect its health with a web browser.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Je ne suis d&#8217;accord avec aucun de ces affirmations.</p>
+</div>
+<div class="paragraph">
+<p>Déjà, qu&#8217;une métrique soit exposée en HTTP ou poussée sur le réseau est un détail d&#8217;implémentation. Je pourrai très bien exposer mes métriques je sais pas trop où en dev et autre part en prod par exemple.<br>
+Ensuite, c&#8217;est vrai que Prometheus permet de détecter si une cible ne répond plus. C&#8217;est également possible de le faire avec du push en détectant une source n&#8217;ayant pas émis de données pendant X temps. Cela demande un peu de travail, mais ça se fait (et je l&#8217;ai fait dans certains projets).<br>
+Pour le troisième point, pareil, détail d&#8217;implémentation. Je pourrai avoir mes métriques exposées d&#8217;une façon ou une autre pour le debugging et les pousser quand même sur le réseau.</p>
+</div>
+<div class="paragraph">
+<p>Par contre, voici selon moi les désavantages du pull:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Complexité réseau. En push, vous avez <strong>1 règle</strong> de firewalling: de vos applications à votre truc qui stocke vos métrique (si c&#8217;est Kafka c&#8217;est encore mieux). En pull, si j&#8217;ai 10 applications qui exposent du Prometheus sur un serveur, j&#8217;ai 10 ports ouverts entre mon Prometheus et mon serveur. Et ça sur chaque serveur.<br>
+Vous allez me dire "c&#8217;est pas grave, moi j&#8217;automatise mon infra, ouvrir des ports c&#8217;est facile !". Si on veut, ça reste sujet à erreur. Notre job est déjà assez complexe pour ne pas avoir à se compliquer la vie.</p>
+</li>
+<li>
+<p>Si Prometheus ne pull plus pour une raison X ou Y, vos métriques sont perdues. En push, je peux avoir mon Kafka (par exemple) qui fait buffer et permet de "récupérer" mes métriques une fois un incident résolu.</p>
+</li>
+<li>
+<p>Je pense que le push est plus simple à scale, et plus flexible. Dans une ancienne expérience on envoyait toutes nos métriques dans Kafka. N&#8217;importe qui pouvait brancher son consumer dessus et envoyer les métriques où il voulait, c&#8217;était super.<br>
+Quelqu&#8217;un veut tester InfluxDB ? Pas de problème. Vous décidez de partir sur Datadog finalement ? Allez, un nouveau consumer, et vous envoyez tout ça à l&#8217;extérieur. Bref, zéro couplage, le top.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Et enfin, je n&#8217;aime pas les DSL à la Prometheus. Avoir un DSL, OK, mais je veux pouvoir facilement l&#8217;étendre avec du code et avoir accès à un vrai langage de programmation. Sinon les queries deviennent des usines à gaz.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_je_recommande_prometheus">Je recommande Prometheus</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Pourtant, j&#8217;ai encouragé le passage à Prometheus dans mon équipe. Pourquoi ? Pragmatisme.</p>
+</div>
+<div class="paragraph">
+<p>Comme dit précédemment, Prometheus est partout. Si vous faites du Kubernetes par exemple, ne pas utiliser Prometheus c&#8217;est se tirer une balle dans le pied. Les intégrations sont là, et soyons honnête la solution fonctionne quand même.<br>
+Je ne l&#8217;aurai pas implémenté de cette façon si j&#8217;avais eu le choix, mais Prometheus est là, facile à installer, facile à brancher sur votre service de discovery préféré, et ça marche.</p>
+</div>
+<div class="paragraph">
+<p>Mais les outils ne vivent pas pour toujours. Dans 2, 3, 5 ans ou plus de nouveaux outils apparaîtrons, et j&#8217;espère qu&#8217;on aura quelque chose de différent.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_mon_outil_idéal">Mon outil idéal</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Je reste convaincu que beaucoup d&#8217;idées de Riemann mériteraient d&#8217;être implémentées dans d&#8217;autres outils, avec quelques variations.</p>
+</div>
+<div class="paragraph">
+<p>Il reste un soucis avec le stream processing. On ne peut souvent que calculer des approximations lors d&#8217;aggregations d&#8217;événements car on n&#8217;a pas toujours de garantie d&#8217;ordre.<br>
+Reprenons notre exemple de moyenne sur 10 secondes que nous avons vu précédemment. Vous recevez des événements entre T et T+10, vous calculez une moyenne sur ces événements. Que devez vous faire si vous recevez des événements du passé ? Dans le mauvais ordre ? Devons nous les ignorer ?</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/pull-push/events-bad-order.jpg" alt="Si des événements arrivent en retard, ils sont perdus"></span></p>
+</div>
+<div class="paragraph">
+<p>Mais cela n&#8217;est finalement pas grave. Vous pouvez calculer très rapidement une approximation qui sera suffisante pour la plupart des cas. Si je veux faire de l&#8217;aggregations sur des métriques venant de 100 machines, tant pis si je n&#8217;ai au final que 99 événements si cela me permet d&#8217;avoir très rapidement (en quelques secondes) une idée de la santé de la plateforme. Et si mes métriques arrivent en continu dans mon système, l&#8217;événement manquant pourra être pris en compte plus tard.</p>
+</div>
+<div class="paragraph">
+<p>On pourrait imaginer également la mise en place d&#8217;un petit buffer de quelques secondes pour limiter ce problème.</p>
+</div>
+<div class="paragraph">
+<p>Mais parfois, on a besoin d&#8217;avoir la garantie que notre calcul est correct. Je pense que le même outil de stream processing pourrait réaliser cela si implémenté correctement.</p>
+</div>
+<div class="paragraph">
+<p>Imaginez si vous pouviez réinjecter dans un outil de stream processing des données venant de votre base de données timeseries.<br>
+On peut ici parler de continuous query. Si vous avez la capacité de ré-emettre les événements (ordonnés par timestamp) dans votre outil de stream processing, l&#8217;outil pourrait recalculer la valeur exacte de votre aggregation à partir de ces événements.</p>
+</div>
+<div class="paragraph">
+<p>Cela demande à l&#8217;outil de gérer correctement les fenêtre de temps. Si l&#8217;on sait que les événements arrivent dans l&#8217;ordre, l&#8217;outil peut se contenter de se baser sur le temps de chaque événement pour faire avancer les différentes fenêtre de temps (et non exécuter un "tick" bêtement toutes les 10 secondes). Le temps n&#8217;a pas à avancer à la même vitesse dans la vraie vie et dans votre système de streaming, c&#8217;est ce stream d&#8217;événement qui doit être la source de vérité concernant le temps.<br>
+Cela a l&#8217;avantage de rendre l&#8217;outil prédictif: pour un même jeu de données en entrée, la sortie sera toujours la même. Reprendre un calcul est également facile vu qu&#8217;on sait où on s&#8217;est arrêté.</p>
+</div>
+<div class="paragraph">
+<p>Et là: on a le meilleur des deux mondes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Mon outil de stream processing pour alerter rapidement (car par expérience, je veux souvent générer une alerte dès que je reçois un événement spécifique, je n&#8217;ai pas toujours besoin de faire des calculs pour générer mon alerte), déplacer mes métriques d&#8217;un système à un autre, faire des calculs approximatifs (parfois complexes) en temps réel sur mes métriques.</p>
+</li>
+<li>
+<p>Le même outil, pour faire du continuous query (à partir d&#8217;une ou plusieurs sources de données), tout en m&#8217;appuyant pourquoi pas sur les capacités de calculs de ma base de données timeserie pour pré-calculer certains trucs (et éviter de déplacer trop de données). Dans ce mode de fonctionnement, chaque query (et ses calculs associés) pourrait avancer "à son rythme" et elles n&#8217;auraient aucun effet de bords entre elles.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Et le tout avec un langage commun entre les deux modes.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/pull-push/event-in-order.jpg" alt="Si des événements arrivent dans l&#8217;ordre, le calcul est correct"></span></p>
+</div>
+<div class="paragraph">
+<p>Il m&#8217;arrive tous les 3 à 6 mois de commencer à écrire une version de l&#8217;outil décrit. Mais je ne suis jamais totalement satisfait donc je laisse tomber (et cela prend beaucoup de temps, que je n&#8217;ai pas forcément, j&#8217;ai déjà un certain nombre de projets à maintenir).</p>
+</div>
+<div class="paragraph">
+<p>Ma dernière tentative date d&#8217;il y a 3 semaines où j&#8217;ai écrit un POC où des unités de calculs peuvent se représenter en structures de données Clojure (au format <a href="https://github.com/edn-format/edn">edn</a>), avec un DSL simple pour écrire la configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-clojure" data-lang="clojure">(-&gt; (init {:name :foo
+           :stream? true
+           :by [:host]})
+     a/increment
+    (where :&gt; 10)
+    (fixed-event-window 2)
+    mean
+    (debug!))
+
+#:pipeline{:name "foo"
+           :stream? true
+           :by [:host]
+           :actions
+           [#:action{:name :increment}
+            #:action{:name :where
+                     :params [:&gt; 10]}
+            #:action{:name :fixed-event-window
+                     :params [2]}
+            #:action{:name :mean}
+            #:action{:name :debug!}]}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette structure de données peut ensuite être transformée en stream exécutable. Cette structure de données peut également me servir de constructeur pour construire à la demande des unités de calculs, connectées à un serveur recevant des événements en mode streaming ou instanciées à la volée pour des continuous query.</p>
+</div>
+<div class="paragraph">
+<p>Mais je n&#8217;ai malheureusement pas de temps à consacrer à ce projet actuellement.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_vector">Vector</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Connaissez vous <a href="https://vector.dev/">Vector</a> ? Cet outil écrit en Rust permet notamment d&#8217;interconnecter différents systèmes entre eux. Vous le laissez scrap du Prometheus, consommer des logs, du Kafka&#8230;&#8203; Et il se charge de transférer tout ça à des systèmes extérieurs (voir à d&#8217;autres instances de Vector).<br></p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez même réaliser certains calculs ou modifications à vos métriques et logs, et étendre le projet en lua (et donc théoriquement en <a href="https://fennel-lang.org/">fennel</a> si vous aimez Clojure).</p>
+</div>
+<div class="paragraph">
+<p>On peut aussi d&#8217;une certaine façon tester sa configuration (qui est écrite en toml, yaml ou json).</p>
+</div>
+<div class="paragraph">
+<p>Interconnecter différents systèmes est, comme dit précédemment, une des forces de Riemann. D&#8217;ailleurs <a href="https://twitter.com/kartar">James Turnbull</a>, un des mainteneurs de Riemann (qui avait aussi écrit un livre sur le sujet), travaille sans surprise sur Vector.</p>
+</div>
+<div class="paragraph">
+<p>Comme indiqué dans sa documentation, Vector n&#8217;est pas fait pour faire du stream processing complexe. Mais je trouve le concept génial, et surtout on a enfin un outil bien conçu (du moins il semblerait après quelques tests rapides) pour scrape du Prometheus et renvoyer tout ça à d&#8217;autres systèmes.</p>
+</div>
+<div class="paragraph">
+<p>Cela faisait longtemps que je n&#8217;avais pas été aussi enthousiaste sur un outil de monitoring. C&#8217;est peut être également une bonne excuse pour faire du Rust et contribuer un peu au projet. Et clairement si je pouvais avoir un Riemann-like compatible Vector pour les transformations complexes ce serait super cool.</p>
+</div>
+<div class="paragraph">
+<p>Je prévois de tester Vector en détail sur mon infrastructure personnelle dans les mois à venir (et pourquoi pas faire un article dédié sur l&#8217;outil), et je pense que Vector peut devenir une des briques pour de nouveaux outils basés sur le push, et apporter la flexibilité que j&#8217;évoquais précédemment.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/cloud/">cloud</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+        <a class="right" href="/posts/2020-11-29-developpeur-cloud/">Le métier de développeur Cloud &raquo;</a>
+        
+    </div>
+    <!--Crappy code starts here-->
+    
+    <script>
+      $( document ).ready(function() {
+          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+              $('#challenge_question').text(data.question);
+              $('#challenge_name span').text(data.name);
+          });
+          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-12-04-pull-push", function(data) {
+              for (i=0; i<data.length; i++) {
+
+                  response = data[i];
+                  author = document.createElement('div');
+                  author.className="comment_author";
+                  author.textContent=response.author;
+
+                  d = new Date(response.timestamp);
+                  datestring = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + "h" + d.getMinutes();
+
+                  date = document.createElement('span');
+                  date.className="comment_date";
+                  date.textContent=datestring;
+
+                  content = document.createElement('div');
+                  content.className="comment_content";
+                  content.textContent=response.content;
+                  content.style="white-space: pre-wrap;";
+
+
+                  comment = document.createElement('div');
+                  comment.className="comment";
+
+                  comment.appendChild(author);
+                  comment.appendChild(date);
+                  comment.appendChild(content);
+
+                  document.getElementById('comments_list').appendChild(comment);
+              }
+          });
+      });
+      $(function(){
+          $('#comment_create').on('click', function(){
+              $.ajax
+              ({
+                  type: "POST",
+                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-12-04-pull-push",
+                  dataType: 'json',
+                  contentType: 'application/json',
+                  data: JSON.stringify({"author": $("#new_comment_author").val(),
+                                        "content" : $("#new_comment_content").val(),
+                                        "challenge" : $("#challenge_name span").text(),
+                                        "answer" : $("#challenge_answer").val()}),
+                  success: function () {
+                      $('#comment_result span').text("The comment will be approved soon.");
+                  },
+                  error: function () {
+                      $('#comment_result span').text("Fail to add the comment. Please contact the website owner.");
+                  }
+              })
+          });
+      });
+    </script>
+
+    <div id="comment_block">
+      <div id="comments_list">
+      </div>
+
+      <div id="new_comment">
+
+        <div id="challenge_name" style="visibility: hidden">
+          <span  style="visibility: hidden"></span>
+        </div>
+        <b><p>Add a comment</p></b>
+        <input type="text" id="new_comment_author" name="author" placeholder="author"><br><br>
+
+        <textarea id="new_comment_content", name="comment_content" rows="5" placeholder="content"></textarea>
+        <br><br>
+
+        <b><span id="challenge_question"></span></b><br/>
+        <input type="text" id="challenge_answer" name="challenge_answer" placeholder="Answer" size="40"><br><br>
+        <input id="comment_create" type="button" value="Add comment" class="btn btn-primary btn-lg"/>
+        <div id="comment_result">
+          <span></span>
+        </div>
+      </div>
+
+    </div>
+    
+    <!--Ends here-->
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2020 mcorbin</footer>
+    </div>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
