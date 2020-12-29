@@ -12,11 +12,149 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 06 Dec 2020 12:42:48 +0100
+Tue, 29 Dec 2020 23:57:18 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2020-12-30-shell-admin-systeme/
+</guid>
+<link>
+https://mcorbin.fr/posts/2020-12-30-shell-admin-systeme/
+</link>
+<title>
+Trop de shell pour l'administration système: une mauvaise idée ?
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Sous ce titre que certains pourront trouver provocateur se cache selon moi une vraie question: est ce qu&amp;#8217;il n&amp;#8217;est pas plus intéressant d&amp;#8217;utiliser un langage de programmation (comme Python ou Golang) à la place du shell pour faire de l&amp;#8217;administration système ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_avoir_des_bases_en_shell_est_important&quot;&gt;Avoir des bases en Shell est important&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Maitriser le shell est toujours intéressant. J&amp;#8217;utilise d&amp;#8217;ailleurs régulièrement sur ma machine des commandes comme find, grep, ou awk, et j&amp;#8217;ai quelques scripts qui me permettent de changer certains réglages.&lt;br&gt;
+Pour pas mal de petits besoins d&amp;#8217;administration système, un script shell peut être suffisant. Pourquoi s&amp;#8217;embêter à utiliser autre chose alors qu&amp;#8217;un petit script avec quelques conditions et quelques commandes fait le job ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Malheureusement, je pense que les &quot;petits besoins&quot; peuvent grossir rapidement, et pour moi des scripts shell trop long sont vite un problème. Je vais essayer d&amp;#8217;expliquer pourquoi avec un exemple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_réaliser_un_backup&quot;&gt;Réaliser un backup&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Prenons comme exemple un grand classique de l&amp;#8217;administration système: vous voulez écrire un script réalisant un backup d&amp;#8217;une base de données quelconque.&lt;br&gt;
+A première vue, le besoin est simple et pourrait être réalisé par un script shell:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;On crée le backup&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;On le déplace quelque part&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On pourrait très bien écrire un script shell réalisant ces deux actions.&lt;br&gt;
+Mais quand on réfléchit un peu plus à ce script, et à comment le rendre &quot;prod ready&quot;, on se rend compte finalement qu&amp;#8217;on veut aussi:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Des logs pertinents, si possible structurés en json.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Une façon propre de gérer les erreurs: envoi des erreurs à des outils de type Sentry par exemple, envoi d&amp;#8217;alertes pertinentes à son outil de monitoring, slack&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Des métriques, comme par exemple le temps d&amp;#8217;exécution du script.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On peut ensuite imaginer plein d&amp;#8217;autres trucs, comme un système de retry en cas d&amp;#8217;échec par exemple. Peut être aussi qu&amp;#8217;on aura également besoin d&amp;#8217;un client S3 pour stocker le backup sur un object store, ou d&amp;#8217;interagir avec des services cloud (pour les logs et les métriques).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mon petit script est finalement en train de se complexifier, et devient de plus en plus un programme à part entière. De plus, chaque interaction avec un système externe apporte son lot de complexité (client spécifique nécessaire, authentification, mTLS&amp;#8230;&amp;#8203;) qui peut être difficile à réaliser en shell.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;De plus, je veux que ce script (ou programme) ne soit pas gêré de façon différente par rapport aux autres programmes développés dans l&amp;#8217;entreprise:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Tests unitaires et tests d&amp;#8217;intégrations.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Code dans Git, intégration continue, avec creation de releases lors de modifications.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Déploiement automatisé, avec rollbacks possibles etc&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_scripts_et_programmes&quot;&gt;Scripts et programmes&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je pense qu&amp;#8217;il faut éviter de faire une distinction entre les scripts écrits par les ops et les programmes écrits par les développeurs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le cycle de vie de ces base de codes doit être selon moi identique, et utiliser un langage de programmation comme Go pour réaliser ce genre de tâche amène son lot d&amp;#8217;avantages, comme par exemple :&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;L&amp;#8217;énorme écosystème du langage. Je n&amp;#8217;ai pas à me demander si ce sera la galère d&amp;#8217;envoyer mes logs, métriques, alertes ou événements à des systèmes externes car j&amp;#8217;aurai des libs clientes dans le langage.&lt;br&gt;
+Vous allez me dire que tout cela est aussi faisable en shell. Il est en effet possible d&amp;#8217;installer des paquets pour obtenir certains clients (kafkacat, s3cmd&amp;#8230;&amp;#8203;), d&amp;#8217;utiliser curl ou autre, mais le confort de développement sera toujours en dessous de ce que l&amp;#8217;on trouve dans des langages de programmation complets.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Le tooling: outils de tests, formatter, analyse statique du code, gestion des dépendances&amp;#8230;&amp;#8203; Cela est éventuellement possible en shell, mais on est reste selon moi loin de ce qu&amp;#8217;on trouve ailleurs.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Possibilité de produire un binaire statique dans le cas de Go, et donc d&amp;#8217;éviter d&amp;#8217;avoir à polluer la machine en installant des tonnes de packages.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Peut être un point de vue un peu personnel: je trouve qu&amp;#8217;écrire du shell correctement est difficile (la syntaxe est une chose, mais ça on peut s&amp;#8217;y habituer). On se retrouve vite limité d&amp;#8217;un point de vue architecture logicielle avec le shell, et se tirer une balle dans le pied est très rapide (sur la gestion des erreurs par exemple).&lt;br&gt;
+Ayant hérité dans une précédente expérience de scripts shell de plus de 10000 lignes, ou de &quot;programmes&quot; shell complexes où ça &lt;code&gt;source&lt;/code&gt; dans tout les sens pour avoir une sorte de système de modules, c&amp;#8217;est juste l&amp;#8217;enfer à maintenir.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bref, du code c&amp;#8217;est du code, que ce soit écrit par un dev ou par un ops. Les deux mondes doivent avoir les mêmes exigences sur le code produit. D&amp;#8217;ailleurs, cela permet à tout le monde de travailler sur les différents programmes de l&amp;#8217;entreprise de la même façon, et donc les développeurs peuvent aussi contribuer à l&amp;#8217;outillage ops de façon standardisée.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je ne dis pas qu&amp;#8217;on ne doit jamais faire de shell, pour de petites tâches cela marche très bien, mais dès qu&amp;#8217;on commence à avoir des centaines de lignes de shell, avec de la logique dans le script, c&amp;#8217;est le signe qu&amp;#8217;il est temps selon moi de passer à autre chose.&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On me dit aussi parfois que coder en shell est plus rapide que dans un autre langage. C&amp;#8217;est vrai que le shell se prête très bien à certaines choses, comme la rechercher et manipulation de fichiers par exemple. Si votre script ne fait que ça vous pouvez continuer comme je l&amp;#8217;ai dit précédemment à faire du shell. Mais je ne pense pas que cet argument tient quand le script se complexifie, je dirai même que c&amp;#8217;est l&amp;#8217;inverse car le script sera plus maintenable dans un autre langage de programmation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;je pense que l&amp;#8217;abus de shell est dangereux pour la santé. Un certain nombre de scripts seraient plus maintenables et plus fiables dans un langage comme Golang (je cite beaucoup Go ici car je pense que c&amp;#8217;est un très bon langage pour ce genre de tâches. Mais rassurez vous, le langage &lt;a href=&quot;https://mcorbin.fr/posts/2019-06-13-one-year-of-go/&quot;&gt;a aussi ses défauts&lt;/a&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les développeurs et les ops doivent travailler de la même façon sur leurs programmes, et le shell apporte trop de désanvantages pour être utilisé pour des programmes complexes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Wed, 30 Dec 2020 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2020-12-04-pull-push/
