@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Wed, 30 Dec 2020 10:36:04 +0100
+Wed, 30 Dec 2020 10:42:15 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -39,7 +39,7 @@ Trop de shell pour l'administration système: une mauvaise idée ?
 Pour pas mal de petits besoins d&amp;#8217;administration système, un script shell peut être suffisant. Pourquoi s&amp;#8217;embêter à utiliser autre chose alors qu&amp;#8217;un petit script avec quelques conditions et quelques commandes fait le job ?&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Malheureusement, je pense que les &quot;petits besoins&quot; peuvent grossir rapidement, et pour moi des scripts shell trop long sont vite un problème. Je vais essayer d&amp;#8217;expliquer pourquoi avec un exemple.&lt;/p&gt;
+&lt;p&gt;Malheureusement, je pense que les &quot;petits besoins&quot; peuvent grossir rapidement, et pour moi des scripts shell trop longs sont vite un problème. Je vais essayer d&amp;#8217;expliquer pourquoi avec un exemple.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -84,7 +84,7 @@ Mais quand on réfléchit un peu plus à ce script, et à comment le rendre &quo
 &lt;p&gt;Mon petit script est finalement en train de se complexifier, et devient de plus en plus un programme à part entière. De plus, chaque interaction avec un système externe apporte son lot de complexité (client spécifique nécessaire, authentification, mTLS&amp;#8230;&amp;#8203;) qui peut être difficile à réaliser en shell.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;De plus, je veux que ce script (ou programme) ne soit pas gêré de façon différente par rapport aux autres programmes développés dans l&amp;#8217;entreprise:&lt;/p&gt;
+&lt;p&gt;Je veux également que ce script (ou programme) ne soit pas gêré de façon différente par rapport aux autres programmes développés dans l&amp;#8217;entreprise:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
