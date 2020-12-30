@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Tue, 29 Dec 2020 23:57:18 +0100
+Wed, 30 Dec 2020 10:36:04 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -123,7 +123,7 @@ Vous allez me dire que tout cela est aussi faisable en shell. Il est en effet po
 &lt;p&gt;Possibilité de produire un binaire statique dans le cas de Go, et donc d&amp;#8217;éviter d&amp;#8217;avoir à polluer la machine en installant des tonnes de packages.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Peut être un point de vue un peu personnel: je trouve qu&amp;#8217;écrire du shell correctement est difficile (la syntaxe est une chose, mais ça on peut s&amp;#8217;y habituer). On se retrouve vite limité d&amp;#8217;un point de vue architecture logicielle avec le shell, et se tirer une balle dans le pied est très rapide (sur la gestion des erreurs par exemple).&lt;br&gt;
+&lt;p&gt;Je trouve qu&amp;#8217;écrire du shell correctement est difficile (la syntaxe est une chose, mais ça on peut s&amp;#8217;y habituer). On se retrouve vite limité d&amp;#8217;un point de vue architecture logicielle avec le shell, et se tirer une balle dans le pied est très rapide (sur la gestion des erreurs par exemple).&lt;br&gt;
 Ayant hérité dans une précédente expérience de scripts shell de plus de 10000 lignes, ou de &quot;programmes&quot; shell complexes où ça &lt;code&gt;source&lt;/code&gt; dans tout les sens pour avoir une sorte de système de modules, c&amp;#8217;est juste l&amp;#8217;enfer à maintenir.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
