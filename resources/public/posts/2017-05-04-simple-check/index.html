@@ -312,7 +312,7 @@ Not very useful (just a threshold), but it&#8217;s something :)</p>
 
                   content = document.createElement('div');
                   content.className="comment_content";
-                  content.textContent=response.content;
+                  content.innerHTML=response.content;
                   content.style="white-space: pre-wrap;";
 
 
@@ -343,7 +343,7 @@ Not very useful (just a threshold), but it&#8217;s something :)</p>
                       $('#comment_result span').text("The comment will be approved soon.");
                   },
                   error: function () {
-                      $('#comment_result span').text("Fail to add the comment. Please contact the website owner.");
+                      $('#comment_result span').text("Fail to add the comment. Please contact the website owner (the email is in the About section of the website). Thank you in advance.");
                   }
               })
           });
@@ -367,6 +367,7 @@ Not very useful (just a threshold), but it&#8217;s something :)</p>
 
         <b><span id="challenge_question"></span></b><br/>
         <input type="text" id="challenge_answer" name="challenge_answer" placeholder="Answer" size="40"><br><br>
+        <p>If you have a bug/issue with the commenting system, please send me an email (my email is in the "About" section).</p>
         <input id="comment_create" type="button" value="Add comment" class="btn btn-primary btn-lg"/>
         <div id="comment_result">
           <span></span>
