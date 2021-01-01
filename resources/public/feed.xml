@@ -12,11 +12,77 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Thu, 31 Dec 2020 16:03:38 +0100
+Fri, 01 Jan 2021 14:24:30 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-01-01-evolution-si/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-01-01-evolution-si/
+</link>
+<title>
+L'évolution de votre SI est-elle toute tracée ?
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comment évolue votre SI ? Sa voie est-elle toute tracée ? Pouvez-vous justifier vos choix ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_contexte&quot;&gt;Contexte&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le COVID-19 est derrière nous, et vous assistez à votre première conférence physique depuis longtemps.&lt;br&gt;
+Après une journée à suivre des talks sur des sujets vus et revus, vous êtes au bar, et vous sirotez tranquillement votre bière en compagnie d&amp;#8217;autres personnes du public.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une personne prend la parole et décrit le fonctionnement du système d&amp;#8217;information de sa startup créée le mois dernier et ayant déjà 20 clients.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;exposé se conclut par &quot;Bien sûr tout cela va évoluer, on va tout passer en microservice dans Kubernetes le mois prochain, et utiliser Kafka comme base de données&quot;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;assistance hoche la tête en signe d&amp;#8217;assentiment, convaincue que le but ultime de tout architecte sera bientôt atteint par ce jeune startuper.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous recommandez une bière en espérant que que l&amp;#8217;alcool vous fasse oublier ce que vous venez d&amp;#8217;entendre.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_une_évolution_linéaire&quot;&gt;Une évolution linéaire ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Qui n&amp;#8217;a jamais vécu une situation plus ou moins similaire ? Il semblerait qu&amp;#8217;il existe un chemin tout tracé dans notre métier. Votre architecture évolue au gré des modes, et cela de façon prédéfinie par l&amp;#8217;industrie (ou Google).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A quel moment avons-nous arrêté de nous poser les questions: pourquoi ? Que nous apporte réellement tout ça ? Croyez-vous vraiment qu&amp;#8217;une solution unique sera adaptée aux dizaines, centaines de milliers de SI de la planète ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et pourtant, il est classique d&amp;#8217;entendre des &quot;on est en train de découper nos monolithes en microservices, le tout dans Kubernetes&quot;. Personne ne sait pourquoi, mais c&amp;#8217;est ce qu&amp;#8217;il faut faire, ce que l&amp;#8217;industrie veut, ce que les autres font. Comme ci cela allait de soit, il n&amp;#8217;y a pas à se poser de questions, Cela tombe sous le sens.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le pire ? Cela est extrêmement valorisé.&lt;br&gt;
+Qui pensez-vous que les boîtes vont recruter, celui qui maintient une architecture simple, ou la personne pouvant justifier sur son C.V la construction d&amp;#8217;une usine à gaz ?&lt;br&gt;
+Qui va aller parler en conférence ? Celui dont le SI tourne de manière efficace, de façon presque ennuyante, ou celui qui a monté une équipe de 50 personnes pour tout reconstruire ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Est ce que les outils et techniques cités précédemment sont de base néfastes ? Non. Comme toujours, cela a parfois du sens, et parfois non.&lt;br&gt;
+Mais entre le management qui pense résoudre ses problèmes organisationnels via de nouvelles technologies, les consultants spécialisés qui poussent au n&amp;#8217;importe quoi pour faire du cash et briller en société, et la propagande des vendors, on arrive très vite à la foire au n&amp;#8217;importe quoi.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il est temps d&amp;#8217;estimer à sa juste valeur la simplicité, et avoir de vrais justifications lors de choix technologiques.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Fri, 01 Jan 2021 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2020-12-30-shell-admin-systeme/

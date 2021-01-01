@@ -2,8 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>(mcorbin.fr): A tour of Riemann : Installing</title>
-    <link rel="canonical" href="https://mcorbin.fr/posts/2017-04-10-installing-riemann/">
+    <title>(mcorbin.fr): L&#39;évolution de votre SI est-elle toute tracée ?</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2021-01-01-evolution-si/">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -55,37 +55,60 @@
 <div id="post">
     <div class="post-header">
     <div id="post-meta" class="row">
-        <div class="col-lg-6">10 avril 2017</div>
+        <div class="col-lg-6">1 janvier 2021</div>
         
     </div>
-    <h2>A tour of Riemann : Installing</h2>
+    <h2>L&#39;évolution de votre SI est-elle toute tracée ?</h2>
 </div>
 <div>
     
     <div class="paragraph">
-<p>How to install Riemann ?</p>
+<p>Comment évolue votre SI ? Sa voie est-elle toute tracée ? Pouvez-vous justifier vos choix ?</p>
 </div>
 <div class="sect1">
-<h2 id="_installing_riemann">Installing Riemann</h2>
+<h2 id="_contexte">Contexte</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Go to <a href="http://riemann.io/" class="bare">http://riemann.io/</a> and download Riemann for your platform.
-You will also need a JDK (OpenJDK 8 for example).</p>
+<p>Le COVID-19 est derrière nous, et vous assistez à votre première conférence physique depuis longtemps.<br>
+Après une journée à suivre des talks sur des sujets vus et revus, vous êtes au bar, et vous sirotez tranquillement votre bière en compagnie d&#8217;autres personnes du public.</p>
+</div>
+<div class="paragraph">
+<p>Une personne prend la parole et décrit le fonctionnement du système d&#8217;information de sa startup créée le mois dernier et ayant déjà 20 clients.</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;exposé se conclut par "Bien sûr tout cela va évoluer, on va tout passer en microservice dans Kubernetes le mois prochain, et utiliser Kafka comme base de données".</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;assistance hoche la tête en signe d&#8217;assentiment, convaincue que le but ultime de tout architecte sera bientôt atteint par ce jeune startuper.</p>
+</div>
+<div class="paragraph">
+<p>Vous recommandez une bière en espérant que que l&#8217;alcool vous fasse oublier ce que vous venez d&#8217;entendre.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configuring_riemann_jvm">Configuring Riemann JVM</h2>
+<h2 id="_une_évolution_linéaire">Une évolution linéaire ?</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>On <code>Debian</code>, takes a look at <code>/etc/default/riemann</code>.
-On RHEL, it should be on <code>/etc/sysconfig/riemann</code>.</p>
+<p>Qui n&#8217;a jamais vécu une situation plus ou moins similaire ? Il semblerait qu&#8217;il existe un chemin tout tracé dans notre métier. Votre architecture évolue au gré des modes, et cela de façon prédéfinie par l&#8217;industrie (ou Google).</p>
 </div>
 <div class="paragraph">
-<p>For this tutorial, you don&#8217;t need to modify this file.</p>
+<p>A quel moment avons-nous arrêté de nous poser les questions: pourquoi ? Que nous apporte réellement tout ça ? Croyez-vous vraiment qu&#8217;une solution unique sera adaptée aux dizaines, centaines de milliers de SI de la planète ?</p>
 </div>
 <div class="paragraph">
-<p>Riemann is just a jar, so that&#8217;s it, you have installed Riemann :)</p>
+<p>Et pourtant, il est classique d&#8217;entendre des "on est en train de découper nos monolithes en microservices, le tout dans Kubernetes". Personne ne sait pourquoi, mais c&#8217;est ce qu&#8217;il faut faire, ce que l&#8217;industrie veut, ce que les autres font. Comme ci cela allait de soit, il n&#8217;y a pas à se poser de questions, Cela tombe sous le sens.</p>
+</div>
+<div class="paragraph">
+<p>Le pire ? Cela est extrêmement valorisé.<br>
+Qui pensez-vous que les boîtes vont recruter, celui qui maintient une architecture simple, ou la personne pouvant justifier sur son C.V la construction d&#8217;une usine à gaz ?<br>
+Qui va aller parler en conférence ? Celui dont le SI tourne de manière efficace, de façon presque ennuyante, ou celui qui a monté une équipe de 50 personnes pour tout reconstruire ?</p>
+</div>
+<div class="paragraph">
+<p>Est ce que les outils et techniques cités précédemment sont de base néfastes ? Non. Comme toujours, cela a parfois du sens, et parfois non.<br>
+Mais entre le management qui pense résoudre ses problèmes organisationnels via de nouvelles technologies, les consultants spécialisés qui poussent au n&#8217;importe quoi pour faire du cash et briller en société, et la propagande des vendors, on arrive très vite à la foire au n&#8217;importe quoi.</p>
+</div>
+<div class="paragraph">
+<p>Il est temps d&#8217;estimer à sa juste valeur la simplicité, et avoir de vrais justifications lors de choix technologiques.</p>
 </div>
 </div>
 </div>
@@ -96,23 +119,15 @@ On RHEL, it should be on <code>/etc/sysconfig/riemann</code>.</p>
     
     <a href="/tags/devops/">devops</a>
     
-    <a href="/tags/clojure/">clojure</a>
-    
-    <a href="/tags/riemann/">riemann</a>
-    
-    <a href="/tags/tour-of-riemann/">tour-of-riemann</a>
-    
-    <a href="/tags/english/">english</a>
+    <a href="/tags/rant/">rant</a>
     
 </div>
 
 
     <div id="prev-next">
         
-        <a href="/posts/2017-05-04-simple-check/">&laquo; A tour of Riemann : A simple check</a>
         
-        
-        <a class="right" href="/posts/2017-04-09-a-tour-of-riemann/">A tour of Riemann &raquo;</a>
+        <a class="right" href="/posts/2020-12-30-shell-admin-systeme/">Trop de shell pour l&#39;administration système: une mauvaise idée ? &raquo;</a>
         
     </div>
     <!--Crappy code starts here-->
@@ -123,7 +138,7 @@ On RHEL, it should be on <code>/etc/sysconfig/riemann</code>.</p>
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2017-04-10-installing-riemann", function(data) {
+          $.get("https://comments.mcorbin.fr/api/v1/comment/2021-01-01-evolution-si", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -160,7 +175,7 @@ On RHEL, it should be on <code>/etc/sysconfig/riemann</code>.</p>
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2017-04-10-installing-riemann",
+                  url: "https://comments.mcorbin.fr/api/v1/comment/2021-01-01-evolution-si",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),
