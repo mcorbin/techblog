@@ -12,11 +12,516 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Fri, 01 Jan 2021 14:30:54 +0100
+Sat, 02 Jan 2021 21:14:50 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-01-03-vector-introduction/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-01-03-vector-introduction/
+</link>
+<title>
+Une introduction à Vector
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans un &lt;a href=&quot;https://mcorbin.fr/posts/2020-12-04-pull-push/&quot;&gt;précédent article&lt;/a&gt;, j&amp;#8217;avais mentionné Vector comme une technologie qui me faisait de l&amp;#8217;oeil. Je ferai un tour rapide de l&amp;#8217;outil dans cet article, notamment pour récupérer des métriques, gérer des logs, avec une petite intégration InfluxDB.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_pourquoi_utiliser_vector&quot;&gt;Pourquoi utiliser Vector ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vector permet de collecter, transformer et transférer entre différents systèmes des logs et des métriques.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Par exemple, vous pouvez avec collecter des logs depuis différentes sources (journald, fichiers&amp;#8230;&amp;#8203;), réaliser des transformations dessus (ajout de labels, transformations diverses) puis transférer tout ça à un système externe comme par exemple Elasticsearch ou Loki.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;De la même manière, Vector peut ingérer des métriques (ou même scrap des métriques au format Prometheus comme nous le verrons plus tard), réaliser là aussi au besoin des transformations, et envoyer les métriques dans InfluxDB, Datadog&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ecrit en Rust, Vector se veut léger et performant. Il peut être utilisé de différentes façons (il est possible de transférer les logs et métriques entre différentes instances de Vector, ce qui permet d&amp;#8217;avoir des Vector &quot;agents&quot; et des Vector &quot;centraux&quot; recevant les informations des agents par exemple), s&amp;#8217;intègre avec Kafka&amp;#8230;&amp;#8203; Bref, l&amp;#8217;outil a l&amp;#8217;air très flexible (une &lt;a href=&quot;https://vector.dev/docs/setup/deployment/&quot;&gt;section&lt;/a&gt; de la documentation explique tout ça).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cet outil a tout pour me plaire, et cet article montre quelques exemples d&amp;#8217;utilisation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_l_architecture_que_je_vais_présenter&quot;&gt;L&amp;#8217;architecture que je vais présenter.&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous allons ici utiliser Vector pour plusieurs choses:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Récupérer les logs et les métriques d&amp;#8217;une instance de &lt;a href=&quot;https://github.com/mcorbin/cabourotte&quot;&gt;Cabourotte&lt;/a&gt; démarrée en tant que service systemd.&lt;br&gt;
+Vous ne connaissez pas Cabourotte ? C&amp;#8217;est un outil que j&amp;#8217;ai conçu pour pouvoir facilement configurer (notamment par API) et exécuter des healthchecks sur votre infrastructure, le tout en fournissant des métriques et logs pertinents.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Réaliser quelques transformations.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Envoyer les métriques à InfluxDB et les logs dans un fichier (il serait possible d&amp;#8217;envoyer les logs dans Loki ou Elasticsearch par exemple dans un cas d&amp;#8217;utilisation réel).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/vector-intro/architecture.jpg&quot; alt=&quot;L&amp;#8217;architecture mise en place&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: Je n&amp;#8217;ai jamais utilisé InfluxDB 2.0, donc je n&amp;#8217;irai pas très loin dans l&amp;#8217;utilisation de cet outil.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_démarrer_influxdb&quot;&gt;Démarrer InfluxDB&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Téléchargez InfluxDB depuis le &lt;a href=&quot;https://docs.influxdata.com/influxdb/v2.0/get-started/&quot;&gt;site officiel&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une fois téléchargé et décompressé, vous pouvez le lancer avec la simple commande &lt;code&gt;./influxd&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Allez ensuite sur &lt;code&gt;&lt;a href=&quot;http://localhost:8086&quot; class=&quot;bare&quot;&gt;http://localhost:8086&lt;/a&gt;&lt;/code&gt; pour configurer InfluxDB. J&amp;#8217;ai créé dans mon cas une organisation et un bucket appelé &lt;code&gt;mcorbin&lt;/code&gt;.&lt;br&gt;
+Vous pouvez récupérer également dans cette interface le token InfluxDB.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_démarrer_cabourotte&quot;&gt;Démarrer Cabourotte&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les releases de Cabourotte sont disponibles sur &lt;a href=&quot;https://github.com/mcorbin/cabourotte/releases&quot;&gt;Github&lt;/a&gt;. Je vais utiliser ici la version &lt;code&gt;0.7.0&lt;/code&gt; qui est la version la plus récente au moment où j&amp;#8217;écris l&amp;#8217;article.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme dit précédemment, je vais configurer Cabourotte en tant que service systemd. Placez le fichier suivant dans &lt;code&gt;/etc/systemd/system/cabourotte.service&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[Unit]
+Description=The best tool to execute healthchecks on your infrastructure
+After=network.target
+ConditionPathExists=/etc/cabourotte/cabourotte.yml
+
+[Service]
+DynamicUser=yes
+ExecStart=/usr/local/cabourotte/cabourotte daemon --config /etc/cabourotte/cabourotte.yml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Installez ensuite Cabourotte dans &lt;code&gt;/usr/local/cabourotte&lt;/code&gt; et activez le service:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wget https://github.com/mcorbin/cabourotte/releases/download/v0.7.0/cabourotte_0.7.0_Linux_x86_64.tar.gz
+sudo mkdir /usr/local/cabourotte/
+sudo tar -C /usr/local/cabourotte -xzf cabourotte_0.7.0_Linux_x86_64.tar.gz
+mkdir ~/Documents/vector
+systemctl daemon-reload&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Créons maintenant le fichier de configuration de Cabourotte.&lt;br&gt;
+Placez la configuration suivante dans &lt;code&gt;/etc/cabourotte/cabourotte.yml&lt;/code&gt;. Vous pouvez retrouver toutes les options disponibles dans la &lt;a href=&quot;https://cabourotte.mcorbin.fr/installation/configuration/&quot;&gt;documentation&lt;/a&gt; de l&amp;#8217;outil.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;---
+http:
+  host: &quot;0.0.0.0&quot;
+  port: 9013
+dns-checks:
+  - name: &quot;dns-mcorbin.fr&quot;
+    description: &quot;dns healthcheck on mcorbin.fr&quot;
+    domain: &quot;mcorbin.fr&quot;
+    interval: 5s
+    labels:
+      site: mcorbin.fr
+http-checks:
+  - name: &quot;http-mcorbin.fr&quot;
+    description: &quot;http healthcheck on mcorbin.fr&quot;
+    valid-status:
+      - 200
+      - 201
+    target: &quot;mcorbin.fr&quot;
+    port: 443
+    protocol: &quot;https&quot;
+    path: &quot;/&quot;
+    timeout: 5s
+    interval: 5s
+    labels:
+      site: mcorbin.fr
+  - name: &quot;http-error-example&quot;
+    description: &quot;This healthcheck should fail&quot;
+    valid-status:
+      - 200
+      - 201
+    target: &quot;doesnotexist.mcorbin.fr&quot;
+    port: 443
+    protocol: &quot;https&quot;
+    path: &quot;/&quot;
+    timeout: 5s
+    interval: 5s
+    labels:
+      site: mcorbin.fr&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous configurons ici 3 healthchecks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Un healthcheck de type DNS qui devrait s&amp;#8217;exécuter correctement.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Un healthcheck de type HTTP qui là aussi est censé être réussi.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Un autre healthcheck de type HTTP ciblant &lt;code&gt;doesnotexist.mcorbin.fr&lt;/code&gt;. Ce domaine n&amp;#8217;existant pas, ce healthcheck doit retourner des erreurs.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Démarrez maintenant le service:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo systemctl start cabourotte&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le service doit démarrer correctement, et vous devez voir dans les logs (&lt;code&gt;sudo journalctl -eu cabourotte --no-pager&lt;/code&gt;) quelque chose comme:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;janv. 02 16:40:05 mathieu cabourotte[16652]: {&quot;level&quot;:&quot;info&quot;,&quot;ts&quot;:1609602005.3045712,&quot;caller&quot;:&quot;exporter/root.go:116&quot;,&quot;msg&quot;:&quot;Healthcheck successful&quot;,&quot;name&quot;:&quot;dns-mcorbin.fr&quot;,&quot;labels&quot;:{&quot;site&quot;:&quot;mcorbin.fr&quot;},&quot;date&quot;:&quot;2021-01-02 16:40:05.304543995 +0100 CET m=+65.311308786&quot;}
+janv. 02 16:40:05 mathieu cabourotte[16652]: {&quot;level&quot;:&quot;error&quot;,&quot;ts&quot;:1609602005.3066423,&quot;caller&quot;:&quot;exporter/root.go:122&quot;,&quot;msg&quot;:&quot;healthcheck failed&quot;,&quot;name&quot;:&quot;http-error-example&quot;,&quot;labels&quot;:{&quot;site&quot;:&quot;mcorbin.fr&quot;},&quot;cause&quot;:&quot;HTTP request failed: Get \&quot;https://doesnotexist.mcorbin.fr:443/\&quot;: dial tcp: lookup doesnotexist.mcorbin.fr on 192.168.1.1:53: no such host&quot;,&quot;date&quot;:&quot;2021-01-02 16:40:05.30661737 +0100 CET m=+65.313382168&quot;,&quot;stacktrace&quot;:&quot;cabourotte/exporter.(*Component).Start.func2\n\t/home/mathieu/prog/go/cabourotte/exporter/root.go:122\ngopkg.in/tomb%2ev2.(*Tomb).run\n\t/home/mathieu/prog/go/cabourotte/vendor/gopkg.in/tomb.v2/tomb.go:163&quot;}
+janv. 02 16:40:05 mathieu cabourotte[16652]: {&quot;level&quot;:&quot;info&quot;,&quot;ts&quot;:1609602005.3296578,&quot;caller&quot;:&quot;exporter/root.go:116&quot;,&quot;msg&quot;:&quot;Healthcheck successful&quot;,&quot;name&quot;:&quot;http-mcorbin.fr&quot;,&quot;labels&quot;:{&quot;site&quot;:&quot;mcorbin.fr&quot;},&quot;date&quot;:&quot;2021-01-02 16:40:05.329629923 +0100 CET m=+65.336394717&quot;}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cela me fait d&amp;#8217;ailleurs penser que je devrais changer ces logs pour montrer un timestamp plutôt qu&amp;#8217;une date formattée à la Golang.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_vector&quot;&gt;Vector&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Téléchargez Vector sur le &lt;a href=&quot;https://vector.dev/releases/&quot;&gt;site officiel&lt;/a&gt;. Vector peut se configurer en YAML, TOML ou JSON. Dans cet exemple je le configurerai en YAML.&lt;br&gt;
+Toutes les options de configuration sont disponibles &lt;a href=&quot;https://vector.dev/docs/setup/configuration/&quot;&gt;ici&lt;/a&gt;. L&amp;#8217;outil est assez récent mais il est déjà possible de faire des tonnes de trucs avec.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mon fichier &lt;code&gt;vector.yaml&lt;/code&gt; contient:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;data_dir: /home/mathieu/Documents/vector
+sources:
+
+  cabourotte_prometheus:
+    type: prometheus_scrape
+    endpoints:
+    - http://127.0.0.1:9013/metrics
+    scrape_interval_secs: 15
+
+  cabourotte_logs:
+    type: journald
+    current_boot_only: true
+    exclude_units: []
+    include_units: [&quot;cabourotte&quot;]
+
+transforms:
+
+  journald_json:
+    type: json_parser
+    inputs:
+      - cabourotte_logs
+    drop_field: true
+    drop_invalid: true
+    field: message
+
+  log_fields:
+    type: add_fields
+    inputs:
+      - journald_json
+    overwrite: true
+    fields:
+      environment: &quot;prod&quot;
+      location: &quot;ch-gva-2&quot;
+
+  metric_tags:
+    type: add_tags
+    inputs:
+      - cabourotte_prometheus
+    overwrite: true
+    tags:
+      environment: &quot;prod&quot;
+      location: &quot;ch-gva-2&quot;
+
+sinks:
+  influxdb:
+    type: influxdb_metrics
+    inputs:
+      - metric_tags
+    bucket: mcorbin
+    default_namespace: service
+    endpoint: http://localhost:8086/
+    org: mcorbin
+    token: &quot;wlJqadZ9yLdMHDpifDhSKzwej-neZ2mrF-vp955w7nZY1lJAGKP7dRiiZtYSOuh82e63zYN_IPodBWQ2XO29mw==&quot;
+    healthcheck: true
+
+  file:
+    type: file
+    inputs:
+      - log_fields
+    compression: none
+    path: &quot;/tmp/vector-%Y-%m-%d.log&quot;
+    encoding:
+      codec: ndjson
+    healthcheck: true&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La configuration &lt;code&gt;data_dir&lt;/code&gt; est un chemin vers un répertoire utilisé par Vector pour stocker des metadatas.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Maintenant, lancez Vector avec &lt;code&gt;sudo ./vector --config ~/vector.yaml&lt;/code&gt; (j&amp;#8217;utilise sudo pour que la source &lt;code&gt;journald&lt;/code&gt; fonctionne).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_sources&quot;&gt;Sources&lt;/h3&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;La partie &lt;code&gt;sources&lt;/code&gt; contient les différentes sources pour les logs et métriques. Nous avons ici deux sources.&lt;br&gt;
+Une va récupérer les métriques exposées par Cabourotte au format Prometheus. Vector ira donc récupérer ces métriques toutes les 15 secondes.&lt;br&gt;
+Une autre source va récupérer les logs de Cabourotte depuis &lt;code&gt;journald&lt;/code&gt;. Vous pourriez modifier cette source pour récupérer automatiquement les logs toutes les units de votre système.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_transforms&quot;&gt;Transforms&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une fois que les sources sont configurées, Vector peut réaliser des transformations dessus.&lt;br&gt;
+Une première transformation appelée &lt;code&gt;journald_json&lt;/code&gt; se charge de transformer en json les logs de journald. En effet, voici ce qu&amp;#8217;on obtiendrait sans cette transformation:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &quot;PRIORITY&quot;: &quot;6&quot;,
+  &quot;SYSLOG_FACILITY&quot;: &quot;3&quot;,
+  &quot;SYSLOG_IDENTIFIER&quot;: &quot;cabourotte&quot;,
+  &quot;_BOOT_ID&quot;: &quot;051a2c4dc6f74a238d257030efa2b3f1&quot;,
+  &quot;_CAP_EFFECTIVE&quot;: &quot;0&quot;,
+  &quot;_CMDLINE&quot;: &quot;/usr/local/cabourotte/cabourotte daemon --config /etc/cabourotte/cabourotte.yml&quot;,
+  &quot;_COMM&quot;: &quot;cabourotte&quot;,
+  &quot;_EXE&quot;: &quot;/usr/local/cabourotte/cabourotte&quot;,
+  &quot;_GID&quot;: &quot;64171&quot;,
+  &quot;_MACHINE_ID&quot;: &quot;f8de18ca659543f08aa82967a944fde0&quot;,
+  &quot;_PID&quot;: &quot;16652&quot;,
+  &quot;_SELINUX_CONTEXT&quot;: &quot;unconfined\n&quot;,
+  &quot;_STREAM_ID&quot;: &quot;4f4bbd77076b464799455c1fd9d634dd&quot;,
+  &quot;_SYSTEMD_CGROUP&quot;: &quot;/system.slice/cabourotte.service&quot;,
+  &quot;_SYSTEMD_INVOCATION_ID&quot;: &quot;869cef96790a4fc99cbe81f54bc7b986&quot;,
+  &quot;_SYSTEMD_SLICE&quot;: &quot;system.slice&quot;,
+  &quot;_SYSTEMD_UNIT&quot;: &quot;cabourotte.service&quot;,
+  &quot;_TRANSPORT&quot;: &quot;stdout&quot;,
+  &quot;_UID&quot;: &quot;64171&quot;,
+  &quot;__MONOTONIC_TIMESTAMP&quot;: &quot;92565244358&quot;,
+  &quot;__REALTIME_TIMESTAMP&quot;: &quot;1609607085328622&quot;,
+  &quot;host&quot;: &quot;mathieu&quot;,
+  &quot;message&quot;: &quot;{\&quot;level\&quot;:\&quot;info\&quot;,\&quot;ts\&quot;:1609607085.3284657,\&quot;caller\&quot;:\&quot;exporter/root.go:116\&quot;,\&quot;msg\&quot;:\&quot;Healthcheck successful\&quot;,\&quot;name\&quot;:\&quot;http-mcorbin.fr\&quot;,\&quot;labels\&quot;:{\&quot;site\&quot;:\&quot;mcorbin.fr\&quot;},\&quot;date\&quot;:\&quot;2021-01-02 18:04:45.328370895 +0100 CET m=+5145.335135914\&quot;}&quot;,
+  &quot;source_type&quot;: &quot;journald&quot;,
+  &quot;timestamp&quot;: &quot;2021-01-02T17:04:45.328622Z&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Grâce à la transformation précédente, le json présent dans le champ &quot;message&quot; sera transformé. Nous verrons ce que ça donne un peu plus loin.&lt;br&gt;
+&lt;strong&gt;Note&lt;/strong&gt;: Les champs autres que &lt;code&gt;message&lt;/code&gt; sont automatiquement ajoutés par Vector.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous avons ensuite deux autres transformations: &lt;code&gt;log_fields&lt;/code&gt; et &lt;code&gt;metric_tags&lt;/code&gt;.&lt;br&gt;
+Ces deux transformations réalisent la même action mais sur deux types de données différentes (logs et métriques).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;log_fields&lt;/code&gt; va récupérer la sortie de la transformation &lt;code&gt;journald_json&lt;/code&gt; et rajouter les clés &lt;code&gt;environment&lt;/code&gt; et &lt;code&gt;location&lt;/code&gt; au message. Le choix de ces clés sont totalement libres.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;metric_tags&lt;/code&gt; fait la même chose mais pour les métriques venant de Cabourotte. Les tags &lt;code&gt;environment&lt;/code&gt; et &lt;code&gt;location&lt;/code&gt; sont ajoutés aux métriques.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_sinks&quot;&gt;Sinks&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il est maintenant temps de transférer tout ça à des systèmes externes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le sink &lt;code&gt;influxdb&lt;/code&gt; récupèrera la sortie de &lt;code&gt;metric_tags&lt;/code&gt; et enverra les métriques dans l&amp;#8217;instance InfluxDB configurée précédemment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le sink &lt;code&gt;file&lt;/code&gt; récupérera les logs de &lt;code&gt;log_fields&lt;/code&gt; et les ajoutera dans un fichier (le nom du fichier sera en fonction de la date du log).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En résumé, voici ce que nous faisons:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/vector-intro/graphe.jpg&quot; alt=&quot;Le graphe Vector&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_résultat&quot;&gt;Résultat&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_métriques&quot;&gt;Métriques&lt;/h3&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/vector-intro/influx.png&quot; alt=&quot;Des métriques sont visibles dans InfluxDB&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mes métriques (ici la valeur d&amp;#8217;un bucket, d&amp;#8217;où l&amp;#8217;augmentation perpétuelle) sont bien visibles dans InfluxDB. On voit que mes tags &lt;code&gt;environment&lt;/code&gt; et &lt;code&gt;location&lt;/code&gt; ont été ajoutés aux métriques.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_logs&quot;&gt;Logs&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mes logs sont bien visibles dans &lt;code&gt;/tmp/vector-2021-01-02.log&lt;/code&gt;. Par exemple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &quot;PRIORITY&quot;: &quot;6&quot;,
+  &quot;SYSLOG_FACILITY&quot;: &quot;3&quot;,
+  &quot;SYSLOG_IDENTIFIER&quot;: &quot;cabourotte&quot;,
+  &quot;_BOOT_ID&quot;: &quot;051a2c4dc6f74a238d257030efa2b3f1&quot;,
+  &quot;_CAP_EFFECTIVE&quot;: &quot;0&quot;,
+  &quot;_CMDLINE&quot;: &quot;/usr/local/cabourotte/cabourotte daemon --config /etc/cabourotte/cabourotte.yml&quot;,
+  &quot;_COMM&quot;: &quot;cabourotte&quot;,
+  &quot;_EXE&quot;: &quot;/usr/local/cabourotte/cabourotte&quot;,
+  &quot;_GID&quot;: &quot;64171&quot;,
+  &quot;_MACHINE_ID&quot;: &quot;f8de18ca659543f08aa82967a944fde0&quot;,
+  &quot;_PID&quot;: &quot;16652&quot;,
+  &quot;_SELINUX_CONTEXT&quot;: &quot;unconfined\n&quot;,
+  &quot;_STREAM_ID&quot;: &quot;4f4bbd77076b464799455c1fd9d634dd&quot;,
+  &quot;_SYSTEMD_CGROUP&quot;: &quot;/system.slice/cabourotte.service&quot;,
+  &quot;_SYSTEMD_INVOCATION_ID&quot;: &quot;869cef96790a4fc99cbe81f54bc7b986&quot;,
+  &quot;_SYSTEMD_SLICE&quot;: &quot;system.slice&quot;,
+  &quot;_SYSTEMD_UNIT&quot;: &quot;cabourotte.service&quot;,
+  &quot;_TRANSPORT&quot;: &quot;stdout&quot;,
+  &quot;_UID&quot;: &quot;64171&quot;,
+  &quot;__MONOTONIC_TIMESTAMP&quot;: &quot;93010244891&quot;,
+  &quot;__REALTIME_TIMESTAMP&quot;: &quot;1609607530329156&quot;,
+  &quot;caller&quot;: &quot;exporter/root.go:116&quot;,
+  &quot;date&quot;: &quot;2021-01-02 18:12:10.329118217 +0100 CET m=+5590.335882993&quot;,
+  &quot;environment&quot;: &quot;prod&quot;,
+  &quot;host&quot;: &quot;mathieu&quot;,
+  &quot;labels&quot;: {
+    &quot;site&quot;: &quot;mcorbin.fr&quot;
+  },
+  &quot;level&quot;: &quot;info&quot;,
+  &quot;location&quot;: &quot;ch-gva-2&quot;,
+  &quot;msg&quot;: &quot;Healthcheck successful&quot;,
+  &quot;name&quot;: &quot;http-mcorbin.fr&quot;,
+  &quot;source_type&quot;: &quot;journald&quot;,
+  &quot;timestamp&quot;: &quot;2021-01-02T17:12:10.329156Z&quot;,
+  &quot;ts&quot;: 1609607530.3291318
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On voit que mon champ &lt;code&gt;message&lt;/code&gt; a disparu (les clés et valeurs ont été fusionnées au json principal), et &lt;code&gt;environment&lt;/code&gt; et &lt;code&gt;location&lt;/code&gt; ont bien été ajoutés à mon log.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_tester_sa_configuration&quot;&gt;Tester sa configuration.&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Fait intéressant, il est possible de tester sa configuration. Ajoutez par exemple à la fin de votre configuration:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;tests:
+  - name: &quot;test-logs&quot;
+    inputs:
+      - insert_at: journald_json
+        type: log
+        log_fields:
+          message: &quot;{\&quot;foo\&quot;: \&quot;bar\&quot;}&quot;
+    outputs:
+      - extract_from: &quot;log_fields&quot;
+        conditions:
+          - environment.equals: &quot;prod&quot;
+            location.equals: &quot;ch-gva-2&quot;
+            foo.equals: &quot;bar&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ici, on définit un test qui injectera le message &lt;code&gt;&quot;{\&quot;foo\&quot;: \&quot;bar\&quot;}&quot;&lt;/code&gt; à l&amp;#8217;étape &lt;code&gt;journald_json&lt;/code&gt;.&lt;br&gt;
+On vérifie ensuite qu&amp;#8217;à la sortie de l&amp;#8217;étape &lt;code&gt;log_fields&lt;/code&gt; les clés environment et location ont été ajoutées, et on vérifie également que la clé &lt;code&gt;foo&lt;/code&gt; du message en json a été insérée.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous pouvez maintenant lancer les tests:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;./vector test ~/vector.yaml
+Running /home/mathieu/vector.yaml tests
+test /home/mathieu/vector.yaml: test-logs ... passed&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vector permet de faire beaucoup plus, mais je ne voulais pas que cet introduction à l&amp;#8217;outil soit trop lourde. Il est même possible d&amp;#8217;exécuter du lua ou bien d&amp;#8217;utiliser la fonction &lt;a href=&quot;https://vector.dev/docs/reference/transforms/remap/&quot;&gt;remap&lt;/a&gt; pour réaliser des transformations complexes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le fait de pouvoir tester sa configuration est un gros plus, à voir ensuite à l&amp;#8217;usage jusqu&amp;#8217;à quel niveau les choses sont testables (je n&amp;#8217;ai pas poussé le système dans ses retranchements).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je n&amp;#8217;ai par contre pas trouvé si il était possible d&amp;#8217;inclure un fichier de configuration dans un autre. Cela serait très utile car je pense que les configurations peuvent vite devenir plus verbeuses. Cela permettrait aussi d&amp;#8217;avoir des fichiers consacrés aux logs et d&amp;#8217;autres aux métriques par exemple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je n&amp;#8217;ai pas également trouvé si il était possible de générer le graphe des différentes transformations. Ce serait également intéressant sur des configurations complexes (un peu comme &lt;code&gt;terraform graph&lt;/code&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il existe également une intégration Kubernetes pour notamment récupérer les logs de conteneurs, mais je testerai cela dans un article dédié.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vector est vraiment un outil intéressant. Le fait de pouvoir manipuler mes logs et métriques dans le même outil est un gros plus. Et avec lua de disponible, je sais que je pourrai répondre même à des besoins complexes non prévus par la configuration de base.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Etant en train de réfléchir à reconstuire complètement mon infrastructure personnelle hébergeant plusieurs sites web et applications, cela me donnera une excuse pour le tester dans un vrai contexte (notamment avec du Kubernetes).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Sun, 03 Jan 2021 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2021-01-01-evolution-si/
