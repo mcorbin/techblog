@@ -12,11 +12,93 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sat, 02 Jan 2021 21:14:50 +0100
+Wed, 10 Feb 2021 22:51:59 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-02-11-meuse-1.2.0/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-02-11-meuse-1.2.0/
+</link>
+<title>
+Meuse 1.2.0 released!
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I released today the version &lt;strong&gt;1.2.0&lt;/strong&gt; of &lt;a href=&quot;https://github.com/mcorbin/meuse&quot;&gt;Meuse&lt;/a&gt;, your favorite Rust private registry for your crates.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_what_s_new&quot;&gt;What&amp;#8217;s new&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_more_security&quot;&gt;More security&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Meuse needs some secrets in its &lt;a href=&quot;https://meuse.mcorbin.fr/installation/configuration/&quot;&gt;configuration file&lt;/a&gt;, for example the PostgreSQL database password, or your S3 credentials if you are using the S3 backend for your crates.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This release allows you to set a new &lt;code&gt;!secret&lt;/code&gt; (or &lt;code&gt;!envsecret&lt;/code&gt; to read a value from an environment variable) YAML tags for your secrets in the configuration file.&lt;br&gt;
+This will indicate to Meuse that the value is a secret. If this value is leaked by mistake by the program (like printed somewhere), the secret will be replaced by a &lt;code&gt;&amp;lt;&amp;lt; cloaked &amp;gt;&amp;gt;&lt;/code&gt; string.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You may think &quot;but why would the secret be logged/printed at the first place&quot; ? Meuse will indeed not do that, but a mistake or a bug can happen, so I recommand you to use these tags.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_new_better_metrics&quot;&gt;New/Better metrics&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;New metrics were added to Meuse, and some we renamed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Today, Meuse exposes tons of metrics, for example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Internal metrics about the process, threads&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;HTTP requests duration and count per endpoint&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;HTTP response count per endpoint/status code&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Metrics about the Git index (operations count and duration)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Number of crates, crates versions, users and downloads for the registry&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Everything is exposed on &lt;code&gt;/metrics&lt;/code&gt;, in Prometheus format.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_bugfix&quot;&gt;Bugfix&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;An user found &lt;a href=&quot;https://github.com/mcorbin/meuse/issues/36&quot;&gt;a bug&lt;/a&gt; when uploading on Meuse crates with dependencies renamed. The issue is now solved.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_more_information&quot;&gt;More information&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can find more information about Meuse on &lt;a href=&quot;https://meuse.mcorbin.fr/&quot;&gt;the project website&lt;/a&gt;, and the code is available on &lt;a href=&quot;https://github.com/mcorbin/meuse&quot;&gt;Github&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Thu, 11 Feb 2021 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2021-01-03-vector-introduction/
