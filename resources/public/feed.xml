@@ -12,11 +12,523 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Thu, 25 Feb 2021 21:28:40 +0100
+Sun, 28 Feb 2021 23:56:48 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-02-28-mirabelle-stream-processing/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-02-28-mirabelle-stream-processing/
+</link>
+<title>
+Mirabelle, a new stream processing engine for monitoring
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I started working one month ago on a new stream processing engine heavily inspired by &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt;. The project (named &lt;a href=&quot;https://github.com/mcorbin/mirabelle&quot;&gt;Mirabelle&lt;/a&gt;) is still in a super alpha state, but I would like to explain what I try to achieve with this tool.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_riemann&quot;&gt;Riemann&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I discovered &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt; I think in 2015, and was immediately hooked (and contributed a lot to it at some points). The tool is amazing and well design, and is full of good ideas:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Configuration as code: I&amp;#8217;m not speaking about YAML, TOML&amp;#8230;&amp;#8203; here, the Riemann configuration is real &lt;a href=&quot;https://clojure.org/&quot;&gt;Clojure&lt;/a&gt; code. The DLS and the built it integrations (Pagerduty, InfluxDB, Graphite, Elasticsearch&amp;#8230;&amp;#8203;) were enough for a lot of use cases, but it&amp;#8217;s super easy to write real code to extend the project if needed.&lt;br&gt;
+After working with Riemann and its infinite possibilities, it&amp;#8217;s hard to work with limited DSL in other monitoring tools.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Good performances (JVM + Netty).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Easy to deploy&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Super useful: using Riemann to route events to external systems while doing computations on the stream of events (real time computation of rates, percentiles, detecting patterns by correlating events between multiples hosts and systems, sending alerts&amp;#8230;&amp;#8203;) is amazing.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you are interested by Riemann, I encourage you to watch Aphyr&amp;#8217;s &lt;a href=&quot;https://vimeo.com/131385889&quot;&gt;talk&lt;/a&gt; about it at Monitorama 2015.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Clients are pushing events to Riemann. An event has some fields:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;service&lt;/code&gt;: The measurement name, like &lt;code&gt;cpu_percent&lt;/code&gt;, &lt;code&gt;http_request_second&lt;/code&gt;&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;time&lt;/code&gt;: The event time.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;tags&lt;/code&gt;: A list of tags, for example &lt;code&gt;[&quot;monitoring&quot;, &quot;database&quot;]&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;ttl&lt;/code&gt;: A field indicating how long this event should be considered valid. It&amp;#8217;s used internally to expire events in some computations.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;state&lt;/code&gt;: the event state (&lt;code&gt;ok&lt;/code&gt;, &lt;code&gt;warning&lt;/code&gt;, or &lt;code&gt;critical&lt;/code&gt;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Additional keys, like &lt;code&gt;host&lt;/code&gt;, or custom ones, can be added.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;All of these fields are optional.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This format is very flexible. Riemann clients use protobuf, so performances are also good.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Push has for me several advantages compared to pull for monitoring systems. First, I think push-based systems, especially combined with tools like Kafka, are open systems.&lt;br&gt;
+You can route events to various databases, cloud services&amp;#8230;&amp;#8203; Want to try InfluxDB ? Deploy it, add a new rule to Riemann to forward events to it, and test it. Want to try Datadog ? Same. You want to send specific events in one tool and the others in another ? Easy ! Data are availables, even more with Kafka where everyone can write its own consumer.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s also simpler to operate: one firewalling rule to open between your hosts/services and your Riemann (or Kafka if you use it as a buffer for example) instance. Compared to today&amp;#8217;s &quot;best practices&quot; where you have 10 HTTP servers exposing metrics per host scrapped periodically (and all the network configuration mess it involves), it&amp;#8217;s refreshing.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I would like to thank all the people involved into Riemann (for example Kyle Kingsbury aka &lt;a href=&quot;https://aphyr.com/&quot;&gt;Aphyr&lt;/a&gt;, the original Riemann author, &lt;a href=&quot;https://jamesturnbull.net/&quot;&gt;James Turnbull&lt;/a&gt;, another Riemann maintainer which also wrote a book about it) and its ecosystem.&lt;br&gt;
+It&amp;#8217;s crazy how this tool evolved (the project itself but also the tooling: you can find Riemann integrations or Riemann clients a bit everywhere) without being backed by a company. I think it speaks about the tool quality, and shows that open source tools maintained by individuals can still have an impact.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For the anecdote, I started to work at &lt;a href=&quot;https://www.exoscale.com/&quot;&gt;Exoscale&lt;/a&gt; almost 3 years ago because &lt;a href=&quot;http://spootnik.org/&quot;&gt;Pierre-Yves Ritschard&lt;/a&gt;, another Riemann contributor, proposed me to join the company. Thinking about it, Riemann is probably the piece of software which had the biggest impact on my career (met a lot of cool people, learned a lot about monitoring, Clojure, stream processing engines&amp;#8230;&amp;#8203;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I do not contribute to Riemann anymore for a while. I still like the tool, but I had at some point the feeling that everything I could have done for the project was done, and that bringing Riemann to the next level would need a rewrite.&lt;br&gt;
+Let&amp;#8217;s see what are currently the Riemann pain points for me.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_what_could_be_improved_in_riemann&quot;&gt;What could be improved in Riemann&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said, in Riemann the configuration is code. Real code. Your configuration file is a valid Clojure program which is evalued at runtime by Riemann. It&amp;#8217;s nice but it also brings several issues.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Streams states on reloads&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When Riemann is reloaded (for example, you update its configuration and send a SIGHUP), the configuration is evalued again but &lt;code&gt;all existing states are lost&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, if you were working with time windows, doing computation on group of events&amp;#8230;&amp;#8203; all of this would be lost, and new events (after the reload) would not have any knowledge of the old states.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In practice, it&amp;#8217;s an issue if you reload your configuration often. For a lot of use cases it was not important, but for some of mine it was an issue. It would have be nice to only reset streams which were updated.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;I/O and stateful objects directly created in streams&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said before, you can in Riemann forward events to timeseries databases, cloud services, send alerts to Pagerduty&amp;#8230;&amp;#8203; In short, perform side effects. These clients usually have stuff like threadpools etc&amp;#8230;&amp;#8203; which should be correctly initialized and stopped if needed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Riemann, these kind of clients are also directly initialized and used inside streams, and it was hard to manage them cleanly, especially on reloads.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Event time vs scheduler&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Riemann, some streams perform actions based on the events &lt;code&gt;time&lt;/code&gt;, but some also use a scheduler to execute tasks periodically.&lt;br&gt;
+For example, some time windows streams use the events &lt;code&gt;time&lt;/code&gt; to know when a window is closed. If you have a 60 seconds window, you could consider the window closed if an event arrives at &lt;strong&gt;start of the window + 60&lt;/strong&gt;.
+But other streams would use the scheduler to periodically flush states (windows for example) every N seconds (flushing events every N seconds, no matter what is received).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Having two ways to manage the time was an issue. It was sometimes difficult to understand exactly the outputs of some streams because of that, and simulating the scheduler side effects complicated the unit test framework (yes, in Riemann, you can write unit tests to test your streams to me sure about your computations and alerting rules, which is super nice).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This and a couple of small issues motivated me to try to write a new tool heavily inspired by Riemann, using the same protocol/event format, which feels like Riemann but with more capabilities.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_mirabelle&quot;&gt;Mirabelle&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;My tool named &lt;a href=&quot;https://github.com/mcorbin/mirabelle&quot;&gt;Mirabelle&lt;/a&gt; is still a work in progress, but I will explain the ideas behind it and how it differs compared to Riemann.
+It should be noted that parts of the code were directly taken from Riemann, and that Mirabelle is also licensed under EPL, like Riemann. Again, I would like to thank all Riemann contributors.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_an_intermediate_serializable_representation_of_streams&quot;&gt;An intermediate, serializable representation of streams&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said, in Riemann, the configuration is a real Clojure program. Mirabelle mimics the Riemann DLS (I already reimplemented or backported tons of actions) but actually produces an &lt;a href=&quot;https://github.com/edn-format/edn&quot;&gt;edn&lt;/a&gt; representation of the streams. An example with a Mirabelle stream:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;;; keep only events with service = &quot;ram_percent&quot;
+(where [:= :service &quot;ram_percent&quot;]
+  ;; split children actions by host, each children being independant
+  (by [:host]
+    ;; check if the event metric is &amp;gt; 90 (so 90 %) during more than 30 sec
+    (above-dt 90 30
+      ;; set the state to critical
+      (with :state &quot;critical&quot;
+        ;; only send one event every 30 minutes to downstream systems
+        ;; to avoid generating too many alerts for example
+        (throttle 1 1800
+          ;; log the message (could be forwarded to pagerduty for example)
+          (error))))))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you look at the &lt;a href=&quot;http://riemann.io/howto.html&quot;&gt;Riemann howto&lt;/a&gt;, this configuration looks like Riemann. But actually, in Mirabelle, this code only produces an edn datastructure, it does not evaluates to a function like in Riemann. The edn generated is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;{:action :where,
+ :params [[:= :service &quot;ram_percent&quot;]],
+ :children
+ ({:action :by,
+   :params [[:host]],
+   :children
+   ({:action :above-dt,
+     :params [[:&amp;gt; :metric 90] 30],
+     :children
+     ({:action :with,
+       :children
+       ({:action :throttle,
+         :params [1],
+         :children (1800 {:action :error, :children nil})}),
+       :params [{:state &quot;critical&quot;}]})})})}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can easily understand the structure while comparing it to the DSL. Each step contains an &lt;code&gt;:action&lt;/code&gt; key, (optional) parameters, and (optional) children.&lt;br&gt;
+Another example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;;; imagine we gather events representing the duration of a job
+(where [:= :service &quot;job_execution_time&quot;]
+  ;; create a 120 second time window for all events
+  (fixed-time-window 120
+    ;; compute quantiles about them (like that, you have quantiles for all of your hosts grouped together)
+    (percentiles [0.5 0.75 0.98 0.99]
+      ;; log (could be forwarded to a TSDB for example)
+      (info)))
+  ;; in another action, split everything by host
+  (by [:host]
+    ;; for each host, create a 120 second time window
+    (fixed-time-window 120
+      ;; compute the percentiles for each host independently on the windows results
+      (percentiles [0.5 0.75 0.98 0.99]
+        ;; log
+        (info)))))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, like in Riemann, it&amp;#8217;s OK to have various computations/actions running in parallel (in differents &quot;branches&quot;) for the same event because of the amazing Clojure persistent datastructures. No side effects between actions, never, even between threads. &lt;strong&gt;You&lt;/strong&gt; choose what should be forwarded to downstream systems, what should be computed, and for the same events several actions can be done.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The generated edn is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;{:action :where,
+ :params [[:= :service &quot;job_execution_time&quot;]],
+ :children
+ ({:action :coalesce,
+   :children
+   ({:action :percentiles,
+     :params [[0.5 0.75 0.98 0.99]],
+     :children ({:action :info, :children nil})}),
+   :params [60 [:host]]}
+  {:action :by,
+   :params [[:host]],
+   :children
+   ({:action :fixed-time-window,
+     :params [120],
+     :children
+     ({:action :percentiles,
+       :params [[0.5 0.75 0.98 0.99]],
+       :children ({:action :info, :children nil})})})})}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This edn can then be &quot;compiled&quot; into functions on which you can inject events (it&amp;#8217;s done automatically for you when you send events to the Mirabelle TCP server).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Having this edn repsentation brings several things:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Streams configurations &lt;strong&gt;can be compared&lt;/strong&gt;. On a reload, Mirabelle will compare them and only reload streams which were changed. &lt;strong&gt;No more state loss&lt;/strong&gt; between reloads like in Riemann.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;They can be used by Mirabelle to &lt;strong&gt;dynamically create&lt;/strong&gt; streams instances. I will talk about it later, but Mirabelle has an API to dynamically create streams based on a configuration passed by an HTTP request for example.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The configurations can &lt;strong&gt;be validated&lt;/strong&gt; (I actually do it using &lt;a href=&quot;https://clojure.org/guides/spec&quot;&gt;Clojure spec&lt;/a&gt;), statically analyzed. For example, I will soon work on a tool to draw (using gnuplot for example) the streams graphes based on the configurations.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I think having this format between the DSL and Mirabelle is a huge win.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;IO at clearly identified, and managed outside of streams&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said before, in Riemann I/O are directly created inside streams, and can be difficult to manage.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Mirabelle, I/O are clearly identified and have their own lifecycles. They are also defined as edn, and the I/O configurations should live in dedicated files. Here is an example I/0 which will write events into a file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;{:file-example {:config {:path &quot;/tmp/events.edn&quot;}
+                :type :file}}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can then use it into a stream:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;(where [:= :service &quot;ram_percent&quot;]
+  (push-io! :file-example))
+
+;; this example would generate this edn configuration:
+
+{:action :where,
+ :params [[:= :service &quot;ram_percent&quot;]],
+ :children ({:action :push-io!, :params [:file-example]})}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here, my stream will write into the file &lt;code&gt;&quot;/tmp/events.edn&quot;&lt;/code&gt; all events with service &lt;code&gt;ram_percent&lt;/code&gt;. You see that I reference the I/O by name into &lt;code&gt;push-io!&lt;/code&gt; in order to do that.
+The stateful I/O object (imagine a timeserie client using a threadpool, or more complex examples) are injected by Mirabelle when the stream is compiled.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Multiple streams can use the same I/O. In Mirabelle, I/O are easy to maintain (start, stop, share between streams).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Streams in Mirabelle always use the events time&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said before, some streams in Riemann use a scheduler to periodically do action (flushing time windows for example).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Mirabelle, &lt;strong&gt;all&lt;/strong&gt; streams use the events time as a source of truth. It means streams will &lt;strong&gt;always&lt;/strong&gt; produce the same output for a given list of input events.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It has several advantages:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Easier to unit test and to reason about (yes, you can &lt;strong&gt;test everything&lt;/strong&gt; in Mirabelle, by writing tests which create your stream, and then you inject events into it, and check the outputs).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Easier to maintain (no global side effects in streams).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;You can in Mirabelle have various streams, each one advancing at its own pace (each one will advance depending of the time of the received events).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s develop the third point a bit more, and discuss a bit about stream processing in general.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In stream processing engines, events can arrive out of order, especially if you aggregate and do computations on events arriving from multiple sources.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you have a host pushing every 10 seconds events, and if you write a stream which will for example create time windows only for this host, most of the time events will arrive in order (or else it means someone modified the host clock :D).&lt;br&gt;
+In Mirabelle/Riemann, you can even use the &lt;code&gt;by&lt;/code&gt; action to create computation per host (you can check the previous example in this article), and so compute things for each host (or other label) in isolation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But sometimes, you want to aggregate data from multiple hosts. In that case, you don&amp;#8217;t have any guarantee on the events order (because even if the hosts clocks are synchronized, some events from some hosts will arrive first).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The Riemann philosophy is &lt;code&gt;mostly correct information right now is more useful, than totally correct information only available once the failure is over&lt;/code&gt;.&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/mirabelle/events-ordering.jpg&quot; alt=&quot;late events can cause issues&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Of course, these issues can be mitigated by having moving time windows for example, in order to allow events to arrive &lt;em&gt;a bit late&lt;/em&gt; (&lt;em&gt;a bit&lt;/em&gt; depending of the stream configuration). But at some point, old events are lost.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;What could we do to solve this issue ? Unfortunately, we have to live with this trade-off in real time stream processing engines. We could try to &quot;wait&quot;, buffer events for a while, sort them by timestamp, and then perform the computations. You could easily write a stream to do that in Mirabelle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But what if we could replay all events, in order, and on demand ? Mirabelle allows that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Mirabelle, some streams from the configuration are used by default for events received by the TCP server. But you can also create streams (from the configuration, or dynamically using the API, remember, streams are just edn), and add a label to events to push them into these dedicated streams.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/mirabelle/dyn-stream.jpg&quot; alt=&quot;Events can be reinjected into Mirabelle in order&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this schema, events arrive into Mirabelle and are then pushed into a timeserie database. You could already perform real-time computations on the events in order to quickly alert on some patterns.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then, you can at any time create (or use an existing one) a stream into Mirabelle, do a query on your timeserie database (like, give me the events for these series from yesterday between 5AM and 9AM, in order), and inject these events into the stream.&lt;br&gt;
+Remember, in Mirabelle, each streams has its own view of the time. It&amp;#8217;s OK to have one stream working on real time events, and another working on events from yesterday for example. Streams work in isolation&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;That way, you can if needed perform new computations on your events, do tests (for example, if you want to define a threshold for alerting, you could replay last week events to see how many alerts would be triggered), or even move data between systems.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;An example using the API:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{&quot;config&quot;: &quot;ezphY3Rpb25zIHs6YWN0aW9uIDpzZG8sCiAgICAgICAgICAgOmNoaWxkcmVuCiAgICAgICAgICAgKHs6YWN0aW9uIDp3aGVyZSwKICAgICAgICAgICAgIDpwYXJhbXMgW1s6PiA6bWV0cmljIDMwXV0sCiAgICAgICAgICAgICA6Y2hpbGRyZW4KICAgICAgICAgICAgICh7OmFjdGlvbiA6aW5jcmVtZW50LAogICAgICAgICAgICAgICA6Y2hpbGRyZW4KICAgICAgICAgICAgICAgKHs6YWN0aW9uIDplcnJvcgogICAgICAgICAgICAgICAgIDpwYXJhbXMgW10sCiAgICAgICAgICAgICAgICAgOmNoaWxkcmVuIG5pbH0pfSl9KX19Cg==&quot;}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;code&gt;config&lt;/code&gt; key contains the base64 representation of a stream. I can then create dynamically a stream named &lt;code&gt;bar&lt;/code&gt; into Mirabelle:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl -X POST --header &quot;Content-Type: application/json&quot; localhost:5666/api/v1/stream/bar --data @payload.json&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, I can send events to this stream by setting the &lt;code&gt;stream&lt;/code&gt; attribute to &lt;code&gt;bar&lt;/code&gt; on a Riemann client:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;riemann-client send --host my-host --service bar --metric-d 35 --attribute=stream=bar 127.0.0.1 5555&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This event will only be received by the stream named &lt;code&gt;bar&lt;/code&gt;, not by other streams. As I said before, you could do the same thing with streams configured in the configuration file. Some could be used for real-time stream processing, others for some use cases. You could even have multiple Mirabelle instances, some focused on real-time computations, and the old ones on old data.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Being able to do it thought the API is nice. You can create a stream, compute stuff, and then delete it once the computation is over. And by sending ordered events, you &lt;strong&gt;know&lt;/strong&gt; the stream result will be 100 % correct.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, let&amp;#8217;s talk a bit more about Mirabelle internal states.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_replaying_events&quot;&gt;Replaying events&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As I said, Mirabelle will &lt;strong&gt;not&lt;/strong&gt; lose its states (time windows for example) during a restart. But what if the process crashes ? If you bufferize events for 5 minutes and that the process crashes after 4 minutes, you will lose 4 minutes of events.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first answer is (and it&amp;#8217;s the Riemann one): we don&amp;#8217;t care. New events will rebuild the state, but the old window is lost.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You could also have this approach in Mirabelle, and for example rerun the raw events (from your TSDB) in a dynamically created stream in order to recompute the result for this window.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A third solution could be to save the Mirabelle streams states somewhere (on disk, on a database&amp;#8230;&amp;#8203;). It&amp;#8217;s possible (and could be implemented if needed for some streams), but performances will not be good if you have to persist tons of states for &lt;strong&gt;every&lt;/strong&gt; event. You could only save the internal states periodically (every 5, 10, or 30 sec for example) to limit the impact of the crash, but in that case you will also lose events (the last N seconds) during a crash.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A last solution, which I just implemented in Mirabelle, is to replay the last N minutes of events when the process starts, discarding I/O, in order to rebuild the internal states.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In Mirabelle streams, you can call &lt;code&gt;(write!)&lt;/code&gt; in order to persist your events on disk, into a &lt;a href=&quot;https://github.com/OpenHFT/Chronicle-Queue&quot;&gt;Chronicle queue&lt;/a&gt;.&lt;br&gt;
+A chronicle queue is a bit like a Kafka topic but stored on your local disk. You can write data on it, or re-read it from the beginning or from a specific offset. Chronicle queue are also periodically rotated (it&amp;#8217;s configurable, it could be every minute, every hour, every two hours&amp;#8230;&amp;#8203;). You could even back them up somewhere to keep your events history.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When Mirabelle starts, it will re-read automatically all the data from the queue configured in its configuration, but will also add to the events a &lt;code&gt;discard&lt;/code&gt; tag. Events tagged &lt;code&gt;discard&lt;/code&gt; will be automatically removed from I/O actions in Mirabelle. It means these events will just be reinjected (in the order they are in the queue) into the streams to rebuild their internal states.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m still playing with this mechanism, because for huge queues re-reading everything can take a while. But I&amp;#8217;m confident reinjecting the last 5, 10, or 20 minutes of events will be enough for 99 % of the use cases and should have good performances.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Combined with dynamic streams in order to recompute stuff on existing data, tons of options are possible to compute things in Mirabelle&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_high_availability&quot;&gt;High availability&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For now, Mirabelle is only a mono-node project. It could indeed be an issue, but history (and Prometheus) shows us that people do not actually care about HA setup, and that running the thing in two machines in parallel may be enough for a lot of use cases.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You could indeed forward events to two Mirabelle instances (like that, if one fails, the other will continue to compute things on your events).&lt;br&gt;
+A lot of people were also using Kafka with Riemann, you could also do that with Mirabelle. By using Kafka and the Mirabelle queue feature to rebuild streams states, you can really have a solid solution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I&amp;#8217;m still thinking about how Mirabelle can be distributed (sharding events between instances or stuff like that), but for now I prefer to not go down the distributed system rabbit hole. I know it&amp;#8217;s a trap.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_in_memory_database&quot;&gt;In Memory database&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Riemann provides an index to keep in memory the latest event for each &lt;code&gt;host&lt;/code&gt; and &lt;code&gt;service&lt;/code&gt; pair. This was not ported to Mirabelle.&lt;br&gt;
+Indeed, I think users should be able to put in memory the last N minutes (or hours) of events, on demand, and allow them to do computation (combined with dynamic streams for example) on them. I actually already implemented quickly something:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;(where [:= :service &quot;ram_percent&quot;]
+  (index! [:host]))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this example, I will save in memory all events for the service &lt;code&gt;ram_percent&lt;/code&gt;, indexed by &lt;code&gt;host&lt;/code&gt;. It means I will have a new &lt;code&gt;serie&lt;/code&gt; in memory per &lt;code&gt;host&lt;/code&gt; for the service &lt;code&gt;ram_percent&lt;/code&gt;. I can then query these data using the API.&lt;br&gt;
+These data are stored in memory in a dedicated datastructure &lt;em&gt;per serie&lt;/em&gt;, &lt;em&gt;in order&lt;/em&gt;. The implementation is not that good for now but it seems to work.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Storing data in order allows me to asks for data between two times for example, without performance issues. It will also offer the guarantee that the data are ordered if reinjected into a stream.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Data in memory are automatically removed after a while. For example, you could say &quot;keep only the last 2 hours of data&quot;, and old data will be removed once expired. Having hot data, in memory, always availables (and rebuildable after a crash thanks to the queue), with (in the future) a nice way of querying/executing actions on them will be super useful.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You could for example do real-time actions on your events (relabelling, clean them, perform small computations&amp;#8230;&amp;#8203;), forward them to a TSDB for long term storage, but also put them in memory in order to execute alerting queries on the last N hours of data for example.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_future_work&quot;&gt;Future work&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So, I have my on disk queue where events are persisted in the order they arrived on the system, sorted data per series in memory, and a way to rebuild the Mirabelle states (including the in-memory data) from the queue.&lt;br&gt;
+The queue could be considered like a Write-ahead log, the sorted in-memory datastructures could be a poorly-implemented memtable&amp;#8230;&amp;#8203; Am I writing a database ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;it&amp;#8217;s not my goal for the moment (I will focus on the stream processing engine and I don&amp;#8217;t have all the knowledges needed to write a database), but it can actually be a fun exercice in the future.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This article is way longer than expected. I hope at least a couple of people will read everything, if it&amp;#8217;s the case for you, well done ;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In the next few weeks, I will try to publish an usable version of the project, with some doc to get started. I will also add some basic integrations (Graphite, InfluxDB, Pagerduty&amp;#8230;&amp;#8203;).&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I spoke a lot about metrics and events in this article, but logs could also be handled by the tool.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Currently, users cannot provide custom actions. I will allow that in a near future, so you will be able to code everything you want and integrate it into Mirabelle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Stay tuned !&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Sun, 28 Feb 2021 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2021-02-11-meuse-1.2.0/
