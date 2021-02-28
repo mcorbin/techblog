@@ -12,17 +12,17 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 28 Feb 2021 23:56:48 +0100
+Sun, 28 Feb 2021 23:59:14 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
 <item>
 <guid>
-https://mcorbin.fr/posts/2021-02-28-mirabelle-stream-processing/
+https://mcorbin.fr/posts/2021-03-01-mirabelle-stream-processing/
 </guid>
 <link>
-https://mcorbin.fr/posts/2021-02-28-mirabelle-stream-processing/
+https://mcorbin.fr/posts/2021-03-01-mirabelle-stream-processing/
 </link>
 <title>
 Mirabelle, a new stream processing engine for monitoring
@@ -526,7 +526,7 @@ The queue could be considered like a Write-ahead log, the sorted in-memory datas
 &lt;/div&gt;
 </description>
 <pubDate>
-Sun, 28 Feb 2021 00:00:00 +0100
+Mon, 01 Mar 2021 00:00:00 +0100
 </pubDate>
 </item>
 <item>

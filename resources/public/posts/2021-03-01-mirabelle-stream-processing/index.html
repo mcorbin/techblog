@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>(mcorbin.fr): Mirabelle, a new stream processing engine for monitoring</title>
-    <link rel="canonical" href="https://mcorbin.fr/posts/2021-02-28-mirabelle-stream-processing/">
+    <link rel="canonical" href="https://mcorbin.fr/posts/2021-03-01-mirabelle-stream-processing/">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -55,7 +55,7 @@
 <div id="post">
     <div class="post-header">
     <div id="post-meta" class="row">
-        <div class="col-lg-6">28 février 2021</div>
+        <div class="col-lg-6">1 mars 2021</div>
         
     </div>
     <h2>Mirabelle, a new stream processing engine for monitoring</h2>
@@ -588,7 +588,7 @@ The queue could be considered like a Write-ahead log, the sorted in-memory datas
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2021-02-28-mirabelle-stream-processing", function(data) {
+          $.get("https://comments.mcorbin.fr/api/v1/comment/2021-03-01-mirabelle-stream-processing", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -625,7 +625,7 @@ The queue could be considered like a Write-ahead log, the sorted in-memory datas
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2021-02-28-mirabelle-stream-processing",
+                  url: "https://comments.mcorbin.fr/api/v1/comment/2021-03-01-mirabelle-stream-processing",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),
