@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Mon, 01 Mar 2021 18:00:24 +0100
+Mon, 01 Mar 2021 20:02:12 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -505,7 +505,7 @@ These data are stored in memory in a dedicated datastructure &lt;em&gt;per serie
 &lt;h2 id=&quot;_future_work&quot;&gt;Future work&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;So, I have my on disk queue where events are persisted in the order they arrived on the system, sorted data per series in memory, and a way to rebuild the Mirabelle states (including the in-memory data) from the queue.&lt;br&gt;
+&lt;p&gt;So, I have on disk a queue where events are persisted in the order they arrived on the system, sorted data per series in memory, and a way to rebuild the Mirabelle states (including the in-memory data) from the queue.&lt;br&gt;
 The queue could be considered like a Write-ahead log, the sorted in-memory datastructures could be a poorly-implemented memtable&amp;#8230;&amp;#8203; Am I writing a database ?&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;

@@ -539,7 +539,7 @@ These data are stored in memory in a dedicated datastructure <em>per serie</em>,
 <h2 id="_future_work">Future work</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>So, I have my on disk queue where events are persisted in the order they arrived on the system, sorted data per series in memory, and a way to rebuild the Mirabelle states (including the in-memory data) from the queue.<br>
+<p>So, I have on disk a queue where events are persisted in the order they arrived on the system, sorted data per series in memory, and a way to rebuild the Mirabelle states (including the in-memory data) from the queue.<br>
 The queue could be considered like a Write-ahead log, the sorted in-memory datastructures could be a poorly-implemented memtable&#8230;&#8203; Am I writing a database ?</p>
 </div>
 <div class="paragraph">
