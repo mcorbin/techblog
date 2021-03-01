@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 28 Feb 2021 23:59:14 +0100
+Mon, 01 Mar 2021 17:44:31 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -375,7 +375,7 @@ In Mirabelle/Riemann, you can even use the &lt;code&gt;by&lt;/code&gt; action to
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Then, you can at any time create (or use an existing one) a stream into Mirabelle, do a query on your timeserie database (like, give me the events for these series from yesterday between 5AM and 9AM, in order), and inject these events into the stream.&lt;br&gt;
-Remember, in Mirabelle, each streams has its own view of the time. It&amp;#8217;s OK to have one stream working on real time events, and another working on events from yesterday for example. Streams work in isolation&lt;/p&gt;
+Remember, in Mirabelle, each streams has its own view of the time. It&amp;#8217;s OK to have one stream working on real time events, and another working on events from yesterday for example. Streams work in isolation.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;That way, you can if needed perform new computations on your events, do tests (for example, if you want to define a threshold for alerting, you could replay last week events to see how many alerts would be triggered), or even move data between systems.&lt;/p&gt;
@@ -405,7 +405,7 @@ Remember, in Mirabelle, each streams has its own view of the time. It&amp;#8217;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;This event will only be received by the stream named &lt;code&gt;bar&lt;/code&gt;, not by other streams. As I said before, you could do the same thing with streams configured in the configuration file. Some could be used for real-time stream processing, others for some use cases. You could even have multiple Mirabelle instances, some focused on real-time computations, and the old ones on old data.&lt;/p&gt;
+&lt;p&gt;This event will only be received by the stream named &lt;code&gt;bar&lt;/code&gt;, not by other streams. As I said before, you could do the same thing with streams configured in the configuration file. Some could be used for real-time stream processing, others for another use case. You could even have multiple Mirabelle instances, some focused on real-time computations, and the other ones on old data.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Being able to do it thought the API is nice. You can create a stream, compute stuff, and then delete it once the computation is over. And by sending ordered events, you &lt;strong&gt;know&lt;/strong&gt; the stream result will be 100 % correct.&lt;/p&gt;
@@ -441,11 +441,11 @@ A chronicle queue is a bit like a Kafka topic but stored on your local disk. You
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;When Mirabelle starts, it will re-read automatically all the data from the queue configured in its configuration, but will also add to the events a &lt;code&gt;discard&lt;/code&gt; tag. Events tagged &lt;code&gt;discard&lt;/code&gt; will be automatically removed from I/O actions in Mirabelle. It means these events will just be reinjected (in the order they are in the queue) into the streams to rebuild their internal states.&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I&amp;#8217;m still playing with this mechanism, because for huge queues re-reading everything can take a while. But I&amp;#8217;m confident reinjecting the last 5, 10, or 20 minutes of events will be enough for 99 % of the use cases and should have good performances.&lt;/p&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/mirabelle/queue_reinject.jpg&quot; alt=&quot;events are reinjected from the queue on start&quot;&gt;&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Combined with dynamic streams in order to recompute stuff on existing data, tons of options are possible to compute things in Mirabelle&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;m still playing with this mechanism, because for huge queues re-reading everything can take a while. But I&amp;#8217;m confident reinjecting the last 5, 10, or 20 minutes of events will be enough for 99 % of the use cases and should have good performances.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -460,7 +460,7 @@ A chronicle queue is a bit like a Kafka topic but stored on your local disk. You
 A lot of people were also using Kafka with Riemann, you could also do that with Mirabelle. By using Kafka and the Mirabelle queue feature to rebuild streams states, you can really have a solid solution.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I&amp;#8217;m still thinking about how Mirabelle can be distributed (sharding events between instances or stuff like that), but for now I prefer to not go down the distributed system rabbit hole. I know it&amp;#8217;s a trap.&lt;/p&gt;
+&lt;p&gt;I&amp;#8217;m still thinking about how Mirabelle can be distributed (sharding events between instances or stuff like that), but for now I prefer to not go down the distributed system rabbit hole. I know it&amp;#8217;s a trap. IMO, Kafka or duplicating the stream of events is a good solution.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -469,7 +469,7 @@ A lot of people were also using Kafka with Riemann, you could also do that with 
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Riemann provides an index to keep in memory the latest event for each &lt;code&gt;host&lt;/code&gt; and &lt;code&gt;service&lt;/code&gt; pair. This was not ported to Mirabelle.&lt;br&gt;
-Indeed, I think users should be able to put in memory the last N minutes (or hours) of events, on demand, and allow them to do computation (combined with dynamic streams for example) on them. I actually already implemented quickly something:&lt;/p&gt;
+Indeed, I think users should be able to put in memory the last N minutes (or hours) of events, on demand, and then do computations (combined with dynamic streams for example) on them. I actually already implemented quickly something:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;listingblock&quot;&gt;
 &lt;div class=&quot;content&quot;&gt;
@@ -482,13 +482,19 @@ Indeed, I think users should be able to put in memory the last N minutes (or hou
 These data are stored in memory in a dedicated datastructure &lt;em&gt;per serie&lt;/em&gt;, &lt;em&gt;in order&lt;/em&gt;. The implementation is not that good for now but it seems to work.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;Storing data in order allows me to asks for data between two times for example, without performance issues. It will also offer the guarantee that the data are ordered if reinjected into a stream.&lt;/p&gt;
+&lt;p&gt;Storing data in order allows me to asks for data between two times for example, without performance issues. It will also offer the guarantee that the data are ordered if reinjected into a stream. This in-memory database is also rebuilt using the queue, exactly like internal streams states, accross restarts.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Data in memory are automatically removed after a while. For example, you could say &quot;keep only the last 2 hours of data&quot;, and old data will be removed once expired. Having hot data, in memory, always availables (and rebuildable after a crash thanks to the queue), with (in the future) a nice way of querying/executing actions on them will be super useful.&lt;/p&gt;
 &lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/mirabelle/in_memory.jpg&quot; alt=&quot;The in-memory DB can be used to compute things on its data&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;You could for example do real-time actions on your events (relabelling, clean them, perform small computations&amp;#8230;&amp;#8203;), forward them to a TSDB for long term storage, but also put them in memory in order to execute alerting queries on the last N hours of data for example.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I could even integrate a Clojure REPL on the project, to let you explore the in-memory data, create dynamic streams, and compute stuff from it !&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -511,10 +517,10 @@ The queue could be considered like a Write-ahead log, the sorted in-memory datas
 &lt;p&gt;This article is way longer than expected. I hope at least a couple of people will read everything, if it&amp;#8217;s the case for you, well done ;)&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In the next few weeks, I will try to publish an usable version of the project, with some doc to get started. I will also add some basic integrations (Graphite, InfluxDB, Pagerduty&amp;#8230;&amp;#8203;).&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;In the next few weeks, I will try to publish an usable version of the project, with some doc to get started. I will also add some basic integrations (Graphite, InfluxDB, Pagerduty&amp;#8230;&amp;#8203;), and work more on the in-memory database. I would like to do also some benchmarks on real use cases.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I spoke a lot about metrics and events in this article, but logs could also be handled by the tool.&lt;/p&gt;
+&lt;p&gt;I spoke a lot about metrics and events in this article, but logs could also be handled by the tool I think.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Currently, users cannot provide custom actions. I will allow that in a near future, so you will be able to code everything you want and integrate it into Mirabelle.&lt;/p&gt;
