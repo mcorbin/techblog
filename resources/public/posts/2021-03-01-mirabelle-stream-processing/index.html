@@ -63,13 +63,13 @@
 <div>
     
     <div class="paragraph">
-<p>I started working one month ago on a new stream processing engine heavily inspired by <a href="https://riemann.io">Riemann</a>. The project (named <a href="https://github.com/mcorbin/mirabelle">Mirabelle</a>) is still in a super alpha state, but I would like to explain what I try to achieve with this tool.</p>
+<p>I started working one month ago on a new stream processing engine heavily inspired by <a href="https://riemann.io">Riemann</a>. The project (named <a href="https://github.com/mcorbin/mirabelle">Mirabelle</a>) is still in alpha state (but it starts/works), but I would like to explain what I try to achieve with this tool.</p>
 </div>
 <div class="sect1">
 <h2 id="_riemann">Riemann</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>I discovered <a href="https://riemann.io">Riemann</a> I think in 2015, and was immediately hooked (and contributed a lot to it at some points). The tool is amazing and well design, and is full of good ideas:</p>
+<p>I discovered <a href="https://riemann.io">Riemann</a> I think in 2015, and was immediately hooked (and contributed a lot to it at some point). The tool is amazing, well designed, and is full of good ideas:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -143,19 +143,19 @@ Let&#8217;s see what are currently the Riemann pain points for me.</p>
 <div class="sect2">
 <h3 id="_what_could_be_improved_in_riemann">What could be improved in Riemann</h3>
 <div class="paragraph">
-<p>As I said, in Riemann the configuration is code. Real code. Your configuration file is a valid Clojure program which is evalued at runtime by Riemann. It&#8217;s nice but it also brings several issues.</p>
+<p>As I said, in Riemann the configuration is code. Real code. Your configuration file is a valid Clojure program which is evaluated at runtime by Riemann. It&#8217;s nice but it also brings several issues.</p>
 </div>
 <div class="paragraph">
 <p><strong>Streams states on reloads</strong></p>
 </div>
 <div class="paragraph">
-<p>When Riemann is reloaded (for example, you update its configuration and send a SIGHUP), the configuration is evalued again but <code>all existing states are lost</code>.</p>
+<p>When Riemann is reloaded (for example, you update its configuration and send a SIGHUP), the configuration is evaluated again but <code>all existing states are lost</code>.</p>
 </div>
 <div class="paragraph">
-<p>For example, if you were working with time windows, doing computation on group of events&#8230;&#8203; all of this would be lost, and new events (after the reload) would not have any knowledge of the old states.</p>
+<p>For example, if you were working with time windows, doing computations on group of events&#8230;&#8203; all of this would be lost, and new events (after the reload) would not have any knowledge of the old states.</p>
 </div>
 <div class="paragraph">
-<p>In practice, it&#8217;s an issue if you reload your configuration often. For a lot of use cases it was not important, but for some of mine it was an issue. It would have be nice to only reset streams which were updated.</p>
+<p>In practice, it&#8217;s an issue if you reload your configuration often. For a lot of use cases it was not important, but for some of mine it was an issue. It would be nice to only reset streams which were updated.</p>
 </div>
 <div class="paragraph">
 <p><strong>I/O and stateful objects directly created in streams</strong></p>

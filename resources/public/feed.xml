@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Mon, 01 Mar 2021 17:51:33 +0100
+Mon, 01 Mar 2021 18:00:24 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -29,13 +29,13 @@ Mirabelle, a new stream processing engine for monitoring
 </title>
 <description>
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I started working one month ago on a new stream processing engine heavily inspired by &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt;. The project (named &lt;a href=&quot;https://github.com/mcorbin/mirabelle&quot;&gt;Mirabelle&lt;/a&gt;) is still in a super alpha state, but I would like to explain what I try to achieve with this tool.&lt;/p&gt;
+&lt;p&gt;I started working one month ago on a new stream processing engine heavily inspired by &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt;. The project (named &lt;a href=&quot;https://github.com/mcorbin/mirabelle&quot;&gt;Mirabelle&lt;/a&gt;) is still in alpha state (but it starts/works), but I would like to explain what I try to achieve with this tool.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;sect1&quot;&gt;
 &lt;h2 id=&quot;_riemann&quot;&gt;Riemann&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;I discovered &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt; I think in 2015, and was immediately hooked (and contributed a lot to it at some points). The tool is amazing and well design, and is full of good ideas:&lt;/p&gt;
+&lt;p&gt;I discovered &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt; I think in 2015, and was immediately hooked (and contributed a lot to it at some point). The tool is amazing, well designed, and is full of good ideas:&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
@@ -109,19 +109,19 @@ Let&amp;#8217;s see what are currently the Riemann pain points for me.&lt;/p&gt;
 &lt;div class=&quot;sect2&quot;&gt;
 &lt;h3 id=&quot;_what_could_be_improved_in_riemann&quot;&gt;What could be improved in Riemann&lt;/h3&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;As I said, in Riemann the configuration is code. Real code. Your configuration file is a valid Clojure program which is evalued at runtime by Riemann. It&amp;#8217;s nice but it also brings several issues.&lt;/p&gt;
+&lt;p&gt;As I said, in Riemann the configuration is code. Real code. Your configuration file is a valid Clojure program which is evaluated at runtime by Riemann. It&amp;#8217;s nice but it also brings several issues.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;&lt;strong&gt;Streams states on reloads&lt;/strong&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;When Riemann is reloaded (for example, you update its configuration and send a SIGHUP), the configuration is evalued again but &lt;code&gt;all existing states are lost&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;When Riemann is reloaded (for example, you update its configuration and send a SIGHUP), the configuration is evaluated again but &lt;code&gt;all existing states are lost&lt;/code&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;For example, if you were working with time windows, doing computation on group of events&amp;#8230;&amp;#8203; all of this would be lost, and new events (after the reload) would not have any knowledge of the old states.&lt;/p&gt;
+&lt;p&gt;For example, if you were working with time windows, doing computations on group of events&amp;#8230;&amp;#8203; all of this would be lost, and new events (after the reload) would not have any knowledge of the old states.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
-&lt;p&gt;In practice, it&amp;#8217;s an issue if you reload your configuration often. For a lot of use cases it was not important, but for some of mine it was an issue. It would have be nice to only reset streams which were updated.&lt;/p&gt;
+&lt;p&gt;In practice, it&amp;#8217;s an issue if you reload your configuration often. For a lot of use cases it was not important, but for some of mine it was an issue. It would be nice to only reset streams which were updated.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;&lt;strong&gt;I/O and stateful objects directly created in streams&lt;/strong&gt;&lt;/p&gt;
