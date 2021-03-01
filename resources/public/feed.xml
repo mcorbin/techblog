@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Mon, 01 Mar 2021 17:44:31 +0100
+Mon, 01 Mar 2021 17:49:55 +0100
 </lastBuildDate>
 <generator>
 clj-rss
@@ -495,6 +495,9 @@ These data are stored in memory in a dedicated datastructure &lt;em&gt;per serie
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;I could even integrate a Clojure REPL on the project, to let you explore the in-memory data, create dynamic streams, and compute stuff from it !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The only thing I have to check is how many events I can store in memory before running ouf of RAM ;)&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
