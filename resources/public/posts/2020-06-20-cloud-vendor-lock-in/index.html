@@ -211,11 +211,11 @@ Testez ces plateformes, faites des retours, dites ce qui va et ce qui ne va pas.
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-06-20-cloud-vendor-lock-in", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2020-06-20-cloud-vendor-lock-in", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -252,7 +252,7 @@ Testez ces plateformes, faites des retours, dites ce qui va et ce qui ne va pas.
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-06-20-cloud-vendor-lock-in",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2020-06-20-cloud-vendor-lock-in",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

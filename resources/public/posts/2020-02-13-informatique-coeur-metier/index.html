@@ -191,11 +191,11 @@ Mais dans beaucoup de boites, il y a bien assez de travail pour avoir au moins u
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-02-13-informatique-coeur-metier", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2020-02-13-informatique-coeur-metier", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -232,7 +232,7 @@ Mais dans beaucoup de boites, il y a bien assez de travail pour avoir au moins u
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-02-13-informatique-coeur-metier",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2020-02-13-informatique-coeur-metier",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

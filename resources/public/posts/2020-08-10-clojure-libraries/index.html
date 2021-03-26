@@ -364,11 +364,11 @@ expected: {:foo 1, :bar 2}
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-08-10-clojure-libraries", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2020-08-10-clojure-libraries", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -405,7 +405,7 @@ expected: {:foo 1, :bar 2}
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-08-10-clojure-libraries",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2020-08-10-clojure-libraries",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

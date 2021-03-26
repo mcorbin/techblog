@@ -15,11 +15,11 @@
     {% if not post.disable-comments %}
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/{{filename}}", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/{{filename}}", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -56,7 +56,7 @@
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/{{filename}}",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/{{filename}}",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

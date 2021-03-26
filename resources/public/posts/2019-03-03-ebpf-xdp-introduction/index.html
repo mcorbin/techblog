@@ -672,11 +672,11 @@ Certains projets comme <a href="https://github.com/iovisor/bcc">bcc</a> ou <a hr
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2019-03-03-ebpf-xdp-introduction", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2019-03-03-ebpf-xdp-introduction", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -713,7 +713,7 @@ Certains projets comme <a href="https://github.com/iovisor/bcc">bcc</a> ou <a hr
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2019-03-03-ebpf-xdp-introduction",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2019-03-03-ebpf-xdp-introduction",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

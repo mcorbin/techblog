@@ -348,11 +348,11 @@ In the previous example, i used <code>folds/mean</code> to calculate the mean, b
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2017-08-09-coalesce", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2017-08-09-coalesce", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -389,7 +389,7 @@ In the previous example, i used <code>folds/mean</code> to calculate the mean, b
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2017-08-09-coalesce",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2017-08-09-coalesce",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

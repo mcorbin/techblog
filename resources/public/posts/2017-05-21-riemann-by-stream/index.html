@@ -456,11 +456,11 @@ And for this, we will use <a href="http://riemann.io/howto.html#distinct-streams
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2017-05-21-riemann-by-stream", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2017-05-21-riemann-by-stream", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -497,7 +497,7 @@ And for this, we will use <a href="http://riemann.io/howto.html#distinct-streams
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2017-05-21-riemann-by-stream",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2017-05-21-riemann-by-stream",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

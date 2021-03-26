@@ -591,11 +591,11 @@ Par exemple, si je reprends mon autorité de certification générée par cfssl 
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-11-05-certificate-subject-asn1", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2020-11-05-certificate-subject-asn1", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -632,7 +632,7 @@ Par exemple, si je reprends mon autorité de certification générée par cfssl 
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-11-05-certificate-subject-asn1",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2020-11-05-certificate-subject-asn1",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

@@ -593,11 +593,11 @@ The queue could be considered like a Write-ahead log, the sorted in-memory datas
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2021-03-01-mirabelle-stream-processing", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2021-03-01-mirabelle-stream-processing", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -634,7 +634,7 @@ The queue could be considered like a Write-ahead log, the sorted in-memory datas
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2021-03-01-mirabelle-stream-processing",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2021-03-01-mirabelle-stream-processing",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

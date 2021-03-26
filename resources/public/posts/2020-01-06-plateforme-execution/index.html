@@ -152,11 +152,11 @@ Les développeurs perdront un temps fou à configurer leurs postes, seront frust
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-01-06-plateforme-execution", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2020-01-06-plateforme-execution", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -193,7 +193,7 @@ Les développeurs perdront un temps fou à configurer leurs postes, seront frust
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-01-06-plateforme-execution",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2020-01-06-plateforme-execution",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

@@ -138,11 +138,11 @@ Some refactoring has also be done on the unit tests.</p>
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2020-03-24-meuse-0-4-0-release", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2020-03-24-meuse-0-4-0-release", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -179,7 +179,7 @@ Some refactoring has also be done on the unit tests.</p>
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2020-03-24-meuse-0-4-0-release",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2020-03-24-meuse-0-4-0-release",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

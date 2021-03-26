@@ -418,11 +418,11 @@ Les solutions de load balancing traditionnelles ne sont pas vraiment prévues po
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2017-12-03-velocity-1", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2017-12-03-velocity-1", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -459,7 +459,7 @@ Les solutions de load balancing traditionnelles ne sont pas vraiment prévues po
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2017-12-03-velocity-1",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2017-12-03-velocity-1",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),

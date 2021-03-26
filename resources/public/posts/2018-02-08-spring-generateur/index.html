@@ -201,11 +201,11 @@ And it is, and I think you really have to ask yourself, you know, are you progra
     
     <script>
       $( document ).ready(function() {
-          $.get("https://comments.mcorbin.fr/api/v1/challenge", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
               $('#challenge_question').text(data.question);
               $('#challenge_name span').text(data.name);
           });
-          $.get("https://comments.mcorbin.fr/api/v1/comment/2018-02-08-spring-generateur", function(data) {
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2018-02-08-spring-generateur", function(data) {
               for (i=0; i<data.length; i++) {
 
                   response = data[i];
@@ -242,7 +242,7 @@ And it is, and I think you really have to ask yourself, you know, are you progra
               $.ajax
               ({
                   type: "POST",
-                  url: "https://comments.mcorbin.fr/api/v1/comment/2018-02-08-spring-generateur",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2018-02-08-spring-generateur",
                   dataType: 'json',
                   contentType: 'application/json',
                   data: JSON.stringify({"author": $("#new_comment_author").val(),
