@@ -12,11 +12,99 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Fri, 26 Mar 2021 09:49:48 +0100
+Sat, 27 Mar 2021 19:11:22 +0100
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-03-27-cloud-marketing/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-03-27-cloud-marketing/
+</link>
+<title>
+Le cloud, seulement du marketing ?
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A la suite du récent &lt;a href=&quot;https://www.leparisien.fr/faits-divers/strasbourg-un-important-incendie-sur-le-site-de-lentreprise-ovh-qui-abrite-des-serveurs-informatiques-10-03-2021-36SU6LXHHJF4BCZEOKNOAAKLVA.php&quot;&gt;incident&lt;/a&gt; chez OVH, de nombreuses personnes ont accusé &quot;le cloud&quot;, notamment sur les réseaux sociaux. Le cloud ne serait qu&amp;#8217;un argument marketing et n&amp;#8217;aurait aucune autre réalité. Qu&amp;#8217;en est-il vraiment ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_méchant_cloud&quot;&gt;Le méchant cloud&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cet article n&amp;#8217;est pas là pour discuter de l&amp;#8217;aspect &lt;em&gt;vous êtes responsable de vos sauvegardes&lt;/em&gt; ou encore &lt;em&gt;lisez les contrats de votre hébergeur&lt;/em&gt;, certains l&amp;#8217;ont déjà fait (comme cet article de &lt;a href=&quot;https://tferdinand.net/ovh-brule-internet-hurle/&quot;&gt;Teddy Ferdinand&lt;/a&gt;), mais d&amp;#8217;un autre sujet qui revient &lt;strong&gt;à chaque panne&lt;/strong&gt; chez un hébergeur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En cas de problèmes chez un cloud provider, on a un certain nombre d&amp;#8217;individus qui sortent du bois pour critiquer le cloud. Voici les arguments que l&amp;#8217;on voit principalement:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Le cloud, ce n&amp;#8217;est que du marketing, il n&amp;#8217;y a rien derrière.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Le cloud, ce n&amp;#8217;est pas fiable.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_cloud_que_du_marketing&quot;&gt;Le cloud, que du marketing ?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est une critique que l&amp;#8217;on voit beaucoup. Le cloud ne serait qu&amp;#8217;un outil permettant de vendre des choses qui existaient déjà. Il est vrai que certaines entreprises peuvent essayer de surfer sur la vague et de mettre le mot &quot;Cloud&quot; partout. Mais dire &quot;Le cloud ça n&amp;#8217;existe pas&quot; en parlant des fournisseurs d&amp;#8217;infrastructures (PaaS, IaaS&amp;#8230;&amp;#8203; je ne ferai pas la distinction dans cet article) est incompréhensible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je vois souvent ce discours dans la bouche de personnes ayant une certaine expérience de l&amp;#8217;informatique et qui n&amp;#8217;ont pas suivi (et compris) l&amp;#8217;apparition du Cloud. Le mécanisme traditionnel &quot;je ne comprends pas donc je critique&quot; apparaît très vite. Vous voyez les vieux du village critiquant Internet, les téléphones portables, ou la technologie en général ? C&amp;#8217;est exactement ça.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Etait-il possible avant le Cloud de piloter de l&amp;#8217;infrastructure 100 % via API, le tout géré par de l&amp;#8217;outillage permettant un travail collaboratif (via Git par exemple) ?&lt;br&gt;
+De pouvoir provisionner des centaines de machines virtuelles, en gérant leurs templates, en les connectant via des réseaux privés, d&amp;#8217;en rajouter ou en enlever à la demande, de réaliser des snapshots et restorations, de démarrer des load balancers devant&amp;#8230;&amp;#8203; le tout en quelques commandes shell et en quelques minutes ?&lt;br&gt;
+De créer des bases de données en quelques secondes, de démarrer des solutions d&amp;#8217;orchestration, de métriques, de gestion des logs&amp;#8230;&amp;#8203; Très facilement ?&lt;br&gt;
+&lt;em&gt;Et surtout&lt;/em&gt;, de permettre à de petites équipes de gérer des infrastructures composées de dizaines ou centaines d&amp;#8217;applications, de centaines ou milliers de machines, de manière très flexible ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le dernier point est le plus important. Le cloud, en amenant sa flexibilité et sa tarification à l&amp;#8217;usage, aide les équipes dev et ops à construire des infrastructures répondant à leurs besoins sans avoir à gérer eux même un grand nombre de problèmes (gestion du matériel physique en datacenter notamment).&lt;br&gt;
+Et comme dit précédemment, c&amp;#8217;est l&amp;#8217;automatisation des tâches et le contrôle de l&amp;#8217;infrastructure via API (et l&amp;#8217;outillage) qui permet également cela.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Est ce que tout cela est magique et ne demande aucune connaissance pour être utilisé ? Non. Des connaissances en système et réseaux, en architecture (que ce soit logicielle ou au niveau de l&amp;#8217;infrastructure du SI) sont toujours obligatoires.&lt;br&gt;
+Est ce que des gens utilisent mal le cloud ? Probablement. Mais des gens qui faisaient n&amp;#8217;importe quoi, ça n&amp;#8217;existait donc pas avant le cloud ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je comprends également tout à fait les gens préférant gérer eux même de l&amp;#8217;infrastructure physique. Cela peut complètement se justifier, et cela peut même être très intéressant financièrement pour certains besoins.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais au bout d&amp;#8217;un moment, les critiques à base de &quot;Olol le cloud, moi avec mes 2 machines dans mon salon, mon Nagios et 3 scripts shell je fais pareil&quot; sont assez pénibles (surtout venant de gens qui n&amp;#8217;ont &lt;em&gt;aucune&lt;/em&gt; idée de quoi ils parlent).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_le_cloud_n_est_pas_fiable&quot;&gt;Le cloud n&amp;#8217;est pas fiable&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Quel que soit le Cloud Provider, lorsqu&amp;#8217;il y a une panne, on voit les traditionnels messages du type &quot;le Cloud n&amp;#8217;est pas fiable&quot; apparaître.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Tout d&amp;#8217;abord, &lt;strong&gt;personne&lt;/strong&gt; n&amp;#8217;a jamais dit que les cloud providers étaient 100 % fiables. Les cloud providers gèrent du matériel physique (et donc les pannes associées) et beaucoup de logiciels (car c&amp;#8217;est des programmes qui vont piloter l&amp;#8217;infrastructure), les problèmes réseaux arrivent&amp;#8230;&amp;#8203; le 100 % d&amp;#8217;uptime n&amp;#8217;existe pas, et c&amp;#8217;est (comme partout) à l&amp;#8217;utilisateur de prendre ses dispositions pour limiter l&amp;#8217;impact d&amp;#8217;une panne. Et on voit aussi que de très gros incidents peuvent malheureusement arriver.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ensuite, c&amp;#8217;est facile de critiquer le Cloud, mais les pannes n&amp;#8217;existaient pas avant ? Un rack de serveur dans un datacenter est subitement plus fiable si c&amp;#8217;est vous qui le gérez et pas le cloud provider ?&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et pour avoir travaillé dans une boîte où l&amp;#8217;infra était gérée dans des datacenters en interne (sauf quelques uns qui étaient sous les bureaux, je me rappelle qu&amp;#8217;une fois que quelqu&amp;#8217;un a fait le tour de tous les étages pour trouver un serveur physique essentiel qui répondait plus et qui était &quot;perdu&quot;, plus personne ne savait où il était posé), je peux vous dire que les équipes n&amp;#8217;attendaient qu&amp;#8217;une chose: passer sur le Cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Sat, 27 Mar 2021 00:00:00 +0100
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2021-03-01-mirabelle-stream-processing/
