@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sat, 27 Mar 2021 19:12:50 +0100
+Sun, 09 May 2021 18:52:08 +0200
 </lastBuildDate>
 <generator>
 clj-rss
@@ -555,6 +555,9 @@ A lot of people were also using Kafka with Riemann, you could also do that with 
 &lt;div class=&quot;sect1&quot;&gt;
 &lt;h2 id=&quot;_in_memory_database&quot;&gt;In Memory database&lt;/h2&gt;
 &lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;EDIT 05/09/2021: Actually, I was not satisfied of the design of the in memory DB. I decided to remove it for now, and reimplemented the Riemann Index. I will rework on that later.&lt;/p&gt;
+&lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Riemann provides an index to keep in memory the latest event for each &lt;code&gt;host&lt;/code&gt; and &lt;code&gt;service&lt;/code&gt; pair. This was not ported to Mirabelle.&lt;br&gt;
 Indeed, I think users should be able to put in memory the last N minutes (or hours) of events, on demand, and then do computations (combined with dynamic streams for example) on them. I actually already implemented quickly something:&lt;/p&gt;

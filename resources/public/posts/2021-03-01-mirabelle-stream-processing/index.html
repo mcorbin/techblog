@@ -502,6 +502,9 @@ A lot of people were also using Kafka with Riemann, you could also do that with 
 <h2 id="_in_memory_database">In Memory database</h2>
 <div class="sectionbody">
 <div class="paragraph">
+<p>EDIT 05/09/2021: Actually, I was not satisfied of the design of the in memory DB. I decided to remove it for now, and reimplemented the Riemann Index. I will rework on that later.</p>
+</div>
+<div class="paragraph">
 <p>Riemann provides an index to keep in memory the latest event for each <code>host</code> and <code>service</code> pair. This was not ported to Mirabelle.<br>
 Indeed, I think users should be able to put in memory the last N minutes (or hours) of events, on demand, and then do computations (combined with dynamic streams for example) on them. I actually already implemented quickly something:</p>
 </div>
