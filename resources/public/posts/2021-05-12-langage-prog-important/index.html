@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): Choix du langage de programmation pour un projet: vraiment important ?</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2021-05-12-langage-prog-important/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery-3.5.1.min.js" type="text/javascript"></script>
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">12 mai 2021</div>
+        
+    </div>
+    <h2>Choix du langage de programmation pour un projet: vraiment important ?</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Source infinie de trolls, les débats sur les langages de programmation sont vieux comme le monde. Mais est ce que ce choix est vraiment important ? D&#8217;ailleurs, comment choisir ?</p>
+</div>
+<div class="paragraph">
+<p>Il existe probablement des centaines de langage de programmations, certains très populaires, d&#8217;autres non. Il peut être difficile de faire le tri (et donc de faire des choix) à cause de cela. Dans cet article, je décrirai comment je classe les langages, des critères importants selon moi, de comment je fais mes choix.</p>
+</div>
+<div class="paragraph">
+<p>En effet, c&#8217;est d&#8217;abord le type de projet qui va vous permettre de faire un premier filtre sur les langages à utiliser.</p>
+</div>
+<div class="sect1">
+<h2 id="_catégogies_de_langages">Catégogies de langages</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_langages_spécialisés">Langages spécialisés</h3>
+<div class="paragraph">
+<p>La première catégorie de langage que je souhaite aborder est celle des langages spécialisés. Dans certains domaines, vous n&#8217;avez finalement pas ou peu le choix du langage. Ce sont souvent des langages utilisés dans des domaines bien précis.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://en.wikipedia.org/wiki/VHDL">VHDL</a>, que j&#8217;ai eu l&#8217;occasion de pratiquer pendant mes études, rentre par exemple dans cette catégorie. Il fait partie de ces quelques langages de niches permettant de décrire du hardware. C&#8217;est d&#8217;ailleurs un langage super fun, j&#8217;ai parfois presque envie d&#8217;acheter un peu de matériel pour rejouer avec.</p>
+</div>
+<div class="paragraph">
+<p>Bref, ces langages one une niche où la question du choix se pose moins qu&#8217;ailleurs.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_gargage_collector_ou_non">Gargage collector ou non ?</h3>
+<div class="paragraph">
+<p>Si on veut comparer les langages "grands publics", un premier critère important est la présence ou non d&#8217;un garbage collector. Rappelez vous, le gargage collector (GC) est un composant vous permettant de ne pas gérer l&#8217;allocation et la libération de la mémoire de vos programmes. Cela simplifie grandement les programmes (on y reviendra), mais a un coût plus ou moins important en consommation mémoire, et en performance (notamment sur la latence de votre programme par exemple).</p>
+</div>
+<div class="paragraph">
+<p>Certains programmes très spécifiques (kernel, temps réel&#8230;&#8203;) ne peuvent pas se permettre un garbage collector. On compare généralement trois langages lorsqu&#8217;on parle de langages sans GC: C, C++, et Rust.</p>
+</div>
+<div class="paragraph">
+<p>C est le langage historique. Présent partout (comme dans le kernel Linux par exemple), on est pas prêt de pouvoir se passer complètement de lui. De même, C++ est un langage populaire qu&#8217;on retrouve dans de nombreux programmes.</p>
+</div>
+<div class="paragraph">
+<p>Le soucis de ces deux derniers langages est qu&#8217;ils demandent une grande rigueur pour le développeur: en effet, gérer la mémoire manuellement est difficile, et des bugs peuvent rapidement apparaître. Cette catégorie de bug est assez dangereuse car elle peut permettre à un attaquant de prendre le contrôle de la machine par exemple.</p>
+</div>
+<div class="paragraph">
+<p>Rust a été inventé pour résoudre ce problème: avoir un langage sans garbage collector mais qui évite à la compilation les bugs de gestion de mémoire. Rust n&#8217;apporte pas que cela (on parlera de typage et d&#8217;écosystème plus tard), mais c&#8217;est déjà un bon point pour lui.</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est un peu hors du scope de cet article mais j&#8217;ai toujours trouvé la programmation système très difficilement accessible. C&#8217;est plein de subtilités et de bonnes pratiques très difficiles à assimiler (et si les gens d&#8217;OpenSSL arrivent à introduire des bugs en lien avec la mémoire, on sait direct que ce sera le cas pour nous aussi), plein d&#8217;incantations obscures à base de préprocesseurs, de processus de build incompréhensibles à moins d&#8217;avoir un doctorat en Makefile et en installation de dépendances&#8230;&#8203; Bref, quoi qu&#8217;on pense de Rust, il permet au moins de rendre le truc accessible pour le commun des mortels que nous sommes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_donc_gc_ou_pas">Donc, GC ou pas ?</h3>
+<div class="paragraph">
+<p>Je pense que 97 % des programmes (chiffre sorti de mon chapeau) peuvent tolérer un garbage collector. L&#8217;intêret du garbage collector est multiple:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Facilité de développement: Rust apporte par exemple une lourdeur énorme (mais justifiée vu ses objectifs) pour se passer de GC ET être safe. J&#8217;aime le code simple et concis, et j&#8217;aime mon confort de développement.</p>
+</li>
+<li>
+<p>La majorité des applications peuvent tolérer un GC: les garbage collectors d&#8217;aujourd&#8217;hui sont <strong>très</strong> performants. On a récemment beaucoup parlé de <a href="https://malloc.se/blog/zgc-jdk16">ZGC</a> sur la machine virtuelle Java (JVM) récemment par exemple. Demandez vous si c&#8217;est grave si parfois, quelques requêtes mettent quelques dizaines de millisecondes de plus à s&#8217;exécuter parce que vous avez le GC qui tourne. Pour la majorité des applications, c&#8217;est négligeable.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Bien sûr, gérer des programmes consommant d&#8217;énormes quantités de RAM (centaines de GB, voir TB) est un challenge, mais on est ici sur des besoins très particuliers et on voit que des solutions comme ZGC peuvent convenir pour ces besoins. Et de toute façon, GC ou pas, je pense que coder ce genre d&#8217;applications est toujours difficile. Peut être que la productivité amenée par l&#8217;utilisation d&#8217;un GC est plus intéressante ?</p>
+</div>
+<div class="paragraph">
+<p>TL:DR: je ne vois aucun intêret à utiliser par exemple Rust pour faire des applications web standards. Je préfère un langage de plus haut niveau qui me permettra d&#8217;être beaucoup plus productif et avec selon moi un code plus clair.</p>
+</div>
+<div class="paragraph">
+<p>On aura toujours quelques trolls, connus ou non, qui affirmeront que le VRAI code et les VRAIS langages sont des langages sans GC, je préfère ignorer ce genre de remarques.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_typage">Typage</h3>
+<div class="paragraph">
+<p>Un autre grand débat est le typage statique vs le typage dynamique. Comparons le même code écrit en Python et en Rust:</p>
+</div>
+<div class="paragraph">
+<p>Les variables dans un programme ont généralement un type (string, int, double, ou des types plus complexes). Ecrivons par exemple en Python et en Rust la même fonction permettant d&#8217;additionner deux entiers.</p>
+</div>
+<div class="paragraph">
+<p><strong>Python</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">#!/usr/bin/env python
+
+def sum(a, b):
+    return a + b
+
+print(sum(1, 1))
+print(sum(1, "hello"))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ce code Python peut être exécuté. Cela donnera:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-python" data-lang="python">python main.py
+2
+Traceback (most recent call last):
+  File "main.py", line 7, in &lt;module&gt;
+    print(sum(1, "hello"))
+  File "main.py", line 4, in sum
+    return a + b
+TypeError: unsupported operand type(s) for +: 'int' and 'str'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Rust</strong></p>
+</div>
+<div class="paragraph">
+<p>Ecrivons la même fonction en Rust</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-rust" data-lang="rust">pub fn sum(a: i32, b: i32) -&gt; i32 {
+    a + b
+}
+
+fn main() {
+    println!("{}", sum(1, 1));
+    println!("{}", sum(1, "hello"));
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On remarque déjà que contrairement à Python, nous devons déclarer les types de nos variables pour notre function <code>sum</code>. On spécifie ici que la fonction prend deux paramètres de type <code>i32</code> (un entier), et returne également un <code>i32</code>.</p>
+</div>
+<div class="paragraph">
+<p>En Rust, ce code ne compile même pas:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>error[E0308]: mismatched types
+ --&gt; src/main.rs:8:27
+  |
+8 |     println!("{}", sum(1, "hello"));
+  |                           ^^^^^^^ expected `i32`, found `&amp;str`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `example`
+
+To learn more, run the command again with --verbose.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Il est donc impossible d&#8217;exécuter ce code. Le compilateur a en effet détecté mon erreur (passer une chaine de caractère à ma fonction) et me l&#8217;indique immédiatement.</p>
+</div>
+<div class="paragraph">
+<p>Le premier intérêt des types est donc de détecter à la compilation un certain nombre d&#8217;erreurs. Ils permettent aussi de structurer son programme. Bien sûr, il existe aussi des outils et techniques pour structurer un programme dans un langage dynamiquement typé (nous y reviendrons), mais il existe de nombreux mécanismes (par exemple en Rust les <code>Enum</code>, <code>Option</code>, <code>Result</code>, <code>Generic</code>, <code>Trait</code>&#8230;&#8203;) pour encoder certaines propriétés de son programmes qui seront ensuite vérifiées à la compilation.</p>
+</div>
+<div class="paragraph">
+<p>Le typage statique permet également parfois de meilleures performances grâce au compilateur.</p>
+</div>
+<div class="paragraph">
+<p>On pourrait donc se dire <code>mais les langages de programmations fortement typés sont forcément supérieurs ?</code> Je pense que ce n&#8217;est pas si simple. Déjà, il y a d&#8217;autres critères de choix (les autres catégories de cet article), mais les langages dynamiques sont aussi très intéressants.</p>
+</div>
+<div class="paragraph">
+<p><strong>Le typage dynamique a aussi des avantages</strong></p>
+</div>
+<div class="paragraph">
+<p>Mon langage de prédilection est <a href="https://clojure.org/">Clojure</a>, un langage fonctionnel et dynamique sur la JVM. Je l&#8217;utilise depuis fin 2014, et je travaille depuis 3 ans avec professionnellement chez <a href="https://www.exoscale.com/">Exoscale</a>.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai eu l&#8217;occasion de développer des programmes complexes avec: <a href="https://community.exoscale.com/documentation/compute/network-load-balancer/">piloter des load balancers</a>, <a href="https://www.exoscale.com/sks/">orchestrer des control planes Kubernetes</a>, <a href="https://community.exoscale.com/documentation/compute/instance-pools/">gérer des groupes de machines virtuelles</a>&#8230;&#8203; Tout ça en Clojure.</p>
+</div>
+<div class="paragraph">
+<p>Est ce que mes programmes sont moins fiables parce que codés en Clojure. Non.</p>
+</div>
+<div class="paragraph">
+<p>Comme dit précédemment, le typage n&#8217;est pas le seul critère: la programmation fonctionnelle et l&#8217;immuabilité, l&#8217;expressivité, la simplicité, la productivité, la cohérence du langage, son écosystème&#8230;&#8203; sont autant de sujets importants. Nous reviendrons sur ces sujets un peu plus loin.</p>
+</div>
+<div class="paragraph">
+<p>Dans le cas de Clojure, le fait de pouvoir représenter le monde sous la forme de structures de données simples, immuables, et de pouvoir facilement ensuite intéragir sur ces données, fait sa force. Notre job c&#8217;est à 80 % d&#8217;écrire des programmes qui prennent des trucs en entrée, les traitent, les envoient à d&#8217;autres systèmes, les retournent&#8230;&#8203; Et Clojure est parfait pour ça. De plus, des outils comme <a href="https://clojure.org/guides/spec">Clojure Spec</a> peuvent aider pour valider ces données.</p>
+</div>
+<div class="paragraph">
+<p>Il n&#8217;existe aujourd&#8217;hui <strong>aucune preuve</strong> votre projet marcherait mieux dans un langage fortement typé. Il existe également des langages comme Golang (retrouvez <a href="https://www.mcorbin.fr/posts/2019-06-13-one-year-of-go/">mon article sur le sujet ici</a>) qui sont statiquement typés mais avec un système de typage peu expressif, ce qui cause plus de problèmes qu&#8217;autre chose.</p>
+</div>
+<div class="paragraph">
+<p>Parlons maintenant d&#8217;expressivité.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_expressivité">Expressivité</h3>
+<div class="paragraph">
+<p>Je pense que les langages dynamiquement typés (comme par exemple Clojure), comparés à des langages fortement typés, permettent:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>De prototyper plus vite, d&#8217;arriver plus vite à un résultat</p>
+</li>
+<li>
+<p>De produire des programmes plus courts. Ce point est important. A compréhension égale (donc, sans utiliser de fonctionnalités ésotériques pour volontairement réduire la taille d&#8217;un programme), je préfère maintenir un programme avec 1000 lignes de code que 10000.
+Il existe je dirai <strong>au moins</strong> un facteur de 5 à 10, voir plus par exemple entre le même programme en Java et en Clojure. C&#8217;est énorme, et ça se ressent sur la maintenance des programmes.</p>
+</li>
+<li>
+<p>De se concentrer sur l&#8217;essentiel.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Le dernier point est également important. Un problème des langages fortement typés est de ne jamais s&#8217;arrêter à sortir de nouvelles fonctionnalités sur le système de typage. Vous aurez toujours quelques personnes ayant 3 doctorats en types qui voudront utiliser une fonctionnalité incompréhensible, et chaque nouvelle fonctionnalité rajoute une couche de complexité au langage.</p>
+</div>
+<div class="paragraph">
+<p>Ces langages sont également sujets à l&#8217;explosion de types. Chaque petite variation de donnée doit avoir son propre types (même si les <code>Enum</code>, <code>Option</code> ou autre peuvent aider), ce qui alourdit la base de code, rajoute des fonctions de conversions entre types&#8230;&#8203; Manipuler et étendre des types est toute une cérémonie.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai ouvert dans le cadre de cet article un fichier aléatoire d&#8217;un projet en Rust par exemple:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-rust" data-lang="rust">impl&lt;T&gt; futures_io::AsyncBufRead for Compat&lt;T&gt;
+where
+    T: tokio::io::AsyncBufRead,
+{
+    fn poll_fill_buf&lt;'a&gt;(
+        self: Pin&lt;&amp;'a mut Self&gt;,
+        cx: &amp;mut Context&lt;'_&gt;,
+    ) -&gt; Poll&lt;io::Result&lt;&amp;'a [u8]&gt;&gt; {
+        tokio::io::AsyncBufRead::poll_fill_buf(self.project().inner, cx)
+    }
+
+    fn consume(self: Pin&lt;&amp;mut Self&gt;, amt: usize) {
+        tokio::io::AsyncBufRead::consume(self.project().inner, amt)
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Wtf ?</p>
+</div>
+<div class="paragraph">
+<p>Certes, un expert Rust comprendrait cela (et en Rust les lifetimes n&#8217;arrangent rien), mais je vois cette lourdeur dans tellement de langages fortement typés: types complexes à rallonge (avec plusieurs niveaux d&#8217;imbrications: <code>Result&lt;Option&lt;Foo&lt;Bar&lt;Baz&gt;&gt;&gt;</code>, fonctionnalités obscures ajoutées à chaque release, symboles incantatoires&#8230;&#8203;).</p>
+</div>
+<div class="paragraph">
+<p>Dans le cas de Rust, cela peut se justifier au vu de ses objectifs. Mais si j&#8217;ai le choix, je veux un langage stable, simple, expressif. Je pense sérieusement que des programmes comme <a href="http://riemann.io/">Riemann</a>, ou bien mon fork <a href="https://www.mirabelle.mcorbin.fr/">Mirabelle</a> sont des programmes qui n&#8217;auraient pas pu être construits simplement dans un langage fortement typé par exemple.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_performances">Performances</h3>
+<div class="paragraph">
+<p>On a parlé de l&#8217;impact du garbage collector sur les performances. Mais même entre langages ayant un garbage collector par exemple, il existe une énorme disparité entre langages sur le sujet de la performance.</p>
+</div>
+<div class="paragraph">
+<p>Les langages interprétés (comme Python pour sa version de base) sont généralement beaucoup plus lents que les langages compilés. Certaines plateformes, comme la JVM, sont connues pour leurs très bonnes performances (ce n&#8217;est pas un hasard si la plupart des outils Big Data tournent sur la JVM).</p>
+</div>
+<div class="paragraph">
+<p>Mais là aussi, il faut se poser la question: est ce que la performance du langage est vraiment importante ?</p>
+</div>
+<div class="paragraph">
+<p>La plupart des applications ont finalement peu de charges, peu de requêtes par seconde. La majorité du temps sera passée dans les I/O, et donc les performances du langage sont négligeables.</p>
+</div>
+<div class="paragraph">
+<p>Pour un projet d&#8217;application web classique qui recevra quelques requêtes par seconde, je ne pense pas que le choix du langage ait un énorme impact. Bien sûr, sur des sites web conséquents, avec de nombreuses instances de l&#8217;application, cela aura un impact et le gain en serveur (et donc en argent) d&#8217;un langage plus performant peut se justifier. Et encore, si votre équipe est à l&#8217;aise avec le langage actuellement utilisé c&#8217;est sûrement ce qui est le plus important. A vous de gérer la balance.</p>
+</div>
+<div class="paragraph">
+<p>Je rajouterai également que les performances brutes sont une chose, mais le fait de pouvoir facilement faire de la programmation concurrente et parallèle en est une autre. Selon les plateformes et langages c&#8217;est plus ou moins compliqué, donc à vous d&#8217;étudier la question avant de vous lancer.<br>
+Certains plateformes (comme Erlang/OTP) peuvent répondre de manière élégante à ces problématiques par exemple.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_programmation_fonctionnelle_objet">Programmation fonctionnelle, objet&#8230;&#8203;</h3>
+<div class="paragraph">
+<p>On découpe également souvent les langages en familles: langages objets, langages fonctionnels&#8230;&#8203; Il y en a d&#8217;autre. Ces catégories ne sont pas simples à définir car certains langages peuvent rentrer dans plusieurs catégories, ou rajoutent des fonctionnalités dans un sens ou un autre, donc je ne vais pas m&#8217;étendre sur le sujet.</p>
+</div>
+<div class="paragraph">
+<p>Néammoins, la programmation fonctionnelle est très intéressante. Le fait de pouvoir décrire son programme comme des données immuables sur lesquelles on va appliquer des fonctions limite grandement les bugs.</p>
+</div>
+<div class="paragraph">
+<p>En passant, programmation fonctionnelle != typage statique.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ecosystème">Ecosystème</h3>
+<div class="paragraph">
+<p>L&#8217;écosystème est très important. Il y a plein de langages intéressants sur le papier mais qui ont au final un écosystème trop petit pour pouvoir être sérieusement utilisé.</p>
+</div>
+<div class="paragraph">
+<p>Si je ne peux pas faire de mTLS, d&#8217;HTTP 2, que je ne peux pas intéragir avec des outils comme Kafka, Rabbit MQ, avec des outils cloud&#8230;&#8203; car l&#8217;écosystème est absent, ce sera un problème.</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est là la force de plateformes comme la JVM, Python, ou bien encore Golang. L&#8217;écosystème est énorme, il existe des librairies de qualité pour un grand nombre de besoins, et donc je sais que je ne me retrouverai pas bloqué à cause d&#8217;une manque de librairies.</p>
+</div>
+<div class="paragraph">
+<p>Le packaging et la gestion des dépendances est aussi important. Avoir des outils comme <code>cargo</code> en Rust, <code>maven</code> en Java ou <code>lein</code> en Clojure pour gérer proprement ses dépendances et ses builds est pour moi obligatoire.<br>
+l&#8217;outillage externes (linter par exemple) est également un gros plus (sur ça Golang est très fort par exemple).</p>
+</div>
+<div class="paragraph">
+<p>bref, l&#8217;écosystème est vraiment un point à ne pas négliger.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_préférences_personnelles">Préférences personnelles</h3>
+<div class="paragraph">
+<p>Enfin, je pense qu&#8217;on a tous le cerveau branché différement, et donc que l&#8217;on va tomber sous le charme de certains langages pour des critères subjectifs.</p>
+</div>
+<div class="paragraph">
+<p>Dans mon cas, j&#8217;espère par exemple ne jamais avoir à retravailler en Java "entreprise". Attention, je trouve le langage Java largement utilisable et très intéressant, mais je pense que la façon de développer en Java aujourd&#8217;hui au niveau des frameworks utilisés est une aberration. J&#8217;ai d&#8217;ailleurs quelques articles sur le sujet <a href="https://www.mcorbin.fr/posts/2020-02-22-jvm-ecosysteme/">ici</a> et <a href="https://www.mcorbin.fr/posts/2018-02-08-spring-generateur/">ici</a>.</p>
+</div>
+<div class="paragraph">
+<p>Et généralement, utiliser le langage que l&#8217;on connait reste le plus intéressant.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_conclusion">Conclusion</h3>
+<div class="paragraph">
+<p>Une chose importante à comprendre est que le choix du langage est d&#8217;abord en lien avec le type de projet. Comme expliqué avant, si vous ne pouvez pas tolérer un GC, vos choix sont limités. Si vous voulez vous inscrire dans un écosystème précis (Kubernetes par exemple), les choix sont aussi limités.</p>
+</div>
+<div class="paragraph">
+<p>Mais souvent, plusieurs langages peuvent correspondre au besoin. Dans ce ca là, à vous de trancher. Mais je pense qu&#8217;au final il n&#8217;existe pas vraiment de mauvais langages dans les choix "classiques", plus des mauvaises utilisations.</p>
+</div>
+<div class="paragraph">
+<p>Vous êtes maintenant libre de troller dans les commentaires.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/programming/">programming</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+        <a class="right" href="/posts/2021-03-27-cloud-marketing/">Le cloud, seulement du marketing ? &raquo;</a>
+        
+    </div>
+    <!--Crappy code starts here-->
+    
+    <script>
+      $( document ).ready(function() {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
+              $('#challenge_question').text(data.question);
+              $('#challenge_name span').text(data.name);
+          });
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2021-05-12-langage-prog-important", function(data) {
+              for (i=0; i<data.length; i++) {
+
+                  response = data[i];
+                  author = document.createElement('div');
+                  author.className="comment_author";
+                  author.textContent=response.author;
+
+                  d = new Date(response.timestamp);
+                  datestring = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + "h" + d.getMinutes();
+
+                  date = document.createElement('span');
+                  date.className="comment_date";
+                  date.textContent=datestring;
+
+                  content = document.createElement('div');
+                  content.className="comment_content";
+                  content.innerHTML=response.content;
+                  content.style="white-space: pre-wrap;";
+
+
+                  comment = document.createElement('div');
+                  comment.className="comment";
+
+                  comment.appendChild(author);
+                  comment.appendChild(date);
+                  comment.appendChild(content);
+
+                  document.getElementById('comments_list').appendChild(comment);
+              }
+          });
+      });
+      $(function(){
+          $('#comment_create').on('click', function(){
+              $.ajax
+              ({
+                  type: "POST",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2021-05-12-langage-prog-important",
+                  dataType: 'json',
+                  contentType: 'application/json',
+                  data: JSON.stringify({"author": $("#new_comment_author").val(),
+                                        "content" : $("#new_comment_content").val(),
+                                        "challenge" : $("#challenge_name span").text(),
+                                        "answer" : $("#challenge_answer").val()}),
+                  success: function () {
+                      $('#comment_result span').text("The comment will be approved soon.");
+                  },
+                  error: function () {
+                      $('#comment_result span').text("Fail to add the comment. Please contact the website owner (the email is in the About section of the website). Thank you in advance.");
+                  }
+              })
+          });
+      });
+    </script>
+
+    <div id="comment_block">
+      <div id="comments_list">
+      </div>
+
+      <div id="new_comment">
+
+        <div id="challenge_name" style="visibility: hidden">
+          <span  style="visibility: hidden"></span>
+        </div>
+        <b><p>Add a comment</p></b>
+        <input type="text" id="new_comment_author" name="author" placeholder="author"><br><br>
+
+        <textarea id="new_comment_content", name="comment_content" rows="5" placeholder="content"></textarea>
+        <br><br>
+
+        <b><span id="challenge_question"></span></b><br/>
+        <input type="text" id="challenge_answer" name="challenge_answer" placeholder="Answer" size="40"><br><br>
+        <p>If you have a bug/issue with the commenting system, please send me an email (my email is in the "About" section).</p>
+        <input id="comment_create" type="button" value="Add comment" class="btn btn-primary btn-lg"/>
+        <div id="comment_result">
+          <span></span>
+        </div>
+      </div>
+
+    </div>
+    
+    <!--Ends here-->
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2021 mcorbin</footer>
+    </div>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

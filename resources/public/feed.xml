@@ -12,11 +12,347 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 09 May 2021 19:04:39 +0200
+Wed, 12 May 2021 14:26:38 +0200
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-05-12-langage-prog-important/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-05-12-langage-prog-important/
+</link>
+<title>
+Choix du langage de programmation pour un projet: vraiment important ?
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Source infinie de trolls, les débats sur les langages de programmation sont vieux comme le monde. Mais est ce que ce choix est vraiment important ? D&amp;#8217;ailleurs, comment choisir ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il existe probablement des centaines de langage de programmations, certains très populaires, d&amp;#8217;autres non. Il peut être difficile de faire le tri (et donc de faire des choix) à cause de cela. Dans cet article, je décrirai comment je classe les langages, des critères importants selon moi, de comment je fais mes choix.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En effet, c&amp;#8217;est d&amp;#8217;abord le type de projet qui va vous permettre de faire un premier filtre sur les langages à utiliser.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_catégogies_de_langages&quot;&gt;Catégogies de langages&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_langages_spécialisés&quot;&gt;Langages spécialisés&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La première catégorie de langage que je souhaite aborder est celle des langages spécialisés. Dans certains domaines, vous n&amp;#8217;avez finalement pas ou peu le choix du langage. Ce sont souvent des langages utilisés dans des domaines bien précis.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/VHDL&quot;&gt;VHDL&lt;/a&gt;, que j&amp;#8217;ai eu l&amp;#8217;occasion de pratiquer pendant mes études, rentre par exemple dans cette catégorie. Il fait partie de ces quelques langages de niches permettant de décrire du hardware. C&amp;#8217;est d&amp;#8217;ailleurs un langage super fun, j&amp;#8217;ai parfois presque envie d&amp;#8217;acheter un peu de matériel pour rejouer avec.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bref, ces langages one une niche où la question du choix se pose moins qu&amp;#8217;ailleurs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_gargage_collector_ou_non&quot;&gt;Gargage collector ou non ?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Si on veut comparer les langages &quot;grands publics&quot;, un premier critère important est la présence ou non d&amp;#8217;un garbage collector. Rappelez vous, le gargage collector (GC) est un composant vous permettant de ne pas gérer l&amp;#8217;allocation et la libération de la mémoire de vos programmes. Cela simplifie grandement les programmes (on y reviendra), mais a un coût plus ou moins important en consommation mémoire, et en performance (notamment sur la latence de votre programme par exemple).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Certains programmes très spécifiques (kernel, temps réel&amp;#8230;&amp;#8203;) ne peuvent pas se permettre un garbage collector. On compare généralement trois langages lorsqu&amp;#8217;on parle de langages sans GC: C, C++, et Rust.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C est le langage historique. Présent partout (comme dans le kernel Linux par exemple), on est pas prêt de pouvoir se passer complètement de lui. De même, C++ est un langage populaire qu&amp;#8217;on retrouve dans de nombreux programmes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le soucis de ces deux derniers langages est qu&amp;#8217;ils demandent une grande rigueur pour le développeur: en effet, gérer la mémoire manuellement est difficile, et des bugs peuvent rapidement apparaître. Cette catégorie de bug est assez dangereuse car elle peut permettre à un attaquant de prendre le contrôle de la machine par exemple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Rust a été inventé pour résoudre ce problème: avoir un langage sans garbage collector mais qui évite à la compilation les bugs de gestion de mémoire. Rust n&amp;#8217;apporte pas que cela (on parlera de typage et d&amp;#8217;écosystème plus tard), mais c&amp;#8217;est déjà un bon point pour lui.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est un peu hors du scope de cet article mais j&amp;#8217;ai toujours trouvé la programmation système très difficilement accessible. C&amp;#8217;est plein de subtilités et de bonnes pratiques très difficiles à assimiler (et si les gens d&amp;#8217;OpenSSL arrivent à introduire des bugs en lien avec la mémoire, on sait direct que ce sera le cas pour nous aussi), plein d&amp;#8217;incantations obscures à base de préprocesseurs, de processus de build incompréhensibles à moins d&amp;#8217;avoir un doctorat en Makefile et en installation de dépendances&amp;#8230;&amp;#8203; Bref, quoi qu&amp;#8217;on pense de Rust, il permet au moins de rendre le truc accessible pour le commun des mortels que nous sommes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_donc_gc_ou_pas&quot;&gt;Donc, GC ou pas ?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je pense que 97 % des programmes (chiffre sorti de mon chapeau) peuvent tolérer un garbage collector. L&amp;#8217;intêret du garbage collector est multiple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Facilité de développement: Rust apporte par exemple une lourdeur énorme (mais justifiée vu ses objectifs) pour se passer de GC ET être safe. J&amp;#8217;aime le code simple et concis, et j&amp;#8217;aime mon confort de développement.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;La majorité des applications peuvent tolérer un GC: les garbage collectors d&amp;#8217;aujourd&amp;#8217;hui sont &lt;strong&gt;très&lt;/strong&gt; performants. On a récemment beaucoup parlé de &lt;a href=&quot;https://malloc.se/blog/zgc-jdk16&quot;&gt;ZGC&lt;/a&gt; sur la machine virtuelle Java (JVM) récemment par exemple. Demandez vous si c&amp;#8217;est grave si parfois, quelques requêtes mettent quelques dizaines de millisecondes de plus à s&amp;#8217;exécuter parce que vous avez le GC qui tourne. Pour la majorité des applications, c&amp;#8217;est négligeable.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Bien sûr, gérer des programmes consommant d&amp;#8217;énormes quantités de RAM (centaines de GB, voir TB) est un challenge, mais on est ici sur des besoins très particuliers et on voit que des solutions comme ZGC peuvent convenir pour ces besoins. Et de toute façon, GC ou pas, je pense que coder ce genre d&amp;#8217;applications est toujours difficile. Peut être que la productivité amenée par l&amp;#8217;utilisation d&amp;#8217;un GC est plus intéressante ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;TL:DR: je ne vois aucun intêret à utiliser par exemple Rust pour faire des applications web standards. Je préfère un langage de plus haut niveau qui me permettra d&amp;#8217;être beaucoup plus productif et avec selon moi un code plus clair.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On aura toujours quelques trolls, connus ou non, qui affirmeront que le VRAI code et les VRAIS langages sont des langages sans GC, je préfère ignorer ce genre de remarques.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_typage&quot;&gt;Typage&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Un autre grand débat est le typage statique vs le typage dynamique. Comparons le même code écrit en Python et en Rust:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les variables dans un programme ont généralement un type (string, int, double, ou des types plus complexes). Ecrivons par exemple en Python et en Rust la même fonction permettant d&amp;#8217;additionner deux entiers.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Python&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;#!/usr/bin/env python
+
+def sum(a, b):
+    return a + b
+
+print(sum(1, 1))
+print(sum(1, &quot;hello&quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce code Python peut être exécuté. Cela donnera:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;python main.py
+2
+Traceback (most recent call last):
+  File &quot;main.py&quot;, line 7, in &amp;lt;module&amp;gt;
+    print(sum(1, &quot;hello&quot;))
+  File &quot;main.py&quot;, line 4, in sum
+    return a + b
+TypeError: unsupported operand type(s) for +: 'int' and 'str'&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Rust&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ecrivons la même fonction en Rust&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;pub fn sum(a: i32, b: i32) -&amp;gt; i32 {
+    a + b
+}
+
+fn main() {
+    println!(&quot;{}&quot;, sum(1, 1));
+    println!(&quot;{}&quot;, sum(1, &quot;hello&quot;));
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On remarque déjà que contrairement à Python, nous devons déclarer les types de nos variables pour notre function &lt;code&gt;sum&lt;/code&gt;. On spécifie ici que la fonction prend deux paramètres de type &lt;code&gt;i32&lt;/code&gt; (un entier), et returne également un &lt;code&gt;i32&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En Rust, ce code ne compile même pas:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;error[E0308]: mismatched types
+ --&amp;gt; src/main.rs:8:27
+  |
+8 |     println!(&quot;{}&quot;, sum(1, &quot;hello&quot;));
+  |                           ^^^^^^^ expected `i32`, found `&amp;amp;str`
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `example`
+
+To learn more, run the command again with --verbose.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il est donc impossible d&amp;#8217;exécuter ce code. Le compilateur a en effet détecté mon erreur (passer une chaine de caractère à ma fonction) et me l&amp;#8217;indique immédiatement.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le premier intérêt des types est donc de détecter à la compilation un certain nombre d&amp;#8217;erreurs. Ils permettent aussi de structurer son programme. Bien sûr, il existe aussi des outils et techniques pour structurer un programme dans un langage dynamiquement typé (nous y reviendrons), mais il existe de nombreux mécanismes (par exemple en Rust les &lt;code&gt;Enum&lt;/code&gt;, &lt;code&gt;Option&lt;/code&gt;, &lt;code&gt;Result&lt;/code&gt;, &lt;code&gt;Generic&lt;/code&gt;, &lt;code&gt;Trait&lt;/code&gt;&amp;#8230;&amp;#8203;) pour encoder certaines propriétés de son programmes qui seront ensuite vérifiées à la compilation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le typage statique permet également parfois de meilleures performances grâce au compilateur.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On pourrait donc se dire &lt;code&gt;mais les langages de programmations fortement typés sont forcément supérieurs ?&lt;/code&gt; Je pense que ce n&amp;#8217;est pas si simple. Déjà, il y a d&amp;#8217;autres critères de choix (les autres catégories de cet article), mais les langages dynamiques sont aussi très intéressants.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Le typage dynamique a aussi des avantages&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mon langage de prédilection est &lt;a href=&quot;https://clojure.org/&quot;&gt;Clojure&lt;/a&gt;, un langage fonctionnel et dynamique sur la JVM. Je l&amp;#8217;utilise depuis fin 2014, et je travaille depuis 3 ans avec professionnellement chez &lt;a href=&quot;https://www.exoscale.com/&quot;&gt;Exoscale&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai eu l&amp;#8217;occasion de développer des programmes complexes avec: &lt;a href=&quot;https://community.exoscale.com/documentation/compute/network-load-balancer/&quot;&gt;piloter des load balancers&lt;/a&gt;, &lt;a href=&quot;https://www.exoscale.com/sks/&quot;&gt;orchestrer des control planes Kubernetes&lt;/a&gt;, &lt;a href=&quot;https://community.exoscale.com/documentation/compute/instance-pools/&quot;&gt;gérer des groupes de machines virtuelles&lt;/a&gt;&amp;#8230;&amp;#8203; Tout ça en Clojure.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Est ce que mes programmes sont moins fiables parce que codés en Clojure. Non.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Comme dit précédemment, le typage n&amp;#8217;est pas le seul critère: la programmation fonctionnelle et l&amp;#8217;immuabilité, l&amp;#8217;expressivité, la simplicité, la productivité, la cohérence du langage, son écosystème&amp;#8230;&amp;#8203; sont autant de sujets importants. Nous reviendrons sur ces sujets un peu plus loin.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans le cas de Clojure, le fait de pouvoir représenter le monde sous la forme de structures de données simples, immuables, et de pouvoir facilement ensuite intéragir sur ces données, fait sa force. Notre job c&amp;#8217;est à 80 % d&amp;#8217;écrire des programmes qui prennent des trucs en entrée, les traitent, les envoient à d&amp;#8217;autres systèmes, les retournent&amp;#8230;&amp;#8203; Et Clojure est parfait pour ça. De plus, des outils comme &lt;a href=&quot;https://clojure.org/guides/spec&quot;&gt;Clojure Spec&lt;/a&gt; peuvent aider pour valider ces données.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il n&amp;#8217;existe aujourd&amp;#8217;hui &lt;strong&gt;aucune preuve&lt;/strong&gt; votre projet marcherait mieux dans un langage fortement typé. Il existe également des langages comme Golang (retrouvez &lt;a href=&quot;https://www.mcorbin.fr/posts/2019-06-13-one-year-of-go/&quot;&gt;mon article sur le sujet ici&lt;/a&gt;) qui sont statiquement typés mais avec un système de typage peu expressif, ce qui cause plus de problèmes qu&amp;#8217;autre chose.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Parlons maintenant d&amp;#8217;expressivité.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_expressivité&quot;&gt;Expressivité&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je pense que les langages dynamiquement typés (comme par exemple Clojure), comparés à des langages fortement typés, permettent:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;De prototyper plus vite, d&amp;#8217;arriver plus vite à un résultat&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;De produire des programmes plus courts. Ce point est important. A compréhension égale (donc, sans utiliser de fonctionnalités ésotériques pour volontairement réduire la taille d&amp;#8217;un programme), je préfère maintenir un programme avec 1000 lignes de code que 10000.
+Il existe je dirai &lt;strong&gt;au moins&lt;/strong&gt; un facteur de 5 à 10, voir plus par exemple entre le même programme en Java et en Clojure. C&amp;#8217;est énorme, et ça se ressent sur la maintenance des programmes.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;De se concentrer sur l&amp;#8217;essentiel.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le dernier point est également important. Un problème des langages fortement typés est de ne jamais s&amp;#8217;arrêter à sortir de nouvelles fonctionnalités sur le système de typage. Vous aurez toujours quelques personnes ayant 3 doctorats en types qui voudront utiliser une fonctionnalité incompréhensible, et chaque nouvelle fonctionnalité rajoute une couche de complexité au langage.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ces langages sont également sujets à l&amp;#8217;explosion de types. Chaque petite variation de donnée doit avoir son propre types (même si les &lt;code&gt;Enum&lt;/code&gt;, &lt;code&gt;Option&lt;/code&gt; ou autre peuvent aider), ce qui alourdit la base de code, rajoute des fonctions de conversions entre types&amp;#8230;&amp;#8203; Manipuler et étendre des types est toute une cérémonie.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai ouvert dans le cadre de cet article un fichier aléatoire d&amp;#8217;un projet en Rust par exemple:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;impl&amp;lt;T&amp;gt; futures_io::AsyncBufRead for Compat&amp;lt;T&amp;gt;
+where
+    T: tokio::io::AsyncBufRead,
+{
+    fn poll_fill_buf&amp;lt;'a&amp;gt;(
+        self: Pin&amp;lt;&amp;amp;'a mut Self&amp;gt;,
+        cx: &amp;amp;mut Context&amp;lt;'_&amp;gt;,
+    ) -&amp;gt; Poll&amp;lt;io::Result&amp;lt;&amp;amp;'a [u8]&amp;gt;&amp;gt; {
+        tokio::io::AsyncBufRead::poll_fill_buf(self.project().inner, cx)
+    }
+
+    fn consume(self: Pin&amp;lt;&amp;amp;mut Self&amp;gt;, amt: usize) {
+        tokio::io::AsyncBufRead::consume(self.project().inner, amt)
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Wtf ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Certes, un expert Rust comprendrait cela (et en Rust les lifetimes n&amp;#8217;arrangent rien), mais je vois cette lourdeur dans tellement de langages fortement typés: types complexes à rallonge (avec plusieurs niveaux d&amp;#8217;imbrications: &lt;code&gt;Result&amp;lt;Option&amp;lt;Foo&amp;lt;Bar&amp;lt;Baz&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt;, fonctionnalités obscures ajoutées à chaque release, symboles incantatoires&amp;#8230;&amp;#8203;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans le cas de Rust, cela peut se justifier au vu de ses objectifs. Mais si j&amp;#8217;ai le choix, je veux un langage stable, simple, expressif. Je pense sérieusement que des programmes comme &lt;a href=&quot;http://riemann.io/&quot;&gt;Riemann&lt;/a&gt;, ou bien mon fork &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/&quot;&gt;Mirabelle&lt;/a&gt; sont des programmes qui n&amp;#8217;auraient pas pu être construits simplement dans un langage fortement typé par exemple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_performances&quot;&gt;Performances&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On a parlé de l&amp;#8217;impact du garbage collector sur les performances. Mais même entre langages ayant un garbage collector par exemple, il existe une énorme disparité entre langages sur le sujet de la performance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les langages interprétés (comme Python pour sa version de base) sont généralement beaucoup plus lents que les langages compilés. Certaines plateformes, comme la JVM, sont connues pour leurs très bonnes performances (ce n&amp;#8217;est pas un hasard si la plupart des outils Big Data tournent sur la JVM).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais là aussi, il faut se poser la question: est ce que la performance du langage est vraiment importante ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La plupart des applications ont finalement peu de charges, peu de requêtes par seconde. La majorité du temps sera passée dans les I/O, et donc les performances du langage sont négligeables.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Pour un projet d&amp;#8217;application web classique qui recevra quelques requêtes par seconde, je ne pense pas que le choix du langage ait un énorme impact. Bien sûr, sur des sites web conséquents, avec de nombreuses instances de l&amp;#8217;application, cela aura un impact et le gain en serveur (et donc en argent) d&amp;#8217;un langage plus performant peut se justifier. Et encore, si votre équipe est à l&amp;#8217;aise avec le langage actuellement utilisé c&amp;#8217;est sûrement ce qui est le plus important. A vous de gérer la balance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je rajouterai également que les performances brutes sont une chose, mais le fait de pouvoir facilement faire de la programmation concurrente et parallèle en est une autre. Selon les plateformes et langages c&amp;#8217;est plus ou moins compliqué, donc à vous d&amp;#8217;étudier la question avant de vous lancer.&lt;br&gt;
+Certains plateformes (comme Erlang/OTP) peuvent répondre de manière élégante à ces problématiques par exemple.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_programmation_fonctionnelle_objet&quot;&gt;Programmation fonctionnelle, objet&amp;#8230;&amp;#8203;&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On découpe également souvent les langages en familles: langages objets, langages fonctionnels&amp;#8230;&amp;#8203; Il y en a d&amp;#8217;autre. Ces catégories ne sont pas simples à définir car certains langages peuvent rentrer dans plusieurs catégories, ou rajoutent des fonctionnalités dans un sens ou un autre, donc je ne vais pas m&amp;#8217;étendre sur le sujet.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Néammoins, la programmation fonctionnelle est très intéressante. Le fait de pouvoir décrire son programme comme des données immuables sur lesquelles on va appliquer des fonctions limite grandement les bugs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En passant, programmation fonctionnelle != typage statique.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_ecosystème&quot;&gt;Ecosystème&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;écosystème est très important. Il y a plein de langages intéressants sur le papier mais qui ont au final un écosystème trop petit pour pouvoir être sérieusement utilisé.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Si je ne peux pas faire de mTLS, d&amp;#8217;HTTP 2, que je ne peux pas intéragir avec des outils comme Kafka, Rabbit MQ, avec des outils cloud&amp;#8230;&amp;#8203; car l&amp;#8217;écosystème est absent, ce sera un problème.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est là la force de plateformes comme la JVM, Python, ou bien encore Golang. L&amp;#8217;écosystème est énorme, il existe des librairies de qualité pour un grand nombre de besoins, et donc je sais que je ne me retrouverai pas bloqué à cause d&amp;#8217;une manque de librairies.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le packaging et la gestion des dépendances est aussi important. Avoir des outils comme &lt;code&gt;cargo&lt;/code&gt; en Rust, &lt;code&gt;maven&lt;/code&gt; en Java ou &lt;code&gt;lein&lt;/code&gt; en Clojure pour gérer proprement ses dépendances et ses builds est pour moi obligatoire.&lt;br&gt;
+l&amp;#8217;outillage externes (linter par exemple) est également un gros plus (sur ça Golang est très fort par exemple).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;bref, l&amp;#8217;écosystème est vraiment un point à ne pas négliger.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_préférences_personnelles&quot;&gt;Préférences personnelles&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, je pense qu&amp;#8217;on a tous le cerveau branché différement, et donc que l&amp;#8217;on va tomber sous le charme de certains langages pour des critères subjectifs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Dans mon cas, j&amp;#8217;espère par exemple ne jamais avoir à retravailler en Java &quot;entreprise&quot;. Attention, je trouve le langage Java largement utilisable et très intéressant, mais je pense que la façon de développer en Java aujourd&amp;#8217;hui au niveau des frameworks utilisés est une aberration. J&amp;#8217;ai d&amp;#8217;ailleurs quelques articles sur le sujet &lt;a href=&quot;https://www.mcorbin.fr/posts/2020-02-22-jvm-ecosysteme/&quot;&gt;ici&lt;/a&gt; et &lt;a href=&quot;https://www.mcorbin.fr/posts/2018-02-08-spring-generateur/&quot;&gt;ici&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Et généralement, utiliser le langage que l&amp;#8217;on connait reste le plus intéressant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une chose importante à comprendre est que le choix du langage est d&amp;#8217;abord en lien avec le type de projet. Comme expliqué avant, si vous ne pouvez pas tolérer un GC, vos choix sont limités. Si vous voulez vous inscrire dans un écosystème précis (Kubernetes par exemple), les choix sont aussi limités.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mais souvent, plusieurs langages peuvent correspondre au besoin. Dans ce ca là, à vous de trancher. Mais je pense qu&amp;#8217;au final il n&amp;#8217;existe pas vraiment de mauvais langages dans les choix &quot;classiques&quot;, plus des mauvaises utilisations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Vous êtes maintenant libre de troller dans les commentaires.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Wed, 12 May 2021 00:00:00 +0200
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2021-03-27-cloud-marketing/
