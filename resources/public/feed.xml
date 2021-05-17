@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Mon, 17 May 2021 17:18:17 +0200
+Mon, 17 May 2021 18:32:31 +0200
 </lastBuildDate>
 <generator>
 clj-rss
@@ -89,7 +89,7 @@ Je pense que les services proposés par les cloud européens sont suffisants pou
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Je veux bien entendre que certains projets avec des besoins spécifiques aient besoin de services disponibles uniquement chez les cloud étrangers, et que gérer ces services en interne sur un cloud européen (car cela est généralement toujours possible, via des solutions libres ou non) ait un coût.&lt;br&gt;
-Mais l&amp;#8217;offre chez les cloud européens ne fait que de s&amp;#8217;étoffer. Je pourrai citer mon employeur actuel (qui n&amp;#8217;est pas une entreprise Française) mais vu qu&amp;#8217;on parle ici spécifiquement de la France (je suis Français et suis content de voir de belles entreprises Françaises même si je travaille pour un concurrent, et je pense de toute façon que le marché est assez gros pour plusieurs acteurs) je citerai &lt;a href=&quot;https://www.scaleway.com/fr/&quot;&gt;Scaleway&lt;/a&gt;, qui est selon moi l&amp;#8217;offre cloud Française la plus intéressante aujourd&amp;#8217;hui.&lt;/p&gt;
+Mais l&amp;#8217;offre chez les cloud européens ne fait que de s&amp;#8217;étoffer. Je pourrai citer &lt;a href=&quot;https://www.exoscale.com/&quot;&gt;mon employeur actuel&lt;/a&gt; (qui n&amp;#8217;est pas une entreprise Française) mais vu qu&amp;#8217;on parle ici spécifiquement de la France (je suis Français et suis content de voir de belles entreprises Françaises même si je travaille pour un concurrent, et je pense de toute façon que le marché est assez gros pour plusieurs acteurs) je citerai &lt;a href=&quot;https://www.scaleway.com/fr/&quot;&gt;Scaleway&lt;/a&gt;, qui est selon moi l&amp;#8217;offre cloud Française la plus intéressante aujourd&amp;#8217;hui.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&quot;paragraph&quot;&gt;
 &lt;p&gt;Les discours du type &quot;je ne sais pas faire mon projet sur Scaleway (ou autre acteur), ça ne marche que sur Google&quot;, je n&amp;#8217;y crois pas. Encouragons nos entreprises, donnons leur une chance au lieu de les reléguer à de simples installateur de solutions américaines. J&amp;#8217;ai été déçu par cette partie de l&amp;#8217;intervention, un peu d&amp;#8217;ambition que diable !&lt;/p&gt;
