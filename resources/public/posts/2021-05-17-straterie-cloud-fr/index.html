@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>(mcorbin.fr): La stratégie cloud de la France</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2021-05-17-straterie-cloud-fr/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery-3.5.1.min.js" type="text/javascript"></script>
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">17 mai 2021</div>
+        
+    </div>
+    <h2>La stratégie cloud de la France</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Ce matin, le gouvernement Français présentait sa stratégie cloud. Voici mon analyse, moi personne "technique" travaillant dans le domaine du cloud.</p>
+</div>
+<div class="sect1">
+<h2 id="_introduction_par_bruno_le_maire">Introduction par Bruno le Maire</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La conférence est ouverte par Bruno le Maire, Ministre de l&#8217;économie, qui commence par indiquer que le sujet discuté ici est le fruit de deux ans de travaux. Cela peut sembler long mais ce temps se justifie selon le ministre dû au fait que les précédentes tentatives de cloud souverains ont été des échecs.</p>
+</div>
+<div class="paragraph">
+<p>Ces tentatives ont échouées car elles n&#8217;avaient pas (toujours selon le ministre) tenu compte des réalités techniques et des attentes de leurs clients (entreprises, administrations).</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;offre de cloud souverain présentée serait donc une offre solide, avec un cadre européen (via GAIA X, nous y reviendrons).<br>
+En effet, les données sont stratégiques aujourd&#8217;hui, et il faut absolument selon Bruno Le Maire protéger ces données, que ce soit des données personnelles ou des données d&#8217;entreprises.</p>
+</div>
+<div class="paragraph">
+<p>Cette offre (qui est en fait un label), appelée <code>cloud de confiance</code> se compose de 3 piliers:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Garantir une protection maximale des données. Cela passera tout d&#8217;abord par la certification <a href="https://www.ssi.gouv.fr/administration/qualifications/prestataires-de-services-de-confiance-qualifies/prestataires-de-service-dinformatique-en-nuage-secnumcloud/">SecNumCloud</a> de l&#8217;ANSSI, certification avec de nombreuses exigences de sécurité.<br>
+Une nouvelle condition fait également son apparition: la protection juridique. L&#8217;entreprise ne doit pas être soumise à des lois extra territoriales (ce qui est par exemple le cas des cloud providers américains). L&#8217;entreprise devra obligatoirement avoir ces serveurs en France, et ladite entreprise devra être une entreprise européenne.</p>
+</li>
+<li>
+<p>Accès aux meilleurs services mondiaux.<br>
+Selon le ministre, les précédentes offres de cloud souverains n&#8217;étaient pas au niveau. Aujourd&#8217;hui, les meilleures offres seraient américaines (Microsoft et Google sont cités).
+La solution serait donc de déployer les logiciels américains sur des infrastructures gérées par des entreprises européennes (les européens seraient donc des hébergeurs et revendeurs de solutions américaines).<br>
+Le ministre a pris les devants en disant que cette annonce allait faire réagir et qu&#8217;on allait accuser le gouvernement de renoncer à la souveraineté numérique du pays, car au final ce ne serait pas des solutions françaises (ou européennes) utilisées. Pourtant, selon lui, c&#8217;est la meilleure solution pour le moment (et est le fruit de 2 ans de réflexion), solution qui aurait déjà marché dans d&#8217;autres secteurs comme le nucléaire dans les années 1960 (j&#8217;aimerai d&#8217;ailleurs bien avoir plus d&#8217;informations sur cela).<br>
+Néammoins, cela ne veut pas dire qu&#8217;il ne faut pas également travailler (et investir) dans des solutions européennes pour rattraper notre retard.</p>
+</li>
+<li>
+<p>Troisième point: fonctionner avec les initiatives européennes. L&#8217;offre <code>cloud de confiance</code> s&#8217;inscrit notamment dans GAIA X.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Que penser de cela ?</p>
+</div>
+<div class="paragraph">
+<p>Tout d&#8217;abord, je pense qu&#8217;il est nécessaire de se féliciter que le gouvernement soit conscient du problème actuel du cloud et de la domination des acteurs non européens dans ce secteur.<br>
+Le fait de privilégier dans certains secteurs (je pense notamment à la santé) des solutions où l&#8217;on a une garantie forte sur la sécurité des données est important. J&#8217;espère juste que ce sera le dernier "label" qui apparaîtra, car à force entre SecNumCloud, Cloud de Confiance, GAIA X (qui semble également devenir un label), les multiples normes ISO&#8230;&#8203; le client peut commencer à s&#8217;y perdre (et certains clouds doivent se demander si leur job est d&#8217;avoir des labels ou bien de développer des produits technologiques).<br>
+Mais je salue l&#8217;initiative que je trouve intéressante.</p>
+</div>
+<div class="paragraph">
+<p>Je suis par contre en total désaccord avec la stratégie d&#8217;hébergement de stacks (logiciels) Cloud américaines chez des fournisseurs européens, et sur la dévalorisation des acteurs français et européens existants.</p>
+</div>
+<div class="paragraph">
+<p>Au cours des présentations, le <a href="https://www.ovh.com/fr/news/presse/cpl1685.ovhcloud-google-cloud-annoncent-partenariat-strategique-co-construire-solution-confiance-europe">partenariat</a> entre OVH et Google a été plusieurs fois cité.<br>
+Que des entreprises montent ce genre de partenariat, pourquoi pas, mais je ne pense pas que ce soit une solution pérenne pour l&#8217;Europe, même à court terme. OVH a pour pour clairement fait une erreur avec ce partenariat car en montrant que c&#8217;était possible, les GAFAM vont s&#8217;engouffrer dans la brèche.</p>
+</div>
+<div class="paragraph">
+<p>Ensuite, pourquoi cette dévalorisation des acteurs européens ? Soyons clair, il est vrai que les services américains ont de l&#8217;avance. Est-il pourtant impossible de faire du cloud en Europe ? Loin de ça.</p>
+</div>
+<div class="paragraph">
+<p>Déjà, combien de services sont vraiment utilisés dans les catalogues américains ? Il peut être tentant de choisir le cloud avec le catalogue le plus important en se disant "au cas où&#8230;&#8203;", mais un catalogue ne fait pas tout.<br>
+Je pense que les services proposés par les cloud européens sont suffisants pour un grand nombre de projets. De plus, ces cloud européens ont des roadmap ambitieuses et lancent chaque année de nouveaux services. C&#8217;est cela qu&#8217;il faut soutenir.</p>
+</div>
+<div class="paragraph">
+<p>Je veux bien entendre que certains projets avec des besoins spécifiques aient besoin de services disponibles uniquement chez les cloud étrangers, et que gérer ces services en interne sur un cloud européen (car cela est généralement toujours possible, via des solutions libres ou non) ait un coût.<br>
+Mais l&#8217;offre chez les cloud européens ne fait que de s&#8217;étoffer. Je pourrai citer mon employeur actuel (qui n&#8217;est pas une entreprise Française) mais vu qu&#8217;on parle ici spécifiquement de la France (je suis Français et suis content de voir de belles entreprises Françaises même si je travaille pour un concurrent, et je pense de toute façon que le marché est assez gros pour plusieurs acteurs) je citerai <a href="https://www.scaleway.com/fr/">Scaleway</a>, qui est selon moi l&#8217;offre cloud Française la plus intéressante aujourd&#8217;hui.</p>
+</div>
+<div class="paragraph">
+<p>Les discours du type "je ne sais pas faire mon projet sur Scaleway (ou autre acteur), ça ne marche que sur Google", je n&#8217;y crois pas. Encouragons nos entreprises, donnons leur une chance au lieu de les reléguer à de simples installateur de solutions américaines. J&#8217;ai été déçu par cette partie de l&#8217;intervention, un peu d&#8217;ambition que diable !</p>
+</div>
+<div class="paragraph">
+<p>Enfin, GAIA X. J&#8217;avais écrit <a href="https://www.mcorbin.fr/posts/2020-06-20-cloud-vendor-lock-in/">un article</a> sur le sujet en Juin 2020. Depuis, pas de nouvelles, pour l&#8217;instant c&#8217;est du vaporware et personne ne comprend vraiment ce qu&#8217;il y a derrière. Bref, à voir mais moi je vois peu d&#8217;espoirs de ce côté (est ce mon côté gaulois réfractaire qui ressort ? Peut être).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_suite_par_amélie_de_montchalin">Suite par Amélie de Montchalin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>C&#8217;est ensuite au tour d&#8217;Amélie de Montchalin, Ministre de la transformation et de la fonction publiques, de monter sur scène pour parler de la stratégie d&#8217;usage du cloud par les administrations.</p>
+</div>
+<div class="paragraph">
+<p>Il y a une très grosse ambition pour numériser l&#8217;administration et de rendre tous les services publics accessibles en ligne. Dans ce cadre, le cloud est essentiel car il permettrait de travailler plus rapidement, de façon plus agile, plus itérative. Il serait également moins coûteux que de l&#8217;hébergement en interne.</p>
+</div>
+<div class="paragraph">
+<p>Une stratégie de migration vers le cloud est en cours. Cette nouvelle doctrine, appelée <code>cloud au centre</code>, fait le cloud le mode de projet par défaut pour les projets de l&#8217;administration.<br>
+Bien sûr, cette migration doit se faire vers des solutions sécurisées (on revient sur le cloud de confiance), ce en quoi je suis tout à fait d&#8217;accord. Les projets actuels de l&#8217;administration auront 12 mois pour se mettre en conformité (et donc migrer vers le cloud ?) une fois les premiers acteurs labellisés <code>cloud de confiance</code> connus.</p>
+</div>
+<div class="paragraph">
+<p>Des points comme la réversabilité, l&#8217;intéropérabilité et la portabilité des projets ont également été mentionnés.</p>
+</div>
+<div class="paragraph">
+<p>Globalement, je trouve la démarche intéressante. Je trouve que l&#8217;administration en ligne a beaucoup progressé ces dernières années et je m&#8217;en félicite. Il est important pour les citoyens de savoir que leurs données sont chez des cloud providers sécurisés.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_intervention_de_cédric_o">Intervention de Cédric O</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Enfin, la dernière intervention est celle de Cédric O, secrétaire d’Etat chargé de la transition numérique et des communications électroniques.<br>
+Après un rappel des points précédents, Cédric O constate lui aussi que les européens sont en retard sur l&#8217;adoption du cloud. Il est indispensable d&#8217;accélérer en la matière et de migrer des entreprises vers le cloud, dont le marché va exploser ces prochaines années.</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;accord entre OVH et Google a été mentionné, et Cédric O espère d&#8217;autres partenariat de ce genre pour hisser les acteurs européens à l&#8217;état de l&#8217;art. De l&#8217;investissement sera également réalisé, via <a href="https://www.gouvernement.fr/france-relance">France Relance</a> mais aussi via des projets "PIIEC" (projets importants d&#8217;intérêt européen commun).</p>
+</div>
+<div class="paragraph">
+<p>Selon Cédric O, on oublie trop souvent la dépendance américaine (comme pour leurs entreprises de téléphones) aux entreprises Française, comme par exemple au niveau des puces utilisées ou de la cryptographie (je serai intéressé par plus d&#8217;informations sur cette partie).</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, ici aussi les partenariats avec les états unis sont plébiscités pour résorber le retard des européens. GAIA X a également été mentionné.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_table_ronde">Table ronde</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ensuite, une table ronde était organisée où plusieurs personnes ont parlé à tour de rôle.</p>
+</div>
+<div class="paragraph">
+<p><strong>Bernard Duverneuil, président du club informatique des grandes entreprisesfrançaises (CIGREF)</strong></p>
+</div>
+<div class="paragraph">
+<p>Selon Monsieur Bernard Duverneuil, le cloud est aujourd&#8217;hui un enjeux majeur et décisif. Le cloud n&#8217;est plus un sous domaine du numérique mais celui qui commande tous les autres, et est incontournable aujourd&#8217;hui pour l&#8217;innovation notamment. La capacité des européens à innover est liée au cloud.</p>
+</div>
+<div class="paragraph">
+<p>Les entreprises du CIGREF ont un besoin fort en cloud (plus de 300 exigences), et on retrouve ici certains critères évoqués par Bruno Le Maire dans le cloud de confiance. Ici aussi, on insiste sur l&#8217;importance du déploiement des technologies des "hyperscalers" en France.</p>
+</div>
+<div class="paragraph">
+<p>Un rapport sur le cloud écrit par le DSI d&#8217;EDF est également mentionné.</p>
+</div>
+<div class="paragraph">
+<p><strong>Geoffroy Roux de Bezieux, président du Mouvement des entreprises de France (MEDEF)</strong></p>
+</div>
+<div class="paragraph">
+<p>Le MEDEF soutient fortement l&#8217;initiative "cloud de confiance". Monsieur Geoffroy Roux de Bezieux insiste sur le fait qu&#8217;il ne faut pas tomber dans le protectionnisme avec la souveraineté (ndlr: on pourrait pourtant penser que c&#8217;est ce que font les Etats Unis et la Chine).</p>
+</div>
+<div class="paragraph">
+<p>La crise du COVID 19 a montré qu&#8217;il y avait des besoins urgents de numérisation (et donc de cloud), mais que les risques du cloud (notamment sur les cloud étrangers) ne sont pas bien compris par les entreprises.</p>
+</div>
+<div class="paragraph">
+<p>Là aussi, on insiste que même si il est souhaitable d&#8217;avoir une vraie industrie européenne, un système de license est une bonne solution pour le moment (mention de OVH et Google). L&#8217;avance des prestataires américains est encore une fois mentionnée.</p>
+</div>
+<div class="paragraph">
+<p><strong>Nadi Bou Hanna, directeur interministériel du numérique (DINUM)</strong></p>
+</div>
+<div class="paragraph">
+<p>Nous avons ici une intervention que j&#8217;ai trouvé très juste.</p>
+</div>
+<div class="paragraph">
+<p>Monsieur Nadi Bou Hanna nous dit donc que la question n&#8217;est plus de s&#8217;interroger sur le cloud mais de basculer dessus. C&#8217;est une nouvelle façon de faire de l&#8217;informatique, centrée sur l&#8217;utilisateurs et des cycles de projets courts. La CI/CD et la scalabilité sont mentionnés, ça fait du bien d&#8217;entendre quelques mots "tech" de temps en temps.</p>
+</div>
+<div class="paragraph">
+<p>Il faut selon lui maîtriser ces technologies cloud pour construire ces projets (ce en quoi je suis en accord, le cloud demande des compétences). La continuité de l&#8217;état dépend aujourd&#8217;hui fortement du numérique (et par extension du cloud) au vu de la stratégie de numérisation de l&#8217;administration.</p>
+</div>
+<div class="paragraph">
+<p>Les enjeux financiers importants du cloud sont mentionnés, ainsi que le fait que l&#8217;état doit avoir des partenaires Cloud mais aussi internaliser des compétences et déployer certains projets sur le cloud interne de l&#8217;état (ce qui est très juste, il vaut mieux ne jamais avoir tous ces oeufs dans le même panier). Les solutions open source sont également citées comme un bon moyen de déployer des services pour l&#8217;état.</p>
+</div>
+<div class="paragraph">
+<p>Enfin, Monsieur Nadi Bou Hanna affirme qu&#8217;au delà du cloud, c&#8217;est le logiciel qui est également important: intéropérabilité, mutualisation de projets entre administrations&#8230;&#8203; Je ne peux qu&#8217;être d&#8217;accord avec ça. D&#8217;ailleurs, ne trouvez vous pas contradictoire le fait que le logiciel soit important mais que la stratégie du gouvernement à court terme soit le déploiement de logiciels étrangers sur de l&#8217;infrastructure en France ?</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai trouvé cette intervention très intéressante et très juste.</p>
+</div>
+<div class="paragraph">
+<p><strong>Thomas Courbe, directeur général des entreprises (DGE)</strong></p>
+</div>
+<div class="paragraph">
+<p>Monsieur Thomas Courbe est revenu sur ce qui a été dit avant en mettant l&#8217;accent sur le soutien économique à apporter aux entreprises.</p>
+</div>
+<div class="paragraph">
+<p>5 projets dans le domaine du cloud et du edge computing ont déjà été sélectionnés et seront lancés en juin. D&#8217;autres suivront.</p>
+</div>
+<div class="paragraph">
+<p>Une mention du "cloud vert" et de l&#8217;importance de l&#8217;écologie est faite. je suis d&#8217;accord pour dire que le volet écologique est important, mais je mentionnerai que malheureusement le nucléaire n&#8217;est toujours pas vu comme une énergie verte dans la majorité des pays européens (et donc de même pour les certifications des datacenters).<br>
+On se retrouve donc avec des pays qui tournent au charbon mais qui arrivent à se donner des postures écologistes sur leurs datacenters. J&#8217;espère que le gouvernement prendra cela en compte (et reverra à la hausse la part du nucléaire dans l&#8217;énergie française, notre priorité devrait être de développper le nucléaire qui est la seule énergie pilotable efficace avec une faible emprunte carbone).</p>
+</div>
+<div class="paragraph">
+<p>De nouveaux "data hub" sont également mentionnés, un dans l&#8217;agriculture et un pour le nucléaire (Genesis). Ces projets utiliseront le cloud.</p>
+</div>
+<div class="paragraph">
+<p>Enfin, GAIA X a également été rapidement mentionné.</p>
+</div>
+<div class="paragraph">
+<p><strong>Guillaume Poupard, directeur de l’Agence Nationale de la Sécurité desSystèmes d&#8217;Information (ANSSI)</strong></p>
+</div>
+<div class="paragraph">
+<p>Une intervention assez courte du directeur de L&#8217;ANSSI. Monsieur Guillaume Poupard a insisté sur la certification SecNumCloud dont les exigences sont très importantes.</p>
+</div>
+<div class="paragraph">
+<p>Les entreprises peuvent dès aujourd&#8217;hui demander à l&#8217;ANSSI de faire un pré audit dans le but d&#8217;avoir un retour rapide sur la possibilité d&#8217;être certifié SecNumCloud, ce que je trouve intéressant.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Tout cela était intéressant. La stratégie du gouvernement est claire et je pense qu&#8217;on va globalement dans le bon sens, à part sur les licenses et sur le fait de sous estimer les offres européennes existantes comme dit précédemment.</p>
+</div>
+<div class="paragraph">
+<p>Peut être ai-je tord mais je n&#8217;ai pas l&#8217;impression que les acteurs cloud Français aient été consultés pour travailler sur le projet. Ils n&#8217;ont en tout cas pas été mentionnés.</p>
+</div>
+<div class="paragraph">
+<p>Je voudrais également rajouter plusieurs choses. Tout d&#8217;abord, comme Monsieur Nadi Bou Hanna l&#8217;a indiqué, le cloud n&#8217;est pas que de l&#8217;infrastructure mais aussi du logiciel, un ensemble de compétences et de bonnes pratiques. Attention à ne pas trop mettre l&#8217;accent sur l&#8217;infrastructure.<br>
+Une application bien conçue <a href="https://www.mcorbin.fr/posts/2020-01-06-plateforme-execution/">doit pouvoir tourner</a> dans de nombreux contextes (cloud, on premise&#8230;&#8203;). Le cloud n&#8217;est qu&#8217;un aspect du travail d&#8217;un ingénieur aujourd&#8217;hui et n&#8217;est pas non plus la solution magique à tout.</p>
+</div>
+<div class="paragraph">
+<p>Enfin, je suis déçu d&#8217;une chose. Nous sommes en 2021. Depuis combien d&#8217;années les équipes (souvent venant de prestataires vu que les entreprises ne veulent plus de profils techniques en interne) de grands groupes Français alertent sur le retard de nos entreprises, pas seulement vis à vis du Cloud mais sur le numérique en général (développement logiciel, bonnes pratiques de déploiement et de sécurité, valorisation des profils techniques&#8230;&#8203;) ?</p>
+</div>
+<div class="paragraph">
+<p>Il est un peu facile pour les DSI de ces grands groupes d&#8217;arriver la fleur au fusil en disant "On va maintenant faire les choses correctement, on va pousser le cloud, on vient d&#8217;écrire un rapport sur le sujet&#8230;&#8203;" quand c&#8217;est Bruno Le Maire en face. Mais quand c&#8217;était leurs équipes techniques il n&#8217;y avait généralement plus personne.<br>
+C&#8217;est cette confiance aux équipes techniques de la part des directions qui permettra également de numériser nos entreprises et de rattraper notre retard sur ces sujets, pas seulement des labels ou des certifications.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/cloud/">cloud</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+        <a class="right" href="/posts/2021-05-12-langage-prog-important/">Choix du langage de programmation pour un projet: vraiment important ? &raquo;</a>
+        
+    </div>
+    <!--Crappy code starts here-->
+    
+    <script>
+      $( document ).ready(function() {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
+              $('#challenge_question').text(data.question);
+              $('#challenge_name span').text(data.name);
+          });
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2021-05-17-straterie-cloud-fr", function(data) {
+              for (i=0; i<data.length; i++) {
+
+                  response = data[i];
+                  author = document.createElement('div');
+                  author.className="comment_author";
+                  author.textContent=response.author;
+
+                  d = new Date(response.timestamp);
+                  datestring = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + "h" + d.getMinutes();
+
+                  date = document.createElement('span');
+                  date.className="comment_date";
+                  date.textContent=datestring;
+
+                  content = document.createElement('div');
+                  content.className="comment_content";
+                  content.innerHTML=response.content;
+                  content.style="white-space: pre-wrap;";
+
+
+                  comment = document.createElement('div');
+                  comment.className="comment";
+
+                  comment.appendChild(author);
+                  comment.appendChild(date);
+                  comment.appendChild(content);
+
+                  document.getElementById('comments_list').appendChild(comment);
+              }
+          });
+      });
+      $(function(){
+          $('#comment_create').on('click', function(){
+              $.ajax
+              ({
+                  type: "POST",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2021-05-17-straterie-cloud-fr",
+                  dataType: 'json',
+                  contentType: 'application/json',
+                  data: JSON.stringify({"author": $("#new_comment_author").val(),
+                                        "content" : $("#new_comment_content").val(),
+                                        "challenge" : $("#challenge_name span").text(),
+                                        "answer" : $("#challenge_answer").val()}),
+                  success: function () {
+                      $('#comment_result span').text("The comment will be approved soon.");
+                  },
+                  error: function () {
+                      $('#comment_result span').text("Fail to add the comment. Please contact the website owner (the email is in the About section of the website). Thank you in advance.");
+                  }
+              })
+          });
+      });
+    </script>
+
+    <div id="comment_block">
+      <div id="comments_list">
+      </div>
+
+      <div id="new_comment">
+
+        <div id="challenge_name" style="visibility: hidden">
+          <span  style="visibility: hidden"></span>
+        </div>
+        <b><p>Add a comment</p></b>
+        <input type="text" id="new_comment_author" name="author" placeholder="author"><br><br>
+
+        <textarea id="new_comment_content", name="comment_content" rows="5" placeholder="content"></textarea>
+        <br><br>
+
+        <b><span id="challenge_question"></span></b><br/>
+        <input type="text" id="challenge_answer" name="challenge_answer" placeholder="Answer" size="40"><br><br>
+        <p>If you have a bug/issue with the commenting system, please send me an email (my email is in the "About" section).</p>
+        <input id="comment_create" type="button" value="Add comment" class="btn btn-primary btn-lg"/>
+        <div id="comment_result">
+          <span></span>
+        </div>
+      </div>
+
+    </div>
+    
+    <!--Ends here-->
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2021 mcorbin</footer>
+    </div>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>

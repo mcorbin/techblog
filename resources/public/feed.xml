@@ -12,11 +12,240 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sun, 16 May 2021 21:33:38 +0200
+Mon, 17 May 2021 15:41:15 +0200
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-05-17-straterie-cloud-fr/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-05-17-straterie-cloud-fr/
+</link>
+<title>
+La stratégie cloud de la France
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ce matin, le gouvernement Français présentait sa stratégie cloud. Voici mon analyse, moi personne &quot;technique&quot; travaillant dans le domaine du cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_introduction_par_bruno_le_maire&quot;&gt;Introduction par Bruno le Maire&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La conférence est ouverte par Bruno le Maire, Ministre de l&amp;#8217;économie, qui commence par indiquer que le sujet discuté ici est le fruit de deux ans de travaux. Cela peut sembler long mais ce temps se justifie selon le ministre dû au fait que les précédentes tentatives de cloud souverains ont été des échecs.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ces tentatives ont échouées car elles n&amp;#8217;avaient pas (toujours selon le ministre) tenu compte des réalités techniques et des attentes de leurs clients (entreprises, administrations).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;offre de cloud souverain présentée serait donc une offre solide, avec un cadre européen (via GAIA X, nous y reviendrons).&lt;br&gt;
+En effet, les données sont stratégiques aujourd&amp;#8217;hui, et il faut absolument selon Bruno Le Maire protéger ces données, que ce soit des données personnelles ou des données d&amp;#8217;entreprises.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cette offre (qui est en fait un label), appelée &lt;code&gt;cloud de confiance&lt;/code&gt; se compose de 3 piliers:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Garantir une protection maximale des données. Cela passera tout d&amp;#8217;abord par la certification &lt;a href=&quot;https://www.ssi.gouv.fr/administration/qualifications/prestataires-de-services-de-confiance-qualifies/prestataires-de-service-dinformatique-en-nuage-secnumcloud/&quot;&gt;SecNumCloud&lt;/a&gt; de l&amp;#8217;ANSSI, certification avec de nombreuses exigences de sécurité.&lt;br&gt;
+Une nouvelle condition fait également son apparition: la protection juridique. L&amp;#8217;entreprise ne doit pas être soumise à des lois extra territoriales (ce qui est par exemple le cas des cloud providers américains). L&amp;#8217;entreprise devra obligatoirement avoir ces serveurs en France, et ladite entreprise devra être une entreprise européenne.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Accès aux meilleurs services mondiaux.&lt;br&gt;
+Selon le ministre, les précédentes offres de cloud souverains n&amp;#8217;étaient pas au niveau. Aujourd&amp;#8217;hui, les meilleures offres seraient américaines (Microsoft et Google sont cités).
+La solution serait donc de déployer les logiciels américains sur des infrastructures gérées par des entreprises européennes (les européens seraient donc des hébergeurs et revendeurs de solutions américaines).&lt;br&gt;
+Le ministre a pris les devants en disant que cette annonce allait faire réagir et qu&amp;#8217;on allait accuser le gouvernement de renoncer à la souveraineté numérique du pays, car au final ce ne serait pas des solutions françaises (ou européennes) utilisées. Pourtant, selon lui, c&amp;#8217;est la meilleure solution pour le moment (et est le fruit de 2 ans de réflexion), solution qui aurait déjà marché dans d&amp;#8217;autres secteurs comme le nucléaire dans les années 1960 (j&amp;#8217;aimerai d&amp;#8217;ailleurs bien avoir plus d&amp;#8217;informations sur cela).&lt;br&gt;
+Néammoins, cela ne veut pas dire qu&amp;#8217;il ne faut pas également travailler (et investir) dans des solutions européennes pour rattraper notre retard.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Troisième point: fonctionner avec les initiatives européennes. L&amp;#8217;offre &lt;code&gt;cloud de confiance&lt;/code&gt; s&amp;#8217;inscrit notamment dans GAIA X.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Que penser de cela ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Tout d&amp;#8217;abord, je pense qu&amp;#8217;il est nécessaire de se féliciter que le gouvernement soit conscient du problème actuel du cloud et de la domination des acteurs non européens dans ce secteur.&lt;br&gt;
+Le fait de privilégier dans certains secteurs (je pense notamment à la santé) des solutions où l&amp;#8217;on a une garantie forte sur la sécurité des données est important. J&amp;#8217;espère juste que ce sera le dernier &quot;label&quot; qui apparaîtra, car à force entre SecNumCloud, Cloud de Confiance, GAIA X (qui semble également devenir un label), les multiples normes ISO&amp;#8230;&amp;#8203; le client peut commencer à s&amp;#8217;y perdre (et certains clouds doivent se demander si leur job est d&amp;#8217;avoir des labels ou bien de développer des produits technologiques).&lt;br&gt;
+Mais je salue l&amp;#8217;initiative que je trouve intéressante.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je suis par contre en total désaccord avec la stratégie d&amp;#8217;hébergement de stacks (logiciels) Cloud américaines chez des fournisseurs européens, et sur la dévalorisation des acteurs français et européens existants.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Au cours des présentations, le &lt;a href=&quot;https://www.ovh.com/fr/news/presse/cpl1685.ovhcloud-google-cloud-annoncent-partenariat-strategique-co-construire-solution-confiance-europe&quot;&gt;partenariat&lt;/a&gt; entre OVH et Google a été plusieurs fois cité.&lt;br&gt;
+Que des entreprises montent ce genre de partenariat, pourquoi pas, mais je ne pense pas que ce soit une solution pérenne pour l&amp;#8217;Europe, même à court terme. OVH a pour pour clairement fait une erreur avec ce partenariat car en montrant que c&amp;#8217;était possible, les GAFAM vont s&amp;#8217;engouffrer dans la brèche.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ensuite, pourquoi cette dévalorisation des acteurs européens ? Soyons clair, il est vrai que les services américains ont de l&amp;#8217;avance. Est-il pourtant impossible de faire du cloud en Europe ? Loin de ça.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Déjà, combien de services sont vraiment utilisés dans les catalogues américains ? Il peut être tentant de choisir le cloud avec le catalogue le plus important en se disant &quot;au cas où&amp;#8230;&amp;#8203;&quot;, mais un catalogue ne fait pas tout.&lt;br&gt;
+Je pense que les services proposés par les cloud européens sont suffisants pour un grand nombre de projets. De plus, ces cloud européens ont des roadmap ambitieuses et lancent chaque année de nouveaux services. C&amp;#8217;est cela qu&amp;#8217;il faut soutenir.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je veux bien entendre que certains projets avec des besoins spécifiques aient besoin de services disponibles uniquement chez les cloud étrangers, et que gérer ces services en interne sur un cloud européen (car cela est généralement toujours possible, via des solutions libres ou non) ait un coût.&lt;br&gt;
+Mais l&amp;#8217;offre chez les cloud européens ne fait que de s&amp;#8217;étoffer. Je pourrai citer mon employeur actuel (qui n&amp;#8217;est pas une entreprise Française) mais vu qu&amp;#8217;on parle ici spécifiquement de la France (je suis Français et suis content de voir de belles entreprises Françaises même si je travaille pour un concurrent, et je pense de toute façon que le marché est assez gros pour plusieurs acteurs) je citerai &lt;a href=&quot;https://www.scaleway.com/fr/&quot;&gt;Scaleway&lt;/a&gt;, qui est selon moi l&amp;#8217;offre cloud Française la plus intéressante aujourd&amp;#8217;hui.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les discours du type &quot;je ne sais pas faire mon projet sur Scaleway (ou autre acteur), ça ne marche que sur Google&quot;, je n&amp;#8217;y crois pas. Encouragons nos entreprises, donnons leur une chance au lieu de les reléguer à de simples installateur de solutions américaines. J&amp;#8217;ai été déçu par cette partie de l&amp;#8217;intervention, un peu d&amp;#8217;ambition que diable !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, GAIA X. J&amp;#8217;avais écrit &lt;a href=&quot;https://www.mcorbin.fr/posts/2020-06-20-cloud-vendor-lock-in/&quot;&gt;un article&lt;/a&gt; sur le sujet en Juin 2020. Depuis, pas de nouvelles, pour l&amp;#8217;instant c&amp;#8217;est du vaporware et personne ne comprend vraiment ce qu&amp;#8217;il y a derrière. Bref, à voir mais moi je vois peu d&amp;#8217;espoirs de ce côté (est ce mon côté gaulois réfractaire qui ressort ? Peut être).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_suite_par_amélie_de_montchalin&quot;&gt;Suite par Amélie de Montchalin&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;C&amp;#8217;est ensuite au tour d&amp;#8217;Amélie de Montchalin, Ministre de la transformation et de la fonction publiques, de monter sur scène pour parler de la stratégie d&amp;#8217;usage du cloud par les administrations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il y a une très grosse ambition pour numériser l&amp;#8217;administration et de rendre tous les services publics accessibles en ligne. Dans ce cadre, le cloud est essentiel car il permettrait de travailler plus rapidement, de façon plus agile, plus itérative. Il serait également moins coûteux que de l&amp;#8217;hébergement en interne.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une stratégie de migration vers le cloud est en cours. Cette nouvelle doctrine, appelée &lt;code&gt;cloud au centre&lt;/code&gt;, fait le cloud le mode de projet par défaut pour les projets de l&amp;#8217;administration.&lt;br&gt;
+Bien sûr, cette migration doit se faire vers des solutions sécurisées (on revient sur le cloud de confiance), ce en quoi je suis tout à fait d&amp;#8217;accord. Les projets actuels de l&amp;#8217;administration auront 12 mois pour se mettre en conformité (et donc migrer vers le cloud ?) une fois les premiers acteurs labellisés &lt;code&gt;cloud de confiance&lt;/code&gt; connus.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Des points comme la réversabilité, l&amp;#8217;intéropérabilité et la portabilité des projets ont également été mentionnés.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Globalement, je trouve la démarche intéressante. Je trouve que l&amp;#8217;administration en ligne a beaucoup progressé ces dernières années et je m&amp;#8217;en félicite. Il est important pour les citoyens de savoir que leurs données sont chez des cloud providers sécurisés.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_intervention_de_cédric_o&quot;&gt;Intervention de Cédric O&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, la dernière intervention est celle de Cédric O, secrétaire d’Etat chargé de la transition numérique et des communications électroniques.&lt;br&gt;
+Après un rappel des points précédents, Cédric O constate lui aussi que les européens sont en retard sur l&amp;#8217;adoption du cloud. Il est indispensable d&amp;#8217;accélérer en la matière et de migrer des entreprises vers le cloud, dont le marché va exploser ces prochaines années.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;L&amp;#8217;accord entre OVH et Google a été mentionné, et Cédric O espère d&amp;#8217;autres partenariat de ce genre pour hisser les acteurs européens à l&amp;#8217;état de l&amp;#8217;art. De l&amp;#8217;investissement sera également réalisé, via &lt;a href=&quot;https://www.gouvernement.fr/france-relance&quot;&gt;France Relance&lt;/a&gt; mais aussi via des projets &quot;PIIEC&quot; (projets importants d&amp;#8217;intérêt européen commun).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Selon Cédric O, on oublie trop souvent la dépendance américaine (comme pour leurs entreprises de téléphones) aux entreprises Française, comme par exemple au niveau des puces utilisées ou de la cryptographie (je serai intéressé par plus d&amp;#8217;informations sur cette partie).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;En conclusion, ici aussi les partenariats avec les états unis sont plébiscités pour résorber le retard des européens. GAIA X a également été mentionné.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_table_ronde&quot;&gt;Table ronde&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Ensuite, une table ronde était organisée où plusieurs personnes ont parlé à tour de rôle.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Bernard Duverneuil, président du club informatique des grandes entreprisesfrançaises (CIGREF)&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Selon Monsieur Bernard Duverneuil, le cloud est aujourd&amp;#8217;hui un enjeux majeur et décisif. Le cloud n&amp;#8217;est plus un sous domaine du numérique mais celui qui commande tous les autres, et est incontournable aujourd&amp;#8217;hui pour l&amp;#8217;innovation notamment. La capacité des européens à innover est liée au cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les entreprises du CIGREF ont un besoin fort en cloud (plus de 300 exigences), et on retrouve ici certains critères évoqués par Bruno Le Maire dans le cloud de confiance. Ici aussi, on insiste sur l&amp;#8217;importance du déploiement des technologies des &quot;hyperscalers&quot; en France.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Un rapport sur le cloud écrit par le DSI d&amp;#8217;EDF est également mentionné.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Geoffroy Roux de Bezieux, président du Mouvement des entreprises de France (MEDEF)&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Le MEDEF soutient fortement l&amp;#8217;initiative &quot;cloud de confiance&quot;. Monsieur Geoffroy Roux de Bezieux insiste sur le fait qu&amp;#8217;il ne faut pas tomber dans le protectionnisme avec la souveraineté (ndlr: on pourrait pourtant penser que c&amp;#8217;est ce que font les Etats Unis et la Chine).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;La crise du COVID 19 a montré qu&amp;#8217;il y avait des besoins urgents de numérisation (et donc de cloud), mais que les risques du cloud (notamment sur les cloud étrangers) ne sont pas bien compris par les entreprises.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Là aussi, on insiste que même si il est souhaitable d&amp;#8217;avoir une vraie industrie européenne, un système de license est une bonne solution pour le moment (mention de OVH et Google). L&amp;#8217;avance des prestataires américains est encore une fois mentionnée.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Nadi Bou Hanna, directeur interministériel du numérique (DINUM)&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Nous avons ici une intervention que j&amp;#8217;ai trouvé très juste.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Monsieur Nadi Bou Hanna nous dit donc que la question n&amp;#8217;est plus de s&amp;#8217;interroger sur le cloud mais de basculer dessus. C&amp;#8217;est une nouvelle façon de faire de l&amp;#8217;informatique, centrée sur l&amp;#8217;utilisateurs et des cycles de projets courts. La CI/CD et la scalabilité sont mentionnés, ça fait du bien d&amp;#8217;entendre quelques mots &quot;tech&quot; de temps en temps.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il faut selon lui maîtriser ces technologies cloud pour construire ces projets (ce en quoi je suis en accord, le cloud demande des compétences). La continuité de l&amp;#8217;état dépend aujourd&amp;#8217;hui fortement du numérique (et par extension du cloud) au vu de la stratégie de numérisation de l&amp;#8217;administration.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les enjeux financiers importants du cloud sont mentionnés, ainsi que le fait que l&amp;#8217;état doit avoir des partenaires Cloud mais aussi internaliser des compétences et déployer certains projets sur le cloud interne de l&amp;#8217;état (ce qui est très juste, il vaut mieux ne jamais avoir tous ces oeufs dans le même panier). Les solutions open source sont également citées comme un bon moyen de déployer des services pour l&amp;#8217;état.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, Monsieur Nadi Bou Hanna affirme qu&amp;#8217;au delà du cloud, c&amp;#8217;est le logiciel qui est également important: intéropérabilité, mutualisation de projets entre administrations&amp;#8230;&amp;#8203; Je ne peux qu&amp;#8217;être d&amp;#8217;accord avec ça. D&amp;#8217;ailleurs, ne trouvez vous pas contradictoire le fait que le logiciel soit important mais que la stratégie du gouvernement à court terme soit le déploiement de logiciels étrangers sur de l&amp;#8217;infrastructure en France ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;J&amp;#8217;ai trouvé cette intervention très intéressante et très juste.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Thomas Courbe, directeur général des entreprises (DGE)&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Monsieur Thomas Courbe est revenu sur ce qui a été dit avant en mettant l&amp;#8217;accent sur le soutien économique à apporter aux entreprises.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;5 projets dans le domaine du cloud et du edge computing ont déjà été sélectionnés et seront lancés en juin. D&amp;#8217;autres suivront.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une mention du &quot;cloud vert&quot; et de l&amp;#8217;importance de l&amp;#8217;écologie est faite. je suis d&amp;#8217;accord pour dire que le volet écologique est important, mais je mentionnerai que malheureusement le nucléaire n&amp;#8217;est toujours pas vu comme une énergie verte dans la majorité des pays européens (et donc de même pour les certifications des datacenters).&lt;br&gt;
+On se retrouve donc avec des pays qui tournent au charbon mais qui arrivent à se donner des postures écologistes sur leurs datacenters. J&amp;#8217;espère que le gouvernement prendra cela en compte (et reverra à la hausse la part du nucléaire dans l&amp;#8217;énergie française, notre priorité devrait être de développper le nucléaire qui est la seule énergie pilotable efficace avec une faible emprunte carbone).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;De nouveaux &quot;data hub&quot; sont également mentionnés, un dans l&amp;#8217;agriculture et un pour le nucléaire (Genesis). Ces projets utiliseront le cloud.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, GAIA X a également été rapidement mentionné.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;Guillaume Poupard, directeur de l’Agence Nationale de la Sécurité desSystèmes d&amp;#8217;Information (ANSSI)&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Une intervention assez courte du directeur de L&amp;#8217;ANSSI. Monsieur Guillaume Poupard a insisté sur la certification SecNumCloud dont les exigences sont très importantes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Les entreprises peuvent dès aujourd&amp;#8217;hui demander à l&amp;#8217;ANSSI de faire un pré audit dans le but d&amp;#8217;avoir un retour rapide sur la possibilité d&amp;#8217;être certifié SecNumCloud, ce que je trouve intéressant.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Tout cela était intéressant. La stratégie du gouvernement est claire et je pense qu&amp;#8217;on va globalement dans le bon sens, à part sur les licenses et sur le fait de sous estimer les offres européennes existantes comme dit précédemment.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Peut être ai-je tord mais je n&amp;#8217;ai pas l&amp;#8217;impression que les acteurs cloud Français aient été consultés pour travailler sur le projet. Ils n&amp;#8217;ont en tout cas pas été mentionnés.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Je voudrais également rajouter plusieurs choses. Tout d&amp;#8217;abord, comme Monsieur Nadi Bou Hanna l&amp;#8217;a indiqué, le cloud n&amp;#8217;est pas que de l&amp;#8217;infrastructure mais aussi du logiciel, un ensemble de compétences et de bonnes pratiques. Attention à ne pas trop mettre l&amp;#8217;accent sur l&amp;#8217;infrastructure.&lt;br&gt;
+Une application bien conçue &lt;a href=&quot;https://www.mcorbin.fr/posts/2020-01-06-plateforme-execution/&quot;&gt;doit pouvoir tourner&lt;/a&gt; dans de nombreux contextes (cloud, on premise&amp;#8230;&amp;#8203;). Le cloud n&amp;#8217;est qu&amp;#8217;un aspect du travail d&amp;#8217;un ingénieur aujourd&amp;#8217;hui et n&amp;#8217;est pas non plus la solution magique à tout.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enfin, je suis déçu d&amp;#8217;une chose. Nous sommes en 2021. Depuis combien d&amp;#8217;années les équipes (souvent venant de prestataires vu que les entreprises ne veulent plus de profils techniques en interne) de grands groupes Français alertent sur le retard de nos entreprises, pas seulement vis à vis du Cloud mais sur le numérique en général (développement logiciel, bonnes pratiques de déploiement et de sécurité, valorisation des profils techniques&amp;#8230;&amp;#8203;) ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Il est un peu facile pour les DSI de ces grands groupes d&amp;#8217;arriver la fleur au fusil en disant &quot;On va maintenant faire les choses correctement, on va pousser le cloud, on vient d&amp;#8217;écrire un rapport sur le sujet&amp;#8230;&amp;#8203;&quot; quand c&amp;#8217;est Bruno Le Maire en face. Mais quand c&amp;#8217;était leurs équipes techniques il n&amp;#8217;y avait généralement plus personne.&lt;br&gt;
+C&amp;#8217;est cette confiance aux équipes techniques de la part des directions qui permettra également de numériser nos entreprises et de rattraper notre retard sur ces sujets, pas seulement des labels ou des certifications.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Mon, 17 May 2021 00:00:00 +0200
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2021-05-12-langage-prog-important/
