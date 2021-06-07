@@ -12,11 +12,462 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Mon, 17 May 2021 22:28:12 +0200
+Mon, 07 Jun 2021 14:37:37 +0200
 </lastBuildDate>
 <generator>
 clj-rss
 </generator>
+<item>
+<guid>
+https://mcorbin.fr/posts/2021-06-07-mirabelle-cabourotte-blackbox/
+</guid>
+<link>
+https://mcorbin.fr/posts/2021-06-07-mirabelle-cabourotte-blackbox/
+</link>
+<title>
+Mirabelle and Cabourotte for blackbox monitoring
+</title>
+<description>
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;In this article, I will explain how I monitor my personal infrastructure from the outside using two tools I wrote: &lt;a href=&quot;https://www.cabourotte.mcorbin.fr/&quot;&gt;Cabourotte&lt;/a&gt; for healthchecks and &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/&quot;&gt;Mirabelle&lt;/a&gt; for stream processing and alerting.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_cabourotte_for_blackbox_monitoring&quot;&gt;Cabourotte for blackbox monitoring&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It&amp;#8217;s always useful to execute various kind of healthchecks on your infrastructure. As explained in the &lt;a href=&quot;https://www.cabourotte.mcorbin.fr/&quot;&gt;Cabourotte&lt;/a&gt; website, networking is complex today and having the ability to execute healthchecks from various sources (in order to detect small/transient network issues, timeouts&amp;#8230;&amp;#8203; from parts of your infrastructure) is for me important.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;People always use services like Pingdom for blackbox monitoring for their public endpoints, but for me running these kinds of healthchecks everywhere in the stack is really a good idea.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I was not satisfied with the existing tools to do that and so I wrote my own. I wanted for example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;A tool where everything can be controlled throught the API or with a configuration file, or both without conflicts between the two.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;A lot of healthchecks options: TCP, DNS, HTTPs, TLS, certificates monitoring, with a lot of options like custom body/headers, mTLS, being able to configure which status code/response is expected, having the ability to configure expected failures for services which &lt;em&gt;should&lt;/em&gt; be unreachable&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Hot reload.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Exporters to push healthchecks results to external systems.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Good metrics and logging: rate/duration for healthchecks, metrics on the tool itself (exporters, HTTP API, internal queues&amp;#8230;&amp;#8203;). In Cabourotte, tons of metrics are exposed using the Prometheus format and logs are in JSON.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Lightweight and simple to deploy.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Cabourotte is for me the perfect tool for what I listed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I have a small infrastructure running on &lt;a href=&quot;https://www.exoscale.com/&quot;&gt;Exoscale&lt;/a&gt;, on the managed Kubernetes product (you should really try it, it&amp;#8217;s very good, and I&amp;#8217;m not saying that because I helped built the product :D).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I first wanted to monitor all my external/public endpoints using Cabourotte (I plan to do internal monitoring of pods a bit later).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, here is a part of the Cabourotte configuration file in my case:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;http:
+  host: &quot;0.0.0.0&quot;
+  port: 9013
+http-checks:
+  - name: &quot;https-mcorbin.fr&quot;
+    description: &quot;https healthcheck on mcorbin.fr&quot;
+    valid-status:
+      - 200
+    target: &quot;www.mcorbin.fr&quot;
+    port: 443
+    protocol: &quot;https&quot;
+    path: &quot;/pages/health/&quot;
+    timeout: 5s
+    interval: 5s
+    labels:
+      site: mcorbin.fr
+  - name: &quot;redirect-mcorbin.fr&quot;
+    description: &quot;redirect on mcorbin.fr&quot;
+    valid-status:
+      - 308
+    target: &quot;mcorbin.fr&quot;
+    port: 80
+    protocol: &quot;http&quot;
+    path: &quot;/pages/health&quot;
+    timeout: 5s
+    interval: 5s
+    labels:
+      site: mcorbin.fr
+exporters:
+  riemann:
+    - name: &quot;mirabelle&quot;
+      host: &quot;89.145.167.133&quot;
+      port: 5555
+      ttl: &quot;120s&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, I have two HTTP healthchecks on &lt;code&gt;mcorbin.fr&lt;/code&gt;, one testing HTTPS connections and one testing a redirection. In reality, I have a lot more healthchecks (DNS ones, healthchecks targeting my subdomains&amp;#8230;&amp;#8203;) but putting a giant YAML file in this article is not interesting.&lt;br&gt;
+You can check the &lt;a href=&quot;https://www.cabourotte.mcorbin.fr/installation/configuration/&quot;&gt;Cabourotte configuration&lt;/a&gt; documentation to see the available options.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I also configure an exporter of type &lt;code&gt;riemann&lt;/code&gt;. &lt;a href=&quot;https://riemann.io&quot;&gt;Riemann&lt;/a&gt; is an amazing stream processing tool written primarly by &lt;a href=&quot;https://aphyr.com/&quot;&gt;Kyle Kingsbury&lt;/a&gt;. I contributed at some point to it, and decided this year (after thinking a lot about it the last few years) to write a new tool heavily inspired by it (and using the same protocol so all Riemann tooling and integrations should work on Mirabelle) named &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/&quot;&gt;Mirabelle&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I wrote an article about why I wrote Mirabelle, which is available &lt;a href=&quot;https://www.mcorbin.fr/posts/2021-03-01-mirabelle-stream-processing/&quot;&gt;here&lt;/a&gt;. Since, a lot of things were added to it, and I spent a lot of time on the documentation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So, let&amp;#8217;s go back to Cabourotte. Once launched, I see logs like that:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{&quot;level&quot;:&quot;info&quot;,&quot;ts&quot;:1623064957.3846312,&quot;caller&quot;:&quot;exporter/root.go:126&quot;,&quot;msg&quot;:&quot;Healthcheck successful&quot;,&quot;name&quot;:&quot;https-mcorbin.fr&quot;,&quot;labels&quot;:{&quot;site&quot;:&quot;mcorbin.fr&quot;},&quot;healthcheck-timestamp&quot;:1623064957}
+{&quot;level&quot;:&quot;info&quot;,&quot;ts&quot;:1623064962.3829973,&quot;caller&quot;:&quot;exporter/root.go:126&quot;,&quot;msg&quot;:&quot;Healthcheck successful&quot;,&quot;name&quot;:&quot;redirect-mcorbin.fr&quot;,&quot;labels&quot;:{&quot;site&quot;:&quot;mcorbin.fr&quot;},&quot;healthcheck-timestamp&quot;:1623064962}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;So far so good. I could scrape the &lt;code&gt;/metrics&lt;/code&gt; endpoint with for example Prometheus to gather my healthchecks metrics (in order to detect performances degradations for example, or monitor the number of errors) but I will use Mirabelle instead.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_the_riemann_mirabelle_exporter&quot;&gt;The Riemann/Mirabelle exporter&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Everytime an healthcheck is executed, Cabourotte will generate and push to my Mirabelle instance an event. The event looks like (in JSON, in reality protobuf is used for performances, like in Riemann):&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;{
+  &quot;host&quot;: &quot;cabourotte-6fc6967b4b-nh6f2&quot;,
+  &quot;service&quot;: &quot;cabourotte-healthcheck&quot;,
+  &quot;state&quot;: &quot;ok&quot;,
+  &quot;description&quot;: &quot;redirect on mcorbin.fr on mcorbin.fr:80: success&quot;,
+  &quot;metric&quot;: 0.00105877,
+  &quot;tags&quot;: [
+    &quot;cabourotte&quot;
+  ],
+  &quot;time&quot;: 1623000193.0,
+  &quot;ttl&quot;: 120.0,
+  &quot;healthcheck&quot;: &quot;redirect-mcorbin.fr&quot;,
+  &quot;site&quot;: &quot;mcorbin.fr&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you compare that with the healthcheck configuration:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;- name: &quot;redirect-mcorbin.fr&quot;
+  description: &quot;redirect on mcorbin.fr&quot;
+  valid-status:
+    - 308
+  target: &quot;mcorbin.fr&quot;
+  port: 80
+  protocol: &quot;http&quot;
+  path: &quot;/pages/health&quot;
+  timeout: 5s
+  interval: 5s
+  labels:
+  site: mcorbin.fr&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Things should be clear. The &lt;code&gt;metric&lt;/code&gt; field is the duration of the healthcheck execution. Let&amp;#8217;s now configure Mirabelle in order to alert on these events.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_mirabelle&quot;&gt;Mirabelle&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I wrote a small &lt;a href=&quot;https://github.com/mcorbin/mirabelle-ansible-role&quot;&gt;Ansible Role&lt;/a&gt; to install Mirabelle, but I will describe in this article how to configure it step by step.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You can either use the prebuilt Java jar or the Docker image to launch it, as explained in &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/howto/build/&quot;&gt;the documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first thing to do is to write the Mirabelle configuration file (again, everything is explained in &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/howto/configuration/&quot;&gt;the documentation&lt;/a&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;{:tcp {:host &quot;0.0.0.0&quot;
+       :port 5555}
+ :http {:host &quot;0.0.0.0&quot;
+        :port 5558}
+ :websocket {:host &quot;0.0.0.0&quot;
+             :port 5556}
+ :stream {:directories [&quot;/etc/mirabelle/streams&quot;]
+          :actions {}}
+ :io {:directories [&quot;/etc/mirabelle/io&quot;]
+      :custom {}}
+ :logging {:level &quot;info&quot;
+           :console {:encoder :json}}}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Some important things are the &lt;code&gt;:stream&lt;/code&gt; configuration which references a directory where the streams will be compiled, and the &lt;code&gt;io&lt;/code&gt; directory where I/O (stateful components in Mirabelle) will be defined.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_i_o&quot;&gt;I/O&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s first put a file name &lt;code&gt;io.edn&lt;/code&gt; in &lt;code&gt;/etc/mirabelle/io&lt;/code&gt; and define a new Pagerduty I/O named &lt;code&gt;:pagerduty-client&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;{:pagerduty-client {:config {:service-key &quot;your-pagerduty-integration-key&quot;
+                             :source-key :host
+                             :summary-keys [:host :service :state]
+                             :dedup-keys [:host :service]
+                             :http-options {:socket-timeout 5000
+                                            :connection-timeout 5000}}
+                    :type :pagerduty}}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The Pagerduty I/O options are described in the &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/howto/action-io-ref/#io&quot;&gt;documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, let&amp;#8217;s write our streams.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_streams&quot;&gt;Streams&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now, we will create a new file named &lt;code&gt;stream.clj&lt;/code&gt; in the directory you want (it will compiled later). What we first want to do is:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Filter expired events (to avoid handling old events, which should in theory not happen with Cabourotte).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Filter all events related to Cabourotte healthchecks.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Send an alert to Pagerduty if an healthcheck is not successful, and resolve the alert when it&amp;#8217;s back.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here is the Mirabelle configuration to do this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;(streams
+ (stream
+  {:name :cabourotte :default true}
+  (not-expired
+    (where [:= :service &quot;cabourotte-healthcheck&quot;]
+      (by [:host :healthcheck]
+        (changed :state &quot;ok&quot;
+          (sformat &quot;cabourotte-healthcheck-alert-%s&quot; :service [:healthcheck]
+            (index [:host :service])
+            (info)
+            (tap :cabourotte-pagerduty)
+            (push-io! :pagerduty-client))))))))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We first use &lt;code&gt;not-expired&lt;/code&gt; to filter expired events, and then keep only events with &lt;code&gt;:service&lt;/code&gt; equal to &lt;code&gt;cabourotte-healthcheck&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We then want to treat each healthcheck independently. We indeed want to alert and resolve alerts based on states transitions for each healthcheck and don&amp;#8217;t want conflicts between healthchecks or Cabourotte instances (you can have multiple Cabourotte instances pushing events from multiple hosts).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We do that in Mirabelle by using the &lt;code&gt;by&lt;/code&gt; action, here with &lt;code&gt;by [:host :healthcheck]&lt;/code&gt;. Everything after &lt;code&gt;by&lt;/code&gt; will be splitted for each combination of &lt;code&gt;:host&lt;/code&gt; and &lt;code&gt;:healthcheck&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Then, we do &lt;code&gt;(changed :state &quot;ok&quot;&lt;/code&gt;. This action will let events pass only on states transitions, the default value being &lt;code&gt;&quot;ok&quot;&lt;/code&gt;. It will prevent Mirabelle to spam the Pagerduty API for &lt;strong&gt;each&lt;/strong&gt; event.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Finally, we use &lt;code&gt;sformat&lt;/code&gt; to rebuild the &lt;code&gt;:service&lt;/code&gt; value. Events will be updated and will have as &lt;code&gt;:service&lt;/code&gt; the value &lt;code&gt;cabourotte-healthcheck-alert-&amp;lt;healthcheck-name&amp;gt;&lt;/code&gt;.
+Indeed, we configured our Pagerduty client with &lt;code&gt;:host&lt;/code&gt; and &lt;code&gt;:service&lt;/code&gt; as &lt;code&gt;:dedup-key&lt;/code&gt; (to detect which event belongs to which alert), so the service value should be unique for each healthcheck.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We then do several things:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;(index [:host :service])&lt;/code&gt;: &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/howto/index/&quot;&gt;Index&lt;/a&gt; (in memory) the event.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;(info)&lt;/code&gt;: Log the event.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;(tap :cabourotte-pagerduty)&lt;/code&gt;: it will be used in tests (more about this later).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;(push-io! :pagerduty-client)&lt;/code&gt;: push the event to Pagerduty.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And we&amp;#8217;re done !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You now need to compile this file into an EDN representation. Everything is explained in the &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/howto/stream/#edn-representation-and-compilation&quot;&gt;documentation&lt;/a&gt; (it&amp;#8217;s only a &lt;code&gt;java -jar mirabelle.jar compile &amp;lt;src-directory&amp;gt; &amp;lt;dst-directory&amp;gt;&lt;/code&gt;). The result should be put in &lt;code&gt;/etc/mirabelle/streams&lt;/code&gt; which is the directory referenced in your configuration file.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_writing_tests&quot;&gt;Writing tests&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;A lot of monitoring tools do not allow you to write unit tests on their configurations. It&amp;#8217;s a big issue because you are unable to verify the configuration because of that.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mirabelle has a simple but powerful &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/howto/tests/&quot;&gt;test system&lt;/a&gt; built in. Here is a test I wrote for ths previous configuration:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;{:cabourotte {:input [{:metric 0.1
+                       :time 0
+                       :state &quot;ok&quot;
+                       :service &quot;cabourotte-healthcheck&quot;
+                       :healthcheck &quot;dns-mcorbin.fr&quot;
+                       :host &quot;host1&quot;}
+                      {:metric 1
+                       :time 5
+                       :state &quot;critical&quot;
+                       :service &quot;cabourotte-healthcheck&quot;
+                       :healthcheck &quot;dns-mcorbin.fr&quot;
+                       :host &quot;host1&quot;}
+                      {:metric 0.5
+                       :time 10
+                       :state &quot;critical&quot;
+                       :service &quot;cabourotte-healthcheck&quot;
+                       :healthcheck &quot;dns-mcorbin.fr&quot;
+                       :host &quot;host1&quot;}]
+              :tap-results {:cabourotte-pagerduty
+                            [{:metric 1
+                              :time 5
+                              :state &quot;critical&quot;
+                              :service &quot;cabourotte-healthcheck-alert-dns-mcorbin.fr&quot;
+                              :healthcheck &quot;dns-mcorbin.fr&quot;
+                              :host &quot;host1&quot;}]}}}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Events in &lt;code&gt;:input&lt;/code&gt; will be injected in Mirabelle and we can then verify what was recorded in the &lt;code&gt;tap&lt;/code&gt; actions (in our case, the &lt;code&gt;:cabourotte-pagerduty&lt;/code&gt; one).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, things work as expected: only states transitions are forwarded to Pagerduty, and my &lt;code&gt;:service&lt;/code&gt; key was correctly updated.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_does_it_really_works&quot;&gt;Does it really works ?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I killed my blog containers to test the setup. I Immediately receive the alerts in Pagerduty:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/mirabelle-cabourotte/alert.png&quot; alt=&quot;pagerduty alert&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once the website is back, the alert is automatically resolved:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph text-center&quot;&gt;
+&lt;p&gt;&lt;span class=&quot;image&quot;&gt;&lt;img src=&quot;/img/mirabelle-cabourotte/resolve.png&quot; alt=&quot;pagerduty resolve&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I could to a lot more, like using the Mirabelle &lt;code&gt;stable&lt;/code&gt; action to avoid flapping states for example. But for my simple use case this configuration is enough.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;_can_we_do_more&quot;&gt;Can we do more ?&lt;/h3&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Yes ! Mirabelle is powerful and extensible (you can write your own actions). As I said before, the events &lt;code&gt;:metric&lt;/code&gt; field contains the healthchecks duration. Why not compute the percentiles on the fly for each healthcheck ?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;(by [:healthcheck]
+  (moving-event-window 10
+    (coll-percentiles [0.5 0.75 0.98 0.99]
+      (with {:service &quot;cabourotte-healthcheck-percentile&quot; :host nil}
+        (publish! :healthchecks-percentiles)))))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you add this code snippet after &lt;code&gt;(not expired&lt;/code&gt; in your original configuration, percentiles will be computed for each healthcheck independently (note that &lt;code&gt;:host&lt;/code&gt; is not used in &lt;code&gt;by&lt;/code&gt; here, we want to compute the percentiles on events for a given healthcheck fromm all Cabourotte instances together).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The events generated for each quantile will be updated with a new service name and then passed to &lt;code&gt;publish!&lt;/code&gt;, which allows use to &lt;a href=&quot;https://www.mirabelle.mcorbin.fr/howto/pubsub/&quot;&gt;subscribe&lt;/a&gt; to it using a websocket client (users can also subscribe to the index).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;For example, I could use the Python script referenced in the Mirabelle documentation to subscribe to the percentiles events for the healthcheck &lt;code&gt;&quot;https-mcorbin.fr&quot;&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;code&gt;./websocket.py --channel healthchecks-percentiles --query '[:= :healthcheck &quot;https-mcorbin.fr&quot;]'&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;gt; Received at Mon Jun  7 12:07:52 2021
+{
+    &quot;host&quot;: null,
+    &quot;service&quot;: &quot;cabourotte-healthcheck-percentile&quot;,
+    &quot;state&quot;: &quot;ok&quot;,
+    &quot;description&quot;: &quot;https healthcheck on mcorbin.fr on www.mcorbin.fr:443: success&quot;,
+    &quot;metric&quot;: 0.004632761,
+    &quot;tags&quot;: [
+        &quot;cabourotte&quot;
+    ],
+    &quot;time&quot;: 1623067652.0,
+    &quot;ttl&quot;: 120.0,
+    &quot;healthcheck&quot;: &quot;https-mcorbin.fr&quot;,
+    &quot;site&quot;: &quot;mcorbin.fr&quot;,
+    &quot;quantile&quot;: 0.99
+}
+
+&amp;gt; Received at Mon Jun  7 12:07:57 2021
+{
+    &quot;host&quot;: null,
+    &quot;service&quot;: &quot;cabourotte-healthcheck-percentile&quot;,
+    &quot;state&quot;: &quot;ok&quot;,
+    &quot;description&quot;: &quot;https healthcheck on mcorbin.fr on www.mcorbin.fr:443: success&quot;,
+    &quot;metric&quot;: 0.002387217,
+    &quot;tags&quot;: [
+        &quot;cabourotte&quot;
+    ],
+    &quot;time&quot;: 1623067632.0,
+    &quot;ttl&quot;: 120.0,
+    &quot;healthcheck&quot;: &quot;https-mcorbin.fr&quot;,
+    &quot;site&quot;: &quot;mcorbin.fr&quot;,
+    &quot;quantile&quot;: 0.5
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Mirabelle, like Riemann, is very powerful. You have tons of built-in actions available, can have multiple streams running in parallel with different clocks (for real time computations and continuous queries&amp;#8230;&amp;#8203;), an API to manage streams, an InfluxDB integration&amp;#8230;&amp;#8203; The documentation explains all of that ;)&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;_conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Writing monitoring tools is fun.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I believe Cabourotte is really a small but powerful tool, which does one thing (executing healthchecks) but do it really well and in a &quot;modern&quot; way (API, metrics&amp;#8230;&amp;#8203;). Don&amp;#8217;t hesitate to try it, alongside Prometheus for example.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;On the other hand, Mirabelle is also powerful. If you like Riemann, Clojure, and stream processing, or need an &quot;event router&quot;, you should also try it.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+<pubDate>
+Mon, 07 Jun 2021 00:00:00 +0200
+</pubDate>
+</item>
 <item>
 <guid>
 https://mcorbin.fr/posts/2021-05-17-straterie-cloud-fr/
