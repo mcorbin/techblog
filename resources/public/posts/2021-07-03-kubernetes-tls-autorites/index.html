@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@_mcorbin" />
+    <title>(mcorbin.fr): Kubernetes: TLS, autorités de certification et authentification</title>
+    <link rel="canonical" href="https://mcorbin.fr/posts/2021-07-03-kubernetes-tls-autorites/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <link href="/css/styles/tomorrow-night.css" rel="stylesheet" type="text/css" />
+    <link href="/css/screen.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery-3.5.1.min.js" type="text/javascript"></script>
+  </head>
+  <body><a name="top"></a>
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar1" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">(mcorbin.fr)</a>
+        </div>
+        <div id="navbar1" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ><a href="/">Home</a></li>
+            <li
+               ><a href="/archives/">Archives</a></li>
+            
+            <li
+               >
+              <a href="/pages/about/">About</a>
+            </li>
+            
+            <li
+               >
+              <a href="/pages/projects/">Projects</a>
+            </li>
+            
+            <li><a href="/feed.xml">RSS</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div><!--/.container-fluid -->
+    </nav>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div id="content">
+            
+<div id="post">
+    <div class="post-header">
+    <div id="post-meta" class="row">
+        <div class="col-lg-6">3 juillet 2021</div>
+        
+    </div>
+    <h2>Kubernetes: TLS, autorités de certification et authentification</h2>
+</div>
+<div>
+    
+    <div class="paragraph">
+<p>Kubernetes est un animal complexe. Configurer le TLS correctement au sein du cluster l&#8217;est aussi. Je parle dans cet article de TLS dans Kubernetes, d&#8217;autorités de certification, d&#8217;authentification, de TLS bootstrapping, et de bonnes pratiques à respecter.<br>
+Que vous soyez dev ou ops, que vous utilisez Kubernetes on premise ou chez un fournisseur cloud, ces sujets sont <strong>très</strong> importants.</p>
+</div>
+<div class="sect1">
+<h2 id="_kubernetes_et_tls">Kubernetes et TLS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Kubernetes est composé de différentes briques. Ces briques communiquent entre elles. Des humains (admin sys) communiquent aussi avec l&#8217;API pour réaliser des actions dans le cluster. Tous ces flux utilisent TLS, voir pour la plupart mTLS (donc avec authentification client: le client doit présenter un certificat signé par une autorité de certification reconnue par le serveur).</p>
+</div>
+<div class="paragraph">
+<p>Configurer TLS correctement dans un cluster est compliqué pour plusieurs raisons:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Des <strong>tonnes</strong> d&#8217;options (voir fin de l&#8217;article) prennent un certificat en paramètre, il est difficile de dire quel certificat sera utilisé par quoi et dans quel contexte quand on débute avec Kubernetes.</p>
+</li>
+<li>
+<p>Cette partie de Kubernetes est très mal documentée, et globalement personne n&#8217;en parle donc il y a peu de retours d&#8217;expérience.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Je vais essayer de détailler dans cet article un ensemble de bonnes pratiques concernant le TLS dans le cluster, et j&#8217;en profiterai pour expliquer comment fonctionne l&#8217;authentification par certificat dans Kubernetes.<br>
+N&#8217;hésitez pas à m&#8217;adresser des retours (en commentaire, par email, sur twitter&#8230;&#8203;) si vous n&#8217;êtes pas d&#8217;accord avec certaines parties de cet article, je suis toujours preneur de retours sur ces sujets.</p>
+</div>
+<div class="paragraph">
+<p>Cet article sera prochainement disponible au format vidéo pour ceux qui préfèrent ce format.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_les_flux_réseau_d_un_cluster">Les flux réseau d&#8217;un cluster.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On peut identifier selon moi plusieurs flux réseau dans un cluster, chaque flux ayant une utilité spécifique. Ce n&#8217;est pas très clair dit comme ça donc je vais tout de suite détailler cela.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flux control plane</strong></p>
+</div>
+<div class="paragraph">
+<p>Dans Kubernetes, on a ce qu&#8217;on appelle un control plane. Ce sont des <a href="https://kubernetes.io/fr/docs/concepts/overview/components/">composants</a> obligatoires pour que le cluster fonctionne, ceux standards. On peut citer par exemple:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>L&#8217;API server, qui est le point d&#8217;entrée du cluster. C&#8217;est l&#8217;API server qui se charge de gérer l&#8217;état du cluster.</p>
+</li>
+<li>
+<p>Le controller manager et le scheduler, qui vont faire converger votre cluster vers l&#8217;état voulu. C&#8217;est eux qui vont réagir quand vous créez une ressource sur un cluster.</p>
+</li>
+<li>
+<p>Le cloud controller manager: c&#8217;est un composant optionnel mais qui existe lorsque vous déployez Kubernetes chez un fournisseur cloud. C&#8217;est lui qui fait le pont entre Kubernetes et le cloud, pour par exemple automatiquement configurer des load balancers chez votre cloud provider pour exposer des ressources du cluster. On y reviendra.</p>
+</li>
+<li>
+<p>Konnectivity, qui est un composant aussi optionnel. On le voit assez peu car il est utilisé dans un cas assez spécifique: quand le control plane Kubernetes et les noeuds workers ne sont pas dans le même réseau. En effet, le control plane doit avoir une "patte" dans le réseau du cluster. Konnectivity peut servir de proxy dans ce cas. Mais ce n&#8217;est pas le sujet de cet article (peut être un autre ?).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Tous ces composants parlent entre eux dans un sens ou dans l&#8217;autre. Voici mon premier flux: des flux réseaux concernant l&#8217;administration du cluster.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flux Kubelet</strong></p>
+</div>
+<div class="paragraph">
+<p>Kubelet est le composant de Kubernetes tournant sur les workers. Il est responsable entre autre de la gestion des conteneurs. Kubelet parle à l&#8217;API server, et d&#8217;ailleurs l&#8217;API server parle aussi à Kubelet. Voici notre second flux: des noeuds kubernetes qui parlent à l&#8217;API server.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flux opérateurs</strong></p>
+</div>
+<div class="paragraph">
+<p>Des opérateurs ou opératrices doivent pouvoir communiquer avec Kubernetes (avec <code>kubectl</code> par exemple), pour administrer le cluster. On a donc des humains parlant à l&#8217;API server. Voici notre troisième flux.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flux ETCD</strong></p>
+</div>
+<div class="paragraph">
+<p>L&#8217;état de Kubernetes est stocké dans une base de données clé/valeur appelée ETCD. C&#8217;est l&#8217;API server qui se charge de gérer ces données dans ETCD. On a donc une communication entre l&#8217;API server et ETCD. Ce sera notre quatrième flux.</p>
+</div>
+<div class="paragraph">
+<p><strong>Flux aggregation layer</strong></p>
+</div>
+<div class="paragraph">
+<p>Kubernetes peut être étendu de plusieurs façons, l&#8217;<a href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/">aggregation layer</a> en est une. Vous pouvez déployer un programme exposant une API et indiquer ensuite à Kubernetes de rediriger le trafic vers cette API pour certaines ressources.</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/kube-tls/aggregation.jpg" alt="exemple de fonctionnement de l&#8217;aggregatio layer"></span></p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est comme cela que fonctionne <a href="https://github.com/kubernetes-sigs/metrics-server">metrics-server</a> de Kubernetes par exemple.</p>
+</div>
+<div class="paragraph">
+<p>C&#8217;est donc là aussi un flux particulier: nous avons ici l&#8217;API server qui est utilisée comme <strong>proxy</strong> vers une autre API.
+C&#8217;est notre cinquième flux.</p>
+</div>
+<div class="paragraph">
+<p><strong>Résumé</strong></p>
+</div>
+<div class="paragraph">
+<p>Si on récapitule, ça nous donne ça:</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/kube-tls/tls-summary.jpg" alt="un schéma des cinq flux dans un cluster"></span></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_autorités_de_certifications">Autorités de certifications.</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Nous avons donc cinq flux réseaux, chaque flux étant composé de plusieurs composants qui parlent entre eux. Toutes ces communications doivent, comme dit précédemment, utiliser TLS (et il faut donc des certificats dans tous les sens).<br>
+Pour générer ces certificats, il faut des <a href="https://fr.wikipedia.org/wiki/Autorit%C3%A9_de_certification">autorités de certification</a>. Mais combien en faut-il ?</p>
+</div>
+<div class="paragraph">
+<p>La réponse est simple: 5 flux, 5 autorités.</p>
+</div>
+<div class="paragraph">
+<p>Pourquoi autant d&#8217;autorités ? Au final, pourquoi ne utiliser la même autorité de certification partout, et générer tous les certificats avec cette unique autorité ?<br>
+Cela marcherait, mais ne serait pas très sécurisé.</p>
+</div>
+<div class="paragraph">
+<p>Reprenons le schéma précédent. On voit que l&#8217;API server communique avec ETCD. Elle seulement doit avoir accès à ETCD qui contient des informations sensibles. Est ce que ça a du sens qu&#8217;un potentiel certificat généré pour Kubelet (donc sur un noeud) puisse parler à ETCD ? Non.</p>
+</div>
+<div class="paragraph">
+<p>De la même manière, est ce que ça a du sens qu&#8217;un humain puisse parler à Kubelet ? Non plus, seulement l&#8217;API server devrait communiquer avec ce composant (bon, on a aussi quelques outils de monitoring ou autre qui parlent à Kubelet mais vous comprenez l&#8217;idée).</p>
+</div>
+<div class="paragraph">
+<p>Avoir plusieurs autorités permet de <strong>cloisonner les flux</strong>, et apporte énormément de garanties. Cela évite un grand nombre d&#8217;attaques et d&#8217;erreurs potentiels via les certificats. Un grand nombre de composants ne sont censés jamais se parler, empêchons le <em>par design</em>.</p>
+</div>
+<div class="paragraph">
+<p>Pour l&#8217;aggregation layer, c&#8217;est carrément préconisé par Kubernetes. Voici un extrait de la documentation officielle: <code>Warning: Do not reuse a CA that is used in a different context unless you understand the risks and the mechanisms to protect the CA&#8217;s usage.</code><br>
+Vous aurez des soucis si vous ne suivez pas ces recommandations.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_authentification">Authentification</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On a donc nos flux, nos autorités, nos certificats. Il est temps de répondre maintenant à la question "mais comment marche l&#8217;authentification par certificat dans Kubernetes" ?</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;authentification se base sur le sujet du certificat. Voici par exemple le sujet de mon certificat que j&#8217;utilise pour administrer mon cluster personnel créé sur SKS, <a href="https://community.exoscale.com/documentation/sks/overview/">l&#8217;offre Kubernetes d&#8217;Exoscale</a> (qui a été conçue notamment par mon équipe):</p>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/kube-tls/ca-subject.jpg" alt="Le sujet du certificat"></span></p>
+</div>
+<div class="paragraph">
+<p>La première ligne <strong>Issuer</strong> contient le sujet de l&#8217;autorité de certification ayant généré le certificat. On est ici sur un certificat utilisé par un humain (seulement ceux là peuvent être générés via l&#8217;API), c&#8217;est donc bien l&#8217;autorité opérateur (operators-ca) qui a été utilisée.<br>
+En effet, sur SKS nous générons comme expliqué dans cet article 4 autorités <em>par cluster</em> (aggregation, kubelet, control plane, operateurs. L&#8217;autorité ETCD étant elle un peu spéciale mais c&#8217;est aussi une autorité dédiée). Ce que je raconte ici est donc un design utilisé en production.</p>
+</div>
+<div class="paragraph">
+<p>On a ensuite à la fin de l&#8217;image le <strong>Subject</strong>. On a les champs habituels (country&#8230;&#8203;) mais ce qui nous intéresse ici sont surtout deux champs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>O (pour Organization). Il est possible d&#8217;avoir une ou plusieurs organisations sur un certificat. Kubernetes utilise cette information pour l&#8217;authentification. Si une organisation d&#8217;un certificat correspond à un groupe Kubernetes, le certificat aura les permissions allouées à ce groupe.<br>
+Ici, mon certificat aura les pouvoirs "super admin" via le groupe <strong>systems:master</strong> (d&#8217;ailleurs, évitez d&#8217;utiliser ce groupe en vrai, créez un autre jeu de permissions admin et ne réutilisez plus jamais <strong>systems:master</strong> ensuite).</p>
+</li>
+<li>
+<p>CN (pour Common Name): Si le CN d&#8217;un certificat correspond à un utilisateur dans Kubernetes, le certificat aura les permissions de cet utilisateur. Ici j&#8217;ai <strong>mathieu</strong> en CN mais je n&#8217;ai en réalité aucun utilisateur mathieu dans Kubernetes, j&#8217;utilise seulement le groupe pour m&#8217;authentifier.</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="_un_autre_exemple">Un autre exemple</h3>
+<div class="paragraph">
+<p>Je parle d&#8217;utilisateurs, de permissions&#8230;&#8203; mais comment définir ça dans le cluster ? Via des Roles ou RolesBindings (ou ClusterRoles et ClusterRolesBindings).<br>
+La <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">documentation</a> de Kubernetes contient beaucoup d&#8217;informations mais voici un exemple avec les yaml de la documentation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>J&#8217;ai ici un rôle Kubernetes appelé <strong>pod-reader</strong>, qui donnera une fois assigné à une entité des permissions (les <code>verbs</code>) sur la ressource <code>pod</code>. Je peux ensuite assigner ce rôle à une utilisatrice (encore une fois, exemple tiré de la doc):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">apiVersion: rbac.authorization.k8s.io/v1
+# This role binding allows "jane" to read pods in the "default" namespace.
+# You need to already have a Role named "pod-reader" in that namespace.
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+# You can specify more than one "subject"
+- kind: User
+  name: jane # "name" is case sensitive
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  # "roleRef" specifies the binding to a Role / ClusterRole
+  kind: Role #this must be Role or ClusterRole
+  name: pod-reader # this must match the name of the Role or ClusterRole you wish to bind to
+  apiGroup: rbac.authorization.k8s.io</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On assigne ici à l&#8217;utilisatrice <strong>jane</strong> (on voit le <code>kind: User</code>) le role <strong>pod-reader</strong> créé précédemment.<br>
+Si je génère un certificat ayant dans son sujet Common Name: <strong>jane</strong>, ce certificat aura les droits donnés par le rôle <strong>pod-reader</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Et voilà ! On a donc des rôles, et on peut assigner ces rôles à des utilisateurs ou des groupes que l&#8217;on référence ensuite dans les certificats.</p>
+</div>
+<div class="paragraph">
+<p>Il faut savoir qu&#8217;il existe des utilisateurs ou groupes par défaut dans Kubernetes. C&#8217;est le cas du groupe super admin <strong>systems:master</strong> vu précédemment, mais il existe aussi des utilisateurs comme <strong>system:kube-controller-manager</strong> pour le controller manager. Vous pouvez donc utiliser ces utilisateurs existants, pour faire communiquer certains composants du control plane avec l&#8217;API server notamment</p>
+</div>
+<div class="paragraph">
+<p>La doc Kubernetes contient <a href="https://kubernetes.io/docs/setup/best-practices/certificates/#certificate-paths">une section</a> sur les CN à utiliser pour les briques de base.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_l_authentification_par_certificat_ça_vaut_quoi">L&#8217;authentification par certificat, ça vaut quoi ?</h3>
+<div class="paragraph">
+<p>L&#8217;authentification par certificat est un moyen simple et globalement sécurisé pour accéder à l&#8217;API server. C&#8217;est super pour les programmes, cela reste correct pour les opérateurs. Il existe d&#8217;autres méthodes intéressantes (OpenID) pour les opérateurs mais c&#8217;est hors du périmètre de cet article (mais on aura l&#8217;occasion d&#8217;en reparler).</p>
+</div>
+<div class="paragraph">
+<p>Il y a quand même quelques points importants à retenir:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Les certificats <strong>clients</strong> doivent avoir l&#8217;extension <strong>TLS Web Client Authentication</strong>, les certificats <strong>serveur</strong> l&#8217;extension <strong>TLS Web Server Authentication</strong>. De cette manière, il n&#8217;est pas possible d&#8217;utiliser un certificat client côté serveur ou vice versa.</p>
+</li>
+<li>
+<p>Evitez les communications en TLS <code>insecure</code> dans le cluster. C&#8217;est possible sur certains composants, voir parfois c&#8217;est dans le README des outils. Ne faites pas ça.</p>
+</li>
+<li>
+<p>Générez toujours des certificats ayant les bonnes permissions pour l&#8217;action à réaliser (que ce soit pour les humains ou des programmes), évitez les certificats trop puissants. Le système RBAC de Kubernetes est puissant, tirez-en partie.</p>
+</li>
+<li>
+<p>Configurer le Time To Live (TTL) du certificat est également intéressant. Une fois le certificat expiré, il devient inutilisable. Si un système doit parler à l&#8217;API server de Kubernetes que pour quelques secondes, pourquoi ne pas générer un certificat valide que durant une minute par exemple ?<br>
+Nous utilisons cette technique en interne chez Exoscale. Nous avons un orchestrateur gérant comme un grand les control planes Kubernetes. Cet orchestrateur doit parfois faire des requêtes à l&#8217;API server. Dans ce cas, nous générons un certificat avec une durée de vie très courte, nous réalisons l&#8217;action, et nous le supprimons. En cas de soucis avec le certificat (ce qui n&#8217;est pas censé arriver, mais vaut mieux prévoir les pires cas dès le début), il sera de toute façon inutilisable car il expire immédiatement.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Sur l&#8217;offre Kubernetes d&#8217;Exoscale, vous pouvez spécifier tous ces paramètres lors de la récupération du kubeconfig, par exemple avec notre CLI:<br></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>exo sks kubeconfig &lt;cluster&gt; &lt;utilisateur/Common Name&gt; --ttl &lt;TTL seconde&gt; --group &lt;groupe k8s/organisation&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette commande générera un kubeconfig contenant un certificat configuré avec le Common Name, le TTL, et les organisations spécifiées.</p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez même avec la commande <code>exo sks authority-cert</code> récupérer les certificats publics des autorités de certification <code>kubelet</code> et <code>aggregation</code> de votre cluster. Cela vous permet de les utiliser si besoin pour des extensions de l&#8217;API server et éviter comme cela le TLS <code>insecure</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_révocation">Révocation</h3>
+<div class="paragraph">
+<p>Il y a un problème avec les certificats: il ne sont <strong>pas</strong> révocables dans Kubernetes.
+Il n&#8217;y a pas de CRL. C&#8217;est selon moi un problème mais l&#8217;écosystème Golang est contre toute forme de CRL. OK.</p>
+</div>
+<div class="paragraph">
+<p>Comment faire ? Plusieurs solutions.</p>
+</div>
+<div class="paragraph">
+<p>La première est de ne <strong>jamais</strong> générer des certificats utilisant des groupes (organisations dans le sujet), mais toujours utiliser des utilisateurs (Common Name).<br>
+Imaginons que vous ayez un certificat pour l&#8217;utilisateur <code>mathieu</code>. Vous avez un leak (genre vous le poussez sur un dépôt public sur Github). Vous pouvez donc:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Supprimer le RoleBinding donnant les permissions à l&#8217;utilisateur <code>mathieu</code> dans Kubernetes.</p>
+</li>
+<li>
+<p>En recréer un pour un nouveau utilisateur, comme <code>mathieu1</code>.</p>
+</li>
+<li>
+<p>Régénérer un certificat pour l&#8217;utilisateur <code>mathieu1</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Le certificat orignal <code>mathieu</code> sera toujours valide d&#8217;un point de vue TLS, mais l&#8217;utilisateur <code>mathieu</code> n&#8217;existe plus dans Kubernetes. Vous êtes sauvé.</p>
+</div>
+<div class="paragraph">
+<p>La seconde solution est de sortir la bombe nucléaire: faire une rotation de l&#8217;autorité de certification.<br>
+En recréant l&#8217;autorité <code>opérateur</code>, et en reconfigurant votre cluster, vous invaliderez tous les certificats <code>opérateur</code> existants.</p>
+</div>
+<div class="paragraph">
+<p>Encore une bonne raison d&#8217;avoir plusieurs autorités ! Vous pouvez faire des rotations de ces autorités <em>sans impact sur les flux non concernés</em>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_les_offres_kubernetes_dans_le_cloud">Les offres Kubernetes dans le cloud</h3>
+<div class="paragraph">
+<p>Beaucoup de fournisseurs cloud ont un produit du type "managed Kubernetes". J&#8217;ai remarqué sur certaines offres les problèmes suivants:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Pas d&#8217;authentification du tout par certificat mais génération de kubeconfig utilisant des tokens statiques. Ces tokens sont très puissants et c&#8217;est la pire technique d&#8217;authentification dans Kubernetes, c&#8217;est une méthode selon moi à éviter. Pas de permissSions, pas de TTL, seulement admin.<br>
+Comment faire communiquer de manière sécurisée des composants externes au cluster avec l&#8217;API server dans ce cas ? Mystère.</p>
+</li>
+<li>
+<p>Possibilité de générer des kubeconfig utilisant des certificats, mais que pour l&#8217;utilisateur admin. Tout le monde admin ici aussi.</p>
+</li>
+<li>
+<p>Kubeconfig contenant un certificat avec l&#8217;extension <strong>TLS Web Server Authentication</strong>, pourtant on parle ici d&#8217;un client.</p>
+</li>
+<li>
+<p>Une seule autorité par cluster, aggregation layer inclus (pourtant c&#8217;est un warning en gras dans la documentation Kubernetes).</p>
+</li>
+<li>
+<p>Composants tournant avec des flags TLS type <code>--insecure</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph text-center">
+<p><span class="image"><img src="/img/kube-tls/monkey.jpg" alt="meme"></span></p>
+</div>
+<div class="paragraph">
+<p>Bref, faites un peu gaffe quand même.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tls_bootstrapping">TLS bootstrapping</h3>
+<div class="paragraph">
+<p>Je voulais aborder un autre sujet dans cet article: le TLS bootstrapping.</p>
+</div>
+<div class="paragraph">
+<p>Vous voulez, lorsque vous utilisez Kubernetes, pouvoir ajouter rapidement des machines au cluster et que ces dernières rejoignent automatiquement le cluster. Le TLS bootstrapping peut être utilisé pour ça.</p>
+</div>
+<div class="paragraph">
+<p>La procédure est <a href="https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-tls-bootstrapping/#bootstrap-initialization">bien expliquée</a> dans la documentation mais je vais la résumer rapidement.</p>
+</div>
+<div class="paragraph">
+<p>Vous devez d&#8217;abord créer un token dans Kubernetes. Un token est un <code>Secret</code> spécial, contenant des champs comme <code>token-id</code>, <code>token-secret</code>, <code>expiration</code> (le token ne sera plus valide après cette date et sera supprimé).<br>
+Vous devez ensuite fournir d&#8217;une façon ou d&#8217;une autre à votre nouvelle machine, et plus spécifiquement à Kubelet, le token.</p>
+</div>
+<div class="paragraph">
+<p>Kubelet utilisera ce token pour s&#8217;authentifier à l&#8217;API server et lancer une procédure qui, au final, permettra à Kubelet d&#8217;obtenir un certificat <strong>client</strong> pour s&#8217;authentifier de manière permanente et avec les bonnes permissions à l&#8217;API server et donc de fonctionner correctement.<br>
+Kubelet gère aussi le renouvellement du certificat automatiquement.</p>
+</div>
+<div class="paragraph">
+<p>En conclusion, le TLS bootstrapping est une bonne technique pour démarrer des noeuds mais souffre d&#8217;un défaut majeur: il ne gère que le certificat <strong>client</strong> de Kubelet. Pourtant, pour fonctionner correctement, Kubelet a aussi besoin d&#8217;un certificat <strong>serveur</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Il est possible de configurer Kubelet pour générer une CSR pour ce certificat serveur. Mais il est impossible d&#8217;approuver automatiquement cette CSR par défaut.</p>
+</div>
+<div class="paragraph">
+<p>Une solution est de lancer la commande manuellement, c&#8217;est à dire qu&#8217;à chaque nouveau noeud (et chaque renouvellement du certificat) vous aurez besoin de lancer <code>kubectl certificate approve &lt;csr&gt;</code> pour approuver la CSR. Pénible.</p>
+</div>
+<div class="paragraph">
+<p>Si vous aimez bien développer, vous pouvez également développer un controller Kubernetes qui va:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Ecouter l&#8217;API de Kubernetes pour voir les nouvelles CSR.</p>
+</li>
+<li>
+<p>Vérifier si la demande est valide.</p>
+</li>
+<li>
+<p>Approuver le CSR.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>C&#8217;est ce que fait le Cloud Controller Manager d&#8217;Exoscale. Il va vérifier pour chaque CSR serveur que la machine appartient bien à votre compte, que les informations dans le CSR (IP, hostname&#8230;&#8203;) correspondent bien aux informations de la machine récupérées dans l&#8217;API d&#8217;Exoscale. Si tout est OK, le CSR est approuvé.</p>
+</div>
+<div class="paragraph">
+<p>Le Cloud Controller Manager apporte donc aussi certaines garanties sur l&#8217;authenticité de la machine, car des vérifications de ce type sont aussi réalisées quand la machine rejoint le cluster pour de bon.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_glossaire_des_options_tls">Glossaire des options TLS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Pour conclure, voici une liste <em>non exhaustive</em> des options concernant le TLS et les certificats dans un cluster:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 40%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Composant</th>
+<th class="tableblock halign-left valign-top">Option</th>
+<th class="tableblock halign-left valign-top">Autorité</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--client-ca-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multiples</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Contient les certs publics des autorités de certifications pouvant s&#8217;authentifier au cluster.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--egress-selector-config-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Référence les certificats utilisés pour parler à Konnectivity server.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--etcd-cafile</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ETCD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le cert public de l&#8217;autorité de certification ETCD</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--etcd-certfile</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ETCD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat utilisé par le client ETCD</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--etcd-keyfile</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ETCD</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé privée utilisé par le client ETCD</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--kubelet-certificate-authority</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Kubelet</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">L&#8217;autorité de certification de Kubelet</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--kubelet-client-certificate</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Kubelet</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat utilisé par le client Kubelet</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--kubelet-client-key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Kubelet</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé privée utilisée par le client Kubelet</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--proxy-client-cert-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Aggregation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat utilisé par le client de l&#8217;aggregation layer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--proxy-client-key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Aggregation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé privée utilisée par le client de l&#8217;aggregation layer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--requestheader-client-ca-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Aggregation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">L&#8217;autorité de certification Aggregation</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--service-account-key-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé utilisée pour vérifier les tokens ServiceAccount. L&#8217;autorité n&#8217;est en fait pas importante ici.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--service-account-signing-key-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé utilisée pour signer les tokens ServiceAccount. L&#8217;autorité n&#8217;est en fait pas importante ici.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--tls-cert-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat pour le serveur de l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--tls-private-key-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé privée pour le serveur de l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controller Manager</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--authentication-kubeconfig</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Un Kubeconfig contenant des certificats client pour s&#8217;authentifier à l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controller Manager</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--authorization-kubeconfig</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Un Kubeconfig contenant des certificats client pour s&#8217;authentifier à l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controller Manager</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--cluster-signing-cert-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Kubelet</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat de l&#8217;autorité de certification Kubelet, pour le TLS bootstrapping</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controller Manager</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--cluster-signing-key-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Kubelet</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé privée de l&#8217;autorité de certification Kubelet, pour le TLS bootstrapping</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controller Manager</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--requestheader-client-ca-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Aggregation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat de l&#8217;autorité de certification de l&#8217;aggregation layer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controller Manager</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--root-ca-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat public de l&#8217;autorité de certification control plane</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Controller Manager</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--root-ca-file</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat public de l&#8217;autorité de certification control plane</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheduler</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--authentication-kubeconfig</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Un Kubeconfig contenant des certificats client pour s&#8217;authentifier à l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Scheduler</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--authorization-kubeconfig</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Un Kubeconfig contenant des certificats client pour s&#8217;authentifier à l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Konnectivity server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--cluster-cert</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat public pour le serveur recevant les connexions de l&#8217;agent Konnectivity</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Konnectivity server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--cluster-key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé privée pour le serveur recevant les connexions de l&#8217;agent Konnectivity</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Konnectivity server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--kubeconfig</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le kubeconfig pour communiquer avec l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Konnectivity server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--server-ca-cert</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat public de l&#8217;autorité de certification Control Plane</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Konnectivity server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--server-cert</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le certificat pour le serveur recevant les connexions de l&#8217;API server</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Konnectivity server</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">--server-key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Control Plane</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">La clé privée pour le serveur recevant les connexions de l&#8217;API server</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La façon de configurer le TLS et de générer les certificats est très important dans Kubernetes.</p>
+</div>
+<div class="paragraph">
+<p>J&#8217;espère que ces informations vous ont été utiles.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="post-tags">
+    <b>Tags: </b>
+    
+    <a href="/tags/devops/">devops</a>
+    
+    <a href="/tags/kubernetes/">kubernetes</a>
+    
+</div>
+
+
+    <div id="prev-next">
+        
+        
+        <a class="right" href="/posts/2021-06-07-mirabelle-cabourotte-blackbox/">Mirabelle and Cabourotte for blackbox monitoring &raquo;</a>
+        
+    </div>
+    <!--Crappy code starts here-->
+    
+    <script>
+      $( document ).ready(function() {
+          $.get("https://www.comments.mcorbin.fr/api/v1/challenge", function(data) {
+              $('#challenge_question').text(data.question);
+              $('#challenge_name span').text(data.name);
+          });
+          $.get("https://www.comments.mcorbin.fr/api/v1/comment/2021-07-03-kubernetes-tls-autorites", function(data) {
+              for (i=0; i<data.length; i++) {
+
+                  response = data[i];
+                  author = document.createElement('div');
+                  author.className="comment_author";
+                  author.textContent=response.author;
+
+                  d = new Date(response.timestamp);
+                  datestring = d.getFullYear() + "/" + (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours() + "h" + d.getMinutes();
+
+                  date = document.createElement('span');
+                  date.className="comment_date";
+                  date.textContent=datestring;
+
+                  content = document.createElement('div');
+                  content.className="comment_content";
+                  content.innerHTML=response.content;
+                  content.style="white-space: pre-wrap;";
+
+
+                  comment = document.createElement('div');
+                  comment.className="comment";
+
+                  comment.appendChild(author);
+                  comment.appendChild(date);
+                  comment.appendChild(content);
+
+                  document.getElementById('comments_list').appendChild(comment);
+              }
+          });
+      });
+      $(function(){
+          $('#comment_create').on('click', function(){
+              $.ajax
+              ({
+                  type: "POST",
+                  url: "https://www.comments.mcorbin.fr/api/v1/comment/2021-07-03-kubernetes-tls-autorites",
+                  dataType: 'json',
+                  contentType: 'application/json',
+                  data: JSON.stringify({"author": $("#new_comment_author").val(),
+                                        "content" : $("#new_comment_content").val(),
+                                        "challenge" : $("#challenge_name span").text(),
+                                        "answer" : $("#challenge_answer").val()}),
+                  success: function () {
+                      $('#comment_result span').text("The comment will be approved soon.");
+                  },
+                  error: function () {
+                      $('#comment_result span').text("Fail to add the comment. Please contact the website owner (the email is in the About section of the website). Thank you in advance.");
+                  }
+              })
+          });
+      });
+    </script>
+
+    <div id="comment_block">
+      <div id="comments_list">
+      </div>
+
+      <div id="new_comment">
+
+        <div id="challenge_name" style="visibility: hidden">
+          <span  style="visibility: hidden"></span>
+        </div>
+        <b><p>Add a comment</p></b>
+        <input type="text" id="new_comment_author" name="author" placeholder="author"><br><br>
+
+        <textarea id="new_comment_content", name="comment_content" rows="5" placeholder="content"></textarea>
+        <br><br>
+
+        <b><span id="challenge_question"></span></b><br/>
+        <input type="text" id="challenge_answer" name="challenge_answer" placeholder="Answer" size="40"><br><br>
+        <p>If you have a bug/issue with the commenting system, please send me an email (my email is in the "About" section).</p>
+        <input id="comment_create" type="button" value="Add comment" class="btn btn-primary btn-lg"/>
+        <div id="comment_result">
+          <span></span>
+        </div>
+      </div>
+
+    </div>
+    
+    <!--Ends here-->
+</div>
+
+            <a href="#top" class="alink" >Top of page</a>
+          </div>
+        </div>
+      </div>
+      <footer>Copyright &copy; 2021 mcorbin</footer>
+    </div>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/js/highlight.pack.js" type="text/javascript"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
