@@ -12,7 +12,7 @@ https://mcorbin.fr
 Blog de mcorbin
 </description>
 <lastBuildDate>
-Sat, 03 Jul 2021 14:53:18 +0200
+Sat, 03 Jul 2021 15:28:43 +0200
 </lastBuildDate>
 <generator>
 clj-rss
@@ -337,7 +337,7 @@ En recréant l&amp;#8217;autorité &lt;code&gt;opérateur&lt;/code&gt;, et en re
 &lt;div class=&quot;ulist&quot;&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;Pas d&amp;#8217;authentification du tout par certificat mais génération de kubeconfig utilisant des tokens statiques. Ces tokens sont très puissants et c&amp;#8217;est la pire technique d&amp;#8217;authentification dans Kubernetes, c&amp;#8217;est une méthode selon moi à éviter. Pas de permissSions, pas de TTL, seulement admin.&lt;br&gt;
+&lt;p&gt;Pas d&amp;#8217;authentification du tout par certificat mais génération de kubeconfig utilisant des tokens statiques. Ces tokens sont très puissants et c&amp;#8217;est la pire technique d&amp;#8217;authentification dans Kubernetes, c&amp;#8217;est une méthode selon moi à éviter. Pas de permissions, pas de TTL, seulement admin.&lt;br&gt;
 Comment faire communiquer de manière sécurisée des composants externes au cluster avec l&amp;#8217;API server dans ce cas ? Mystère.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
